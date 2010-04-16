@@ -35,7 +35,7 @@ std::string get_cur_time();
 }\
 
 #define _LOG(logstr)\
-std::cout<<get_cur_time() <<"::LOG      ::" << logstr <<std::endl
+std::cout<<get_cur_time()<<"::"<< logstr <<std::endl
 
 #define _ERROR(logstr)\
 std::cerr <<"ERROR    ::"<<__FILE__<<"  :"<<__LINE__<<"  :" <<__func__<<":"<< logstr <<std::endl
@@ -70,7 +70,6 @@ inline void log_range ( iter_t begin,iter_t end,const char * title = NULL,bool w
     _LOG ( title_str );
     _LOG ( ln2_str );
   }
-
 
   std::stringstream ss;
 
