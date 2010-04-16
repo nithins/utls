@@ -27,9 +27,12 @@
 
 #include <boost/array.hpp>
 
+typedef unsigned int  uint;
+typedef unsigned char uchar;
+
 struct unordered_pair_comparator
 {
-  typedef unsigned int uint;
+
 
   bool operator() ( const std::pair<uint, uint> &p1,
                     const std::pair<uint, uint> &p2 ) const;
@@ -37,8 +40,6 @@ struct unordered_pair_comparator
 
 struct ordered_pair_comparator
 {
-  typedef unsigned int uint;
-
   bool operator() ( const std::pair<uint, uint> &p1,
                     const std::pair<uint, uint> &p2 ) const;
 };

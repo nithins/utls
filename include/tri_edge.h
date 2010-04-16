@@ -20,8 +20,7 @@
 #ifndef __TRI_EDGE_H_INCLUDED__
 #define __TRI_EDGE_H_INCLUDED__
 
-
-typedef unsigned int uint;
+#include <cpputils.h>
 
 struct tri
 {

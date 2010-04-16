@@ -20,8 +20,7 @@
 #ifndef __QUAD_EDGE_H_INCLUDED__
 #define __QUAD_EDGE_H_INCLUDED__
 
-
-typedef unsigned int uint;
+#include <cpputils.h>
 
 struct quad
 {
@@ -62,7 +61,7 @@ class QuadEdge
     uint  m_edge_ct;
 
     uint *m_quads;   // index list to quads that contain {v1,v2,v3,v4} in consistent orientation
-    uint  m_quad_ct; 
+    uint  m_quad_ct;
 
     uint *m_boundry_quads; // index list to quads that are on the boundry .. only one version is stored
     uint  m_boundry_quad_ct;

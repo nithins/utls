@@ -9,9 +9,6 @@
 
 namespace glutils
 {
-  typedef unsigned int uint;
-  typedef unsigned int uchar;
-
   typedef unsigned int idx_t;
 
   typedef idx_t point_idx_t;
