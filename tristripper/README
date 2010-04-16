@@ -1,0 +1,19 @@
+**********************************************************************************
+
+22-Dec-2009
+
+Ported to CMake 
+
+Nithin
+
+**********************************************************************************
+
+24-Oct-2009
+
+Original implementation from http://users.telenet.be/tfautre/softdev/tristripper/
+
+Touched up the build system to build with qmake & removed the test application
+
+Nithin
+
+**********************************************************************************
