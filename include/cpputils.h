@@ -21,119 +21,27 @@
 #ifndef __CPPUTILS_H_INCLUDED__
 #define __CPPUTILS_H_INCLUDED__
 
-#include <iterator>
 #include <string>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <stdexcept>
 
 #include <boost/array.hpp>
-
-struct uint_iterator
-{
-  typedef unsigned int  value_type;
-  typedef unsigned int* pointer;
-  typedef unsigned int& reference;
-  typedef int difference_type;
-  typedef std::forward_iterator_tag iterator_category;
-
-  unsigned int m_pos;
-
-  uint_iterator ( unsigned int _pos )
-      : m_pos ( _pos )
-  {
-  }
-
-  unsigned int operator*()
-  {
-    return m_pos;
-  }
-
-  uint_iterator operator++()
-  {
-    m_pos++;
-    return *this;
-  }
-
-  uint_iterator operator++ ( int )
-  {
-    m_pos++;
-    return uint_iterator ( m_pos -1 );
-  }
-
-  bool operator== ( const uint_iterator &rhs )
-  {
-    return ( m_pos == rhs.m_pos );
-  }
-
-  bool operator!= ( const uint_iterator &rhs )
-  {
-    return ! ( *this == rhs );
-  }
-
-  static std::pair<uint_iterator, uint_iterator> iterators ( unsigned int s, unsigned int e )
-  {
-    return std::make_pair ( uint_iterator ( s ), uint_iterator ( e ) );
-  }
-};
-
 
 struct unordered_pair_comparator
 {
   typedef unsigned int uint;
 
-  bool operator() ( const std::pair<uint, uint> &p1, const std::pair<uint, uint> &p2 ) const
-  {
-    if ( std::min ( p1.first, p1.second ) == std::min ( p2.first, p2.second ) )
-      return std::max ( p1.first, p1.second ) < std::max ( p2.first, p2.second );
-    else
-      return std::min ( p1.first, p1.second ) < std::min ( p2.first, p2.second );
-  }
+  bool operator() ( const std::pair<uint, uint> &p1,
+                    const std::pair<uint, uint> &p2 ) const;
 };
 
 struct ordered_pair_comparator
 {
   typedef unsigned int uint;
 
-  bool operator() ( const std::pair<uint, uint> &p1, const std::pair<uint, uint> &p2 ) const
-  {
-    if ( p1.first == p2.first )
-      return ( p1.second < p2.second );
-    else
-      return ( p1.first < p2.first );
-  }
+  bool operator() ( const std::pair<uint, uint> &p1,
+                    const std::pair<uint, uint> &p2 ) const;
 };
-
-template <typename list_t, typename ind_t>
-static bool compareListItems ( list_t * list, ind_t i, ind_t j )
-{
-  if ( list[i] != list[j] )
-    return list[i] < list[j];
-  else
-    return i < j;
-}
-
-template <class InputIterator1, class InputIterator2, class AddToSet_ftor_t>
-void set_intersection_ftor ( InputIterator1 first1, InputIterator1 last1,
-                             InputIterator2 first2, InputIterator2 last2,
-                             AddToSet_ftor_t addToSet_ftor )
-{
-  while ( first1 != last1 && first2 != last2 )
-  {
-    if ( *first1 < *first2 )
-      ++first1;
-    else
-      if ( *first2 < *first1 )
-        ++first2;
-      else
-      {
-        addToSet_ftor ( *first1 );
-        first1++;
-        first2++;
-      }
-  }
-}
 
 template<typename data_t>
 void delete_ftor ( data_t * ptr )
@@ -141,30 +49,7 @@ void delete_ftor ( data_t * ptr )
   delete ptr;
 }
 
-template<typename num_t>
-
-struct seq_num_gen_ftor
-{
-  num_t current;
-  num_t inc;
-
-  seq_num_gen_ftor() : current ( 0 ), inc ( 1 ) {}
-
-  seq_num_gen_ftor ( num_t _inc ) : current ( 0 ), inc ( _inc ) {}
-
-  seq_num_gen_ftor ( num_t _inc, num_t _start ) : current ( _start ), inc ( _inc ) {}
-
-  int operator() ()
-  {
-    num_t ret_num = current;
-    current += inc;
-    return ret_num;
-  }
-
-};
-
 template <typename num_t>
-
 class num_generator_t
 {
     num_t incr;
@@ -183,12 +68,6 @@ class num_generator_t
     }
 };
 
-
-template <typename T,typename ST>
-T  shift_right(const T & t,const ST &st)
-{
-  return t>>st;
-}
 
 template<typename T, std::size_t N,bool O= true>
 class n_tuple_t: public boost::array<T,N>

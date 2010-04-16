@@ -111,3 +111,19 @@ void split_string ( const string & line_str, vector<string> & tokens, const stri
 
 }
 
+bool unordered_pair_comparator::operator() ( const std::pair<uint, uint> &p1, const std::pair<uint, uint> &p2 ) const
+{
+  if ( std::min ( p1.first, p1.second ) == std::min ( p2.first, p2.second ) )
+    return std::max ( p1.first, p1.second ) < std::max ( p2.first, p2.second );
+  else
+    return std::min ( p1.first, p1.second ) < std::min ( p2.first, p2.second );
+}
+
+bool ordered_pair_comparator::operator() ( const std::pair<uint, uint> &p1, const std::pair<uint, uint> &p2 ) const
+{
+  if ( p1.first == p2.first )
+    return ( p1.second < p2.second );
+  else
+    return ( p1.first < p2.first );
+}
+
