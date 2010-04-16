@@ -165,7 +165,7 @@ namespace glutils
         bufobj_ptr_t ,
         bufobj_ptr_t  );
 
-  bool read_off_file
+  void read_off_file
       ( const char *filename,
         double *&verts,
         uint &num_verts,

@@ -22,23 +22,6 @@
 
 using namespace std;
 
-
-genericException::genericException ( string str ) : m_str ( str )
-{
-}
-
-string genericException::str() const
-{
-  return m_str;
-}
-
-ostream &operator<< ( ostream &stream, const genericException &e )
-{
-  stream << e.str();
-
-  return stream;
-}
-
 string stripLineComments ( const string& line, const char& comment_char )
 {
   size_t pos = line.find ( comment_char );

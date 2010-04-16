@@ -207,111 +207,95 @@ namespace glutils
     std::copy ( extent, extent + 6, extent_out );
   }
 
-  bool read_off_file ( const char *filename, double *&verts, uint &num_verts, uint *&tris, uint& num_tris )
+  void read_off_file ( const char *filename, double *&verts, uint &num_verts, uint *&tris, uint& num_tris )
   {
+
+    std::fstream offFile ( filename, std::ios::in );
+
+    if ( offFile.eof() )
+      throw std::invalid_argument( "cannot read the file" );
+
+    std::string line;
+
+    getline ( offFile, line );
+
+    line = stripWS ( line );
+
+    if ( line != "OFF" )
+      throw std::invalid_argument ( "Doesnt appear to be an OFF file.. quitting" );
+
+    getline ( offFile, line );
+
+    std::stringstream linestream ( stripWS ( line ) );
+
+    linestream >> num_verts >> num_tris;
+
     try
     {
-      std::fstream offFile ( filename, std::ios::in );
 
-      if ( offFile.eof() )
-        throw genericException ( "cannot read the file" );
+      verts = new double[num_verts*3];
 
-      std::string line;
+      tris = new uint[num_tris*3];
 
-      getline ( offFile, line );
+      uint num_verts_read = 0 ;
 
-      line = stripWS ( line );
-
-      if ( line != "OFF" )
-        throw genericException ( "Doesnt appear to be an OFF file.. quitting" );
-
-      getline ( offFile, line );
-
-      std::stringstream linestream ( stripWS ( line ) );
-
-      linestream >> num_verts >> num_tris;
-
-      try
+      while ( !offFile.eof() )
       {
 
-        verts = new double[num_verts*3];
+        if ( num_verts_read == num_verts )
+          break;
 
-        tris = new uint[num_tris*3];
+        getline ( offFile, line );
 
-        uint num_verts_read = 0 ;
+        std::stringstream linestream ( stripWS ( line ) );
 
-        while ( !offFile.eof() )
-        {
+        linestream >> verts[num_verts_read*3+0];
 
-          if ( num_verts_read == num_verts )
-            break;
+        linestream >> verts[num_verts_read*3+1];
 
-          getline ( offFile, line );
+        linestream >> verts[num_verts_read*3+2];
 
-          std::stringstream linestream ( stripWS ( line ) );
-
-          linestream >> verts[num_verts_read*3+0];
-
-          linestream >> verts[num_verts_read*3+1];
-
-          linestream >> verts[num_verts_read*3+2];
-
-          ++num_verts_read;
-        }
-
-        if ( num_verts != num_verts_read )
-          throw genericException ( "incorrect num verts read" );
-
-        uint num_tris_read = 0 ;
-
-        while ( !offFile.eof() )
-        {
-
-          if ( num_tris_read == num_tris )
-            break;
-
-          getline ( offFile, line );
-
-          uint num_points;
-
-          std::stringstream linestream ( stripWS ( line ) );
-
-          linestream >> num_points;
-
-          linestream >> tris[num_tris_read*3+0];
-
-          linestream >> tris[num_tris_read*3+1];
-
-          linestream >> tris[num_tris_read*3+2];
-
-          ++num_tris_read;
-        }
-
-        if ( num_tris != num_tris_read )
-          throw genericException ( "incorrect num tris read" );
-
+        ++num_verts_read;
       }
-      catch ( ... )
+
+      if ( num_verts != num_verts_read )
+        throw std::logic_error ( "incorrect num verts read" );
+
+      uint num_tris_read = 0 ;
+
+      while ( !offFile.eof() )
       {
-        delete []verts;
-        delete []tris;
-        throw;
+
+        if ( num_tris_read == num_tris )
+          break;
+
+        getline ( offFile, line );
+
+        uint num_points;
+
+        std::stringstream linestream ( stripWS ( line ) );
+
+        linestream >> num_points;
+
+        linestream >> tris[num_tris_read*3+0];
+
+        linestream >> tris[num_tris_read*3+1];
+
+        linestream >> tris[num_tris_read*3+2];
+
+        ++num_tris_read;
       }
 
-    }
-    catch ( genericException e )
-    {
-      _ERROR ( "could not read off file" );
-      _ERROR ( e.str() );
-      return false;
+      if ( num_tris != num_tris_read )
+        throw std::logic_error ( "incorrect num tris read" );
+
     }
     catch ( ... )
     {
-      _ERROR ( "something else happened" );
-      return false;
+      delete []verts;
+      delete []tris;
+      throw;
     }
-
-    return true;
   }
 
   renderable_t * create_buffered_ren_off_file ( const char * filename , bool use_strips )
@@ -321,37 +305,30 @@ namespace glutils
 
     uint num_verts, num_tris;
 
-    bool retval = glutils::read_off_file ( filename, verts, num_verts, tris, num_tris );
+    glutils::read_off_file ( filename, verts, num_verts, tris, num_tris );
 
-    if ( retval )
-    {
+    bufobj_ptr_t v = buf_obj_t::create_bo
+                     (verts, GL_DOUBLE, 3, num_verts * 3 * sizeof ( double ),
+                      GL_ARRAY_BUFFER, 0);
 
-      bufobj_ptr_t v = buf_obj_t::create_bo
-                       (verts, GL_DOUBLE, 3, num_verts * 3 * sizeof ( double ),
-                        GL_ARRAY_BUFFER, 0);
+    bufobj_ptr_t t = buf_obj_t::create_bo
+                     (tris,GL_UNSIGNED_INT,3,num_tris * 3 * sizeof ( uint ),
+                      GL_ELEMENT_ARRAY_BUFFER,0);
 
-      bufobj_ptr_t t = buf_obj_t::create_bo
-                 (tris,GL_UNSIGNED_INT,3,num_tris * 3 * sizeof ( uint ),
-                  GL_ELEMENT_ARRAY_BUFFER,0);
+    bufobj_ptr_t c = buf_obj_t::create_bo();
 
-      bufobj_ptr_t c = buf_obj_t::create_bo();
+    renderable_t * ren = NULL;
 
-      renderable_t * ren = NULL;
-
-      if ( use_strips )
-        ren = create_buffered_triangles_ren ( v,t,c);
-      else
-        ren = create_buffered_tristrip_ren ( v,t,c);
-
-      delete []verts;
-
-      delete []tris;
-
-      return ren;
-
-    }
+    if ( use_strips )
+      ren = create_buffered_triangles_ren ( v,t,c);
     else
-      return NULL;
+      ren = create_buffered_tristrip_ren ( v,t,c);
+
+    delete []verts;
+
+    delete []tris;
+
+    return ren;
   }
 
   void init()

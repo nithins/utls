@@ -163,17 +163,6 @@ struct seq_num_gen_ftor
 
 };
 
-class genericException
-{
-    std::string m_str;
-
-  public:
-
-    genericException ( std::string str ) ;
-    std::string str() const;
-    friend std::ostream &operator<< ( std::ostream &stream, const genericException &e );
-};
-
 template <typename num_t>
 
 class num_generator_t
