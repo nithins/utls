@@ -22,6 +22,7 @@
 #define __CPPUTILS_H_INCLUDED__
 
 #include <string>
+#include <sstream>
 #include <ostream>
 #include <vector>
 
@@ -120,6 +121,15 @@ class n_tuple_t: public boost::array<T,N>
       stream>>bracket;
 
       return stream;
+    }
+
+    std::string to_string()
+    {
+      std::stringstream ss;
+
+      ((std::ostream&)ss)<<(*this);
+
+      return ss.str();
     }
 };
 
