@@ -69,7 +69,7 @@ namespace glutils
       compute_extent ( m_ver_bo, m_extent );
     }
 
-    virtual int render() const
+    virtual int render()
     {
       return ( this->*render_func ) ();
     }

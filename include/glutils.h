@@ -123,7 +123,7 @@ namespace glutils
   class renderable_t
   {
   public:
-    virtual int  render() const  = 0 ;
+    virtual int  render() = 0 ;
     virtual bool get_extent ( double * ){return false;}
     virtual ~renderable_t() {}
   };

@@ -103,7 +103,7 @@ namespace glutils
 
     }
 
-    virtual int render() const
+    virtual int render()
     {
       return ( this->*render_func ) ();
     }
@@ -223,7 +223,7 @@ namespace glutils
 
     }
 
-    virtual int render() const
+    virtual int render()
     {
       return ( this->*render_func ) ();
     }
@@ -383,7 +383,7 @@ namespace glutils
 
     }
 
-    virtual int render() const
+    virtual int render()
     {
       glCallList ( m_render_dl );
       return 0;

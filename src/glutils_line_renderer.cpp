@@ -61,7 +61,7 @@ namespace glutils
 
     }
 
-    virtual int render() const
+    virtual int render()
     {
       return ( this->*render_func ) ();
     }

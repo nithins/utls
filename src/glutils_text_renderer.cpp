@@ -102,7 +102,7 @@ namespace glutils
       glEndList();
     }
 
-    virtual int render() const
+    virtual int render()
     {
       if ( m_render_dl )
         glCallList ( m_render_dl );
