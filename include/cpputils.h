@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <boost/array.hpp>
+#include <boost/any.hpp>
 
 typedef unsigned int  uint;
 typedef unsigned char uchar;
@@ -193,6 +194,64 @@ class three_tuple_t: public n_tuple_t<tup_type_t, 3,ordered>
     }
 
     three_tuple_t():n_tuple_t<tup_type_t,3,ordered>(){}
+};
+
+class configurable_t
+{
+public:
+
+  typedef two_tuple_t<int> data_index_t;
+
+  enum eExchangeMode {EXCHANGE_READ,EXCHANGE_WRITE};
+
+  virtual int         rows()    = 0 ;
+
+  virtual int         columns() = 0 ;
+
+  virtual bool        exchange_data(const data_index_t &,
+                                    boost::any &,
+                                    const eExchangeMode &) = 0;
+
+  virtual std::string get_header(int i)
+  {
+    std::stringstream ss;
+    ss<<i;
+    return ss.str();
+  }
+
+  template <typename T>
+      static bool s_exchange_read_write
+      (T &p_val,boost::any &c_val,const eExchangeMode & mode)
+  {
+    bool ret = true;
+
+    switch(mode)
+    {
+    case EXCHANGE_WRITE:
+      ret   = (p_val != boost::any_cast<T>(c_val));
+      p_val = boost::any_cast<T>(c_val);
+      break;
+    case EXCHANGE_READ:
+      c_val = boost::any(p_val);
+      break;
+    }
+    return ret;
+  }
+
+  template <typename T>
+      static bool s_exchange_read_only
+      (const T &p_val,boost::any &c_val,const eExchangeMode & mode)
+  {
+    switch(mode)
+    {
+    case EXCHANGE_WRITE:
+      throw std::logic_error("read only property cannot write");
+      break;
+    case EXCHANGE_READ:
+      c_val = boost::any(p_val);
+    }
+    return false;
+  }
 };
 
 std::string stripLineComments ( const std::string& line, const char& comment_char = '#' );
