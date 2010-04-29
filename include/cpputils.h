@@ -220,7 +220,7 @@ public:
   }
 
   template <typename T>
-      static bool s_exchange_read_write
+      static bool s_exchange_rw
       (T &p_val,boost::any &c_val,const eExchangeMode & mode)
   {
     bool ret = true;
@@ -239,7 +239,7 @@ public:
   }
 
   template <typename T>
-      static bool s_exchange_read_only
+      static bool s_exchange_ro
       (const T &p_val,boost::any &c_val,const eExchangeMode & mode)
   {
     switch(mode)

@@ -20,8 +20,6 @@ namespace glutils
 
     int m_num_points;
 
-    double m_extent[6];
-
   public:
     buffered_points_ren_t
         ( bufobj_ptr_t ver_buf,
@@ -65,8 +63,6 @@ namespace glutils
       default:
         throw std::logic_error("renderfunc type undetermined");
       }
-
-      compute_extent ( m_ver_bo, m_extent );
     }
 
     virtual int render()
@@ -136,12 +132,6 @@ namespace glutils
 
     virtual ~buffered_points_ren_t()
     {
-    }
-
-    virtual bool get_extent ( double * extent )
-    {
-      std::copy ( m_extent, m_extent + 6, extent );
-      return true;
     }
   };
 
