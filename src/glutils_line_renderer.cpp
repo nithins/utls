@@ -21,8 +21,6 @@ namespace glutils
 
     int m_num_lines;
 
-    double m_extent[6];
-
   public:
     buffered_lines_ren_t
         ( const bufobj_ptr_t & ver_buf,
@@ -54,8 +52,6 @@ namespace glutils
       {
         render_func = &buffered_lines_ren_t::render_with_color;
       }
-
-      compute_extent ( m_ver_bo, m_extent );
 
       m_num_lines = m_lin_bo->get_num_items();
 
@@ -102,12 +98,6 @@ namespace glutils
 
     virtual ~buffered_lines_ren_t()
     {
-    }
-
-    virtual bool get_extent ( double * extent )
-    {
-      copy ( m_extent, m_extent + 6, extent );
-      return true;
     }
   };
 
