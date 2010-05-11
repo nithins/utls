@@ -175,52 +175,11 @@ namespace glutils
 
   void render3d_ascii_text(const char * text,int size,vertex_t pos);
 
+  void draw_aabb_line(vertex_t lc,vertex_t uc);
+
 }
 
-#define DRAWBB(XMIN,XMAX,YMIN,YMAX,ZMIN,ZMAX)    \
-glBegin ( GL_QUADS );       \
-    glVertex3f ( XMIN,YMIN,ZMIN );     \
-    glVertex3f ( XMIN,YMAX,ZMIN );     \
-    glVertex3f ( XMAX,YMAX,ZMIN );     \
-    glVertex3f ( XMAX,YMIN,ZMIN );     \
-    glEnd();        \
-    \
-    glBegin ( GL_QUADS );       \
-    glVertex3f ( XMIN,YMIN,ZMAX );     \
-    glVertex3f ( XMAX,YMIN,ZMAX );     \
-    glVertex3f ( XMAX,YMAX,ZMAX );     \
-    glVertex3f ( XMIN,YMAX,ZMAX );     \
-    glEnd();        \
-    \
-    glBegin ( GL_QUADS );       \
-    glVertex3f ( XMIN,YMAX,ZMIN);      \
-    glVertex3f ( XMIN,YMAX,ZMAX);      \
-    glVertex3f ( XMAX,YMAX,ZMAX);      \
-    glVertex3f ( XMAX,YMAX,ZMIN);      \
-    glEnd();        \
-    \
-    glBegin ( GL_QUADS );       \
-    glVertex3f ( XMIN,YMIN,ZMIN);      \
-    glVertex3f ( XMAX,YMIN,ZMIN);      \
-    glVertex3f ( XMAX,YMIN,ZMAX);      \
-    glVertex3f ( XMIN,YMIN,ZMAX);      \
-    glEnd();        \
-    \
-    glBegin ( GL_QUADS );       \
-    glVertex3f ( XMIN,YMIN,ZMIN);      \
-    glVertex3f ( XMIN,YMIN,ZMAX);      \
-    glVertex3f ( XMIN,YMAX,ZMAX);      \
-    glVertex3f ( XMIN,YMAX,ZMIN);      \
-    glEnd();        \
-    \
-    glBegin ( GL_QUADS );       \
-    glVertex3f ( XMAX,YMIN,ZMIN);      \
-    glVertex3f ( XMAX,YMAX,ZMIN);      \
-    glVertex3f ( XMAX,YMAX,ZMAX);      \
-    glVertex3f ( XMAX,YMIN,ZMAX);      \
-    glEnd();        \
-
-    void DrawAxes();
+void DrawAxes();
 
 void DrawZArrow ();
 

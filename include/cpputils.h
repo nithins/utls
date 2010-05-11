@@ -106,6 +106,17 @@ class n_tuple_t: public boost::array<T,N>
       return stream;
     }
 
+    template<typename OT>
+    n_tuple_t(const boost::array<OT,N> &o)
+    {
+      for(uint i = 0 ; i < N ; ++i)
+        (*this)[i] = o[i];
+    }
+
+    n_tuple_t()
+    {
+    }
+
     friend std::istream &operator>>( std::istream &stream, n_tuple_t &e )
     {
       char comma,bracket;
@@ -176,6 +187,11 @@ class two_tuple_t: public n_tuple_t<tup_type_t, 2,ordered>
     }
 
     two_tuple_t ():n_tuple_t<tup_type_t,2,ordered>(){}
+
+    template<typename OT>
+    two_tuple_t(const boost::array<OT,2> &o):
+        n_tuple_t<tup_type_t, 2,ordered>(o){}
+
 };
 
 template<typename tup_type_t,bool ordered = true>
@@ -194,6 +210,11 @@ class three_tuple_t: public n_tuple_t<tup_type_t, 3,ordered>
     }
 
     three_tuple_t():n_tuple_t<tup_type_t,3,ordered>(){}
+
+    template<typename OT>
+    three_tuple_t(const boost::array<OT,3> &o):
+        n_tuple_t<tup_type_t, 3,ordered>(o){}
+
 };
 
 class configurable_t
@@ -202,15 +223,11 @@ public:
 
   typedef two_tuple_t<int> data_index_t;
 
-  enum eExchangeMode {EXCHANGE_READ,EXCHANGE_WRITE};
-
   virtual int         rows()    = 0 ;
 
   virtual int         columns() = 0 ;
 
-  virtual bool        exchange_data(const data_index_t &,
-                                    boost::any &,
-                                    const eExchangeMode &) = 0;
+  virtual bool        exchange_data(const data_index_t &,boost::any &) = 0;
 
   virtual std::string get_header(int i)
   {
@@ -220,36 +237,34 @@ public:
   }
 
   template <typename T>
-      static bool s_exchange_rw
-      (T &p_val,boost::any &c_val,const eExchangeMode & mode)
+      static bool s_exchange_rw(T &p_val,boost::any &c_val)
   {
     bool ret = true;
 
-    switch(mode)
+    if(c_val.empty())
     {
-    case EXCHANGE_WRITE:
+      c_val = boost::any(p_val);
+    }
+    else
+    {
       ret   = (p_val != boost::any_cast<T>(c_val));
       p_val = boost::any_cast<T>(c_val);
-      break;
-    case EXCHANGE_READ:
-      c_val = boost::any(p_val);
-      break;
     }
     return ret;
   }
 
   template <typename T>
-      static bool s_exchange_ro
-      (const T &p_val,boost::any &c_val,const eExchangeMode & mode)
+      static bool s_exchange_ro(const T &p_val,boost::any &c_val)
   {
-    switch(mode)
+    if(c_val.empty())
     {
-    case EXCHANGE_WRITE:
-      throw std::logic_error("read only property cannot write");
-      break;
-    case EXCHANGE_READ:
       c_val = boost::any(p_val);
     }
+    else
+    {
+      throw std::logic_error("read only property cannot write");
+    }
+
     return false;
   }
 };

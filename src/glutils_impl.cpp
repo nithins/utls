@@ -357,4 +357,55 @@ namespace glutils
 
     init_text_rendering();
   }
+
+  void draw_aabb_line(vertex_t lc,vertex_t uc)
+  {
+
+    vertex_t cube_pts []=
+    {
+      vertex_t(lc[0],lc[1],lc[2]),
+      vertex_t(uc[0],lc[1],lc[2]),
+      vertex_t(lc[0],uc[1],lc[2]),
+      vertex_t(uc[0],uc[1],lc[2]),
+      vertex_t(lc[0],lc[1],uc[2]),
+      vertex_t(uc[0],lc[1],uc[2]),
+      vertex_t(lc[0],uc[1],uc[2]),
+      vertex_t(uc[0],uc[1],uc[2]),
+    };
+
+    glBegin(GL_LINE_LOOP);
+
+    glVertex3dv(cube_pts[0].data());
+    glVertex3dv(cube_pts[1].data());
+    glVertex3dv(cube_pts[3].data());
+    glVertex3dv(cube_pts[2].data());
+
+    glEnd();
+
+    glBegin(GL_LINE_LOOP);
+
+    glVertex3dv(cube_pts[4].data());
+    glVertex3dv(cube_pts[5].data());
+    glVertex3dv(cube_pts[7].data());
+    glVertex3dv(cube_pts[6].data());
+
+    glEnd();
+
+    glBegin(GL_LINES);
+
+    glVertex3dv(cube_pts[0].data());
+    glVertex3dv(cube_pts[4].data());
+
+    glVertex3dv(cube_pts[1].data());
+    glVertex3dv(cube_pts[5].data());
+
+    glVertex3dv(cube_pts[2].data());
+    glVertex3dv(cube_pts[6].data());
+
+    glVertex3dv(cube_pts[3].data());
+    glVertex3dv(cube_pts[7].data());
+
+    glEnd();
+
+  }
 }
