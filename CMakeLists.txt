@@ -8,17 +8,9 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Look for various software we need
-find_package(PythonInterp)
+find_package(PythonInterp REQUIRED)
 
-if(NOT PYTHONINTERP_FOUND OR NOT PYTHON_EXECUTABLE)
-  message(FATAL_ERROR "No python interpreter found .. needed for generating shader include files")
-endif(NOT PYTHONINTERP_FOUND OR NOT PYTHON_EXECUTABLE)
-
-find_package(GLEW)
-
-if(NOT GLEW_FOUND)
-  message(FATAL_ERROR "Failed to find GLEW .. quitting")
-endif(NOT GLEW_FOUND)
+find_package(GLEW REQUIRED)
 
 find_package(Freetype)
 
@@ -36,25 +28,33 @@ endif(NOT FTGL_FOUND AND NOT GLUT_FOUND)
 
 file(GLOB shader_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
 
-set(shader_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shadersources.h ${CMAKE_CURRENT_BINARY_DIR}/shadersources.cpp)
-		   
+set(shader_SRCS 
+  ${CMAKE_CURRENT_BINARY_DIR}/shadersources.h 
+  ${CMAKE_CURRENT_BINARY_DIR}/shadersources.cpp
+  )
+
 add_custom_command(
   OUTPUT ${shader_SRCS}
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_files_to_c_header.py 
   ${CMAKE_CURRENT_BINARY_DIR}/shadersources ${shader_FILES}		   
-  DEPENDS ${shader_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/copy_files_to_c_header.py)
+  DEPENDS ${shader_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/copy_files_to_c_header.py
+  )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) 
 
 # add in all other sources
 
-file(GLOB utls_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp 
-                    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h 
-		    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
+file(GLOB utls_SRCS 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  )
 
-file(GLOB tristripper_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/*.cpp
-			   ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/*.h 
-			   ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/detail/*.h)
+file(GLOB tristripper_SRCS 
+  ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/*.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/*.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/tristripper/detail/*.h
+  )
 
 set(utls_SRCS ${utls_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/shadersources.h)
 
@@ -68,8 +68,19 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/tristripper
   )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in 
+  ${CMAKE_CURRENT_BINARY_DIR}/config.h
+  )
 
-add_library(${PROJECT_NAME} SHARED ${shader_SRCS}  ${utls_SRCS} ${tristripper_SRCS})
+add_library(${PROJECT_NAME} SHARED 
+  ${shader_SRCS}  
+  ${utls_SRCS} 
+  ${tristripper_SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARY} ${GLUT_LIBRARIES} ${FREETYPE_LIBRARIES}  ${FTGL_LIBRARY} )
+target_link_libraries(${PROJECT_NAME} 
+  ${GLEW_LIBRARY} 
+  ${GLUT_LIBRARIES} 
+  ${FREETYPE_LIBRARIES}  
+  ${FTGL_LIBRARY} 
+  )
