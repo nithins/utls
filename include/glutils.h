@@ -1,21 +1,24 @@
 #ifndef __GLUTILS_H_INCLUDED
 #define __GLUTILS_H_INCLUDED
 
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
 
 #include <GL/gl.h>
 
-#include <cpputils.h>
+#include <n_vector.h>
+
 
 namespace glutils
 {
   typedef unsigned int idx_t;
 
   typedef idx_t point_idx_t;
-  typedef two_tuple_t<idx_t> line_idx_t;
-  typedef three_tuple_t<idx_t> tri_idx_t;
-  typedef three_tuple_t<double> vertex_t;
-  typedef three_tuple_t<double> color_t;
+  typedef n_vector_t<idx_t,2> line_idx_t;
+  typedef n_vector_t<idx_t,3> tri_idx_t;
+  typedef n_vector_t<double,3> vertex_t;
+  typedef n_vector_t<double,3> color_t;
 
   class buf_obj_t;
 
