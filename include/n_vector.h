@@ -45,13 +45,8 @@ class n_vector_t: public boost::array<T,N>
     {
     }
 
-    n_vector_t( const T &o)
-    {
-      (*this).assign(o);
-    }
-
-    template<typename OT>
-    n_vector_t( const boost::array<OT,N> &o)
+    template<typename OT,bool OO>
+    n_vector_t( const n_vector_t<OT,N,OO> &o)
     {
       for(size_t i = 0 ; i < N;++i)
         (*this)[i] = o[i];
@@ -71,6 +66,17 @@ class n_vector_t: public boost::array<T,N>
       (*this)[1] = e2;
       (*this)[2] = e3;
     }
+
+    template<typename OT>
+    static n_vector_t s_assign( const OT &o)
+    {
+      n_vector_t r;
+
+      r.assign((T)o);
+
+      return r;
+    }
+
 
     inline n_vector_t operator/(const T & s) const
     {
@@ -156,10 +162,10 @@ T dot_product(const n_vector_t<T,N,O>& v1,const n_vector_t<T,N,O>& v2)
 }
 
 template<typename T, std::size_t N,bool O>
-n_vector_t<T,N,O> n_vector_t<T,N,O>::zero = n_vector_t<T,N,O>((T)0);
+n_vector_t<T,N,O> n_vector_t<T,N,O>::zero = n_vector_t<T,N,O>::s_assign(0);
 
 template<typename T, std::size_t N,bool O>
-n_vector_t<T,N,O> n_vector_t<T,N,O>::one = n_vector_t<T,N,O>((T)1);
+n_vector_t<T,N,O> n_vector_t<T,N,O>::one  = n_vector_t<T,N,O>::s_assign(1);
 
 template<class T, std::size_t N>
 bool operator< (const n_vector_t<T,N,false>& x, const n_vector_t<T,N,false>& y)

@@ -84,7 +84,8 @@ public:
 
   virtual bool        exchange_data(const data_index_t &,boost::any &) = 0;
 
-  virtual std::string get_header(int i)
+  // should be string or vector<string>
+  virtual boost::any get_header(int i)
   {
     std::stringstream ss;
     ss<<i;
