@@ -185,7 +185,7 @@ namespace glutils
     std::copy ( extent, extent + 6, extent_out );
   }
 
-  void compute_extent ( const std::vector<vertex_t> &v, double * extent_out)
+  void compute_extent ( const vertex_list_t &v, double * extent_out)
   {
     double extent[] =
     {
@@ -207,13 +207,13 @@ namespace glutils
     std::copy ( extent, extent + 6, extent_out );
   }
 
-  void read_off_file ( const char *filename, double *&verts, uint &num_verts, uint *&tris, uint& num_tris )
+  void read_off_file ( const char *filename, vertex_list_t  vlist,tri_idx_list_t tlist)
   {
 
     std::fstream offFile ( filename, std::ios::in );
 
-    if ( offFile.eof() )
-      throw std::invalid_argument( "cannot read the file" );
+    if ( offFile.is_open() == false )
+      throw std::runtime_error( "cannot read the file" );
 
     std::string line;
 
@@ -222,113 +222,112 @@ namespace glutils
     line = stripWS ( line );
 
     if ( line != "OFF" )
-      throw std::invalid_argument ( "Doesnt appear to be an OFF file.. quitting" );
+      throw std::runtime_error ( "Doesnt appear to be an OFF file" );
 
     getline ( offFile, line );
 
     std::stringstream linestream ( stripWS ( line ) );
 
+    uint num_verts,num_tris;
+
     linestream >> num_verts >> num_tris;
 
-    try
+    vlist.resize(num_verts);
+
+    tlist.resize(num_tris);
+
+    uint vpos = 0 ;
+
+    while ( !offFile.eof() )
     {
+      if ( vpos == num_verts )
+        break;
 
-      verts = new double[num_verts*3];
+      getline ( offFile, line );
 
-      tris = new uint[num_tris*3];
+      std::stringstream linestream ( stripWS ( line ) );
 
-      uint num_verts_read = 0 ;
+      linestream >> vlist[vpos][0] >>vlist[vpos][1] >> vlist[vpos][2];
 
-      while ( !offFile.eof() )
-      {
-
-        if ( num_verts_read == num_verts )
-          break;
-
-        getline ( offFile, line );
-
-        std::stringstream linestream ( stripWS ( line ) );
-
-        linestream >> verts[num_verts_read*3+0];
-
-        linestream >> verts[num_verts_read*3+1];
-
-        linestream >> verts[num_verts_read*3+2];
-
-        ++num_verts_read;
-      }
-
-      if ( num_verts != num_verts_read )
-        throw std::logic_error ( "incorrect num verts read" );
-
-      uint num_tris_read = 0 ;
-
-      while ( !offFile.eof() )
-      {
-
-        if ( num_tris_read == num_tris )
-          break;
-
-        getline ( offFile, line );
-
-        uint num_points;
-
-        std::stringstream linestream ( stripWS ( line ) );
-
-        linestream >> num_points;
-
-        linestream >> tris[num_tris_read*3+0];
-
-        linestream >> tris[num_tris_read*3+1];
-
-        linestream >> tris[num_tris_read*3+2];
-
-        ++num_tris_read;
-      }
-
-      if ( num_tris != num_tris_read )
-        throw std::logic_error ( "incorrect num tris read" );
-
+      ++vpos;
     }
-    catch ( ... )
+
+    if ( num_verts != vpos )
+      throw std::runtime_error ( "incorrect num verts read" );
+
+    uint tpos = 0 ;
+
+    while ( !offFile.eof() )
     {
-      delete []verts;
-      delete []tris;
-      throw;
+      if ( tpos == num_tris )
+        break;
+
+      getline ( offFile, line );
+
+      uint num_points;
+
+      std::stringstream linestream ( stripWS ( line ) );
+
+      linestream >> num_points;
+
+      linestream >> tlist[tpos][0] >>tlist[tpos][1] >> tlist[tpos][2];
+
+      if(num_points != 3)
+        throw std::runtime_error ( "can read triangles only" );
+
+      ++tpos;
     }
+
+    if ( num_tris != tpos )
+      throw std::runtime_error ( "incorrect num tris read" );
   }
+
+  void read_tri_file
+      ( const char *filename,
+        vertex_list_t  vlist,
+        tri_idx_list_t tlist)
+  {
+    uint num_v,num_t;
+
+    std::fstream tri_file ( filename, std::fstream::in );
+
+    if(tri_file.is_open() == false)
+      throw std::runtime_error("unable to open tri file");
+
+    tri_file >> num_v >> num_t;
+
+    vlist.resize(num_v);
+    tlist.resize(num_t);
+
+    for ( uint i = 0; i < num_v; ++i )
+      for ( uint j = 0; j < 3; ++j )
+        tri_file >> vlist[i][j];
+
+    for ( uint i = 0; i < num_t; i++ )
+      for ( uint j = 0; j < 3; ++j )
+        tri_file >> tlist[i][j];
+
+    tri_file.close();
+  }
+
 
   renderable_t * create_buffered_ren_off_file ( const char * filename , bool use_strips )
   {
-    double * verts;
-    uint   * tris;
 
-    uint num_verts, num_tris;
+    vertex_list_t  vlist;
+    tri_idx_list_t tlist;
 
-    glutils::read_off_file ( filename, verts, num_verts, tris, num_tris );
+    glutils::read_off_file ( filename, vlist,tlist );
 
-    bufobj_ptr_t v = buf_obj_t::create_bo
-                     (verts, GL_DOUBLE, 3, num_verts * 3 * sizeof ( double ),
-                      GL_ARRAY_BUFFER, 0);
-
-    bufobj_ptr_t t = buf_obj_t::create_bo
-                     (tris,GL_UNSIGNED_INT,3,num_tris * 3 * sizeof ( uint ),
-                      GL_ELEMENT_ARRAY_BUFFER,0);
-
-    bufobj_ptr_t c = buf_obj_t::create_bo();
-
-    renderable_t * ren = NULL;
+    bufobj_ptr_t v = make_buf_obj(vlist);
+    bufobj_ptr_t t = make_buf_obj(tlist);
+    bufobj_ptr_t c = make_buf_obj();
 
     if ( use_strips )
-      ren = create_buffered_triangles_ren ( v,t,c);
+      return  create_buffered_tristrip_ren ( v,t,c);
     else
-      ren = create_buffered_tristrip_ren ( v,t,c);
+      return create_buffered_triangles_ren ( v,t,c);
 
-    delete []verts;
-
-    delete []tris;
-
-    return ren;
   }
 
   void init()

@@ -214,28 +214,28 @@ namespace glutils
     }
   }
 
-  bufobj_ptr_t make_buf_obj( const std::vector<vertex_t> &v)
+  bufobj_ptr_t make_buf_obj( const vertex_list_t &v)
   {
     return buf_obj_t::create_bo
         ( v.data(),GL_DOUBLE,3,GL_ARRAY_BUFFER,
           v.size()*sizeof(double)*3,0);
   }
 
-  bufobj_ptr_t make_buf_obj( const std::vector<tri_idx_t> &t)
+  bufobj_ptr_t make_buf_obj( const tri_idx_list_t &t)
   {
     return buf_obj_t::create_bo
         ( t.data(),GL_UNSIGNED_INT,3,GL_ELEMENT_ARRAY_BUFFER,
           t.size()*sizeof(unsigned int)*3,0);
   }
 
-  bufobj_ptr_t make_buf_obj( const std::vector<line_idx_t> &l)
+  bufobj_ptr_t make_buf_obj( const line_idx_list_t &l)
   {
     return buf_obj_t::create_bo
         ( l.data(),GL_UNSIGNED_INT,2,GL_ELEMENT_ARRAY_BUFFER,
           l.size()*sizeof(unsigned int)*2,0);
   }
 
-  bufobj_ptr_t make_buf_obj( const std::vector<point_idx_t> &p)
+  bufobj_ptr_t make_buf_obj( const point_idx_list_t &p)
   {
     return buf_obj_t::create_bo
         ( p.data(),GL_UNSIGNED_INT,1,GL_ELEMENT_ARRAY_BUFFER,

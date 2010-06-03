@@ -12,13 +12,22 @@
 
 namespace glutils
 {
-  typedef unsigned int idx_t;
+  typedef unsigned int             idx_t;
 
-  typedef idx_t point_idx_t;
-  typedef n_vector_t<idx_t,2> line_idx_t;
-  typedef n_vector_t<idx_t,3> tri_idx_t;
-  typedef n_vector_t<double,3> vertex_t;
-  typedef n_vector_t<double,3> color_t;
+  typedef idx_t                    point_idx_t;
+  typedef std::vector<point_idx_t> point_idx_list_t;
+  typedef n_vector_t<idx_t,2>      line_idx_t;
+  typedef std::vector<line_idx_t>  line_idx_list_t;
+  typedef n_vector_t<idx_t,3>      tri_idx_t;
+  typedef std::vector<tri_idx_t>   tri_idx_list_t;
+
+  typedef n_vector_t<double,3>     vertex_t;
+  typedef std::vector<vertex_t>    vertex_list_t;
+  typedef n_vector_t<double,3>     color_t;
+  typedef std::vector<color_t>     color_list_t;
+
+  typedef std::vector<std::string> string_list_t;
+
 
   class buf_obj_t;
 
@@ -109,19 +118,19 @@ namespace glutils
   // create a buffered from list data
   // list can be destroyed after this call.
 
-  bufobj_ptr_t make_buf_obj( const std::vector<vertex_t> &);
+  bufobj_ptr_t make_buf_obj( const vertex_list_t &);
 
-  bufobj_ptr_t make_buf_obj( const std::vector<tri_idx_t> &);
+  bufobj_ptr_t make_buf_obj( const tri_idx_list_t &);
 
-  bufobj_ptr_t make_buf_obj( const std::vector<line_idx_t> &);
+  bufobj_ptr_t make_buf_obj( const line_idx_list_t &);
 
-  bufobj_ptr_t make_buf_obj( const std::vector<point_idx_t> &);
+  bufobj_ptr_t make_buf_obj( const point_idx_list_t &);
 
   bufobj_ptr_t make_buf_obj();
 
   void compute_extent ( bufobj_ptr_t v_buf , double *);
 
-  void compute_extent ( const std::vector<vertex_t> &, double * );
+  void compute_extent ( const vertex_list_t &, double * );
 
   class renderable_t
   {
@@ -132,8 +141,8 @@ namespace glutils
   };
 
   renderable_t * create_buffered_text_ren
-      (const std::vector<std::string> &s,
-       const std::vector<vertex_t> &p);
+      (const string_list_t &s,
+       const vertex_list_t &p);
 
   renderable_t * create_buffered_points_ren
       ( bufobj_ptr_t  v,
@@ -167,10 +176,13 @@ namespace glutils
 
   void read_off_file
       ( const char *filename,
-        double *&verts,
-        uint &num_verts,
-        uint *&tris,
-        uint &num_tris );
+        vertex_list_t  vlist,
+        tri_idx_list_t tlist);
+
+  void read_tri_file
+      ( const char *filename,
+        vertex_list_t  vlist,
+        tri_idx_list_t tlist);
 
   renderable_t * create_buffered_ren_off_file
       ( const char * filename ,
