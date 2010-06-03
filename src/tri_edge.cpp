@@ -65,7 +65,6 @@ void TriEdge::setNumVerts ( const uint & vertex_ct )
 {
   m_vert_ct = vertex_ct;
   m_verts  = new uint[vertex_ct];
-  m_vert_degree = new uint[vertex_ct];
 }
 
 void TriEdge::setNumTris ( const uint & tri_ct )
@@ -87,8 +86,6 @@ struct qaapkt
 void TriEdge::start_adding_tris()
 {
   add_algo_pkt = new qaapkt();
-
-  memset ( m_vert_degree,0,sizeof ( uint ) *m_vert_ct );
 }
 
 void TriEdge::add_tri ( const uint *v )
@@ -98,13 +95,12 @@ void TriEdge::add_tri ( const uint *v )
   edge_map_t   &edge_map  = ( ( qaapkt* ) add_algo_pkt )->edge_map;
   uint         &tri_pos  = ( ( qaapkt* ) add_algo_pkt )->tri_pos;
 
-  // each tri has 8 versions
+  // each tri has 6 versions
 
   // the first four versions
   for ( int i = 0 ; i < 3 ; i++ )
   {
     m_tri_versions[ tri_pos + i].v = v[i];
-    // each vert will hit many times but that does not matter.. could count degree here
     m_verts[v[i]] = tri_pos + i;
   }
 
@@ -128,9 +124,6 @@ void TriEdge::add_tri ( const uint *v )
       q1->fnext = INVALID_VALUE;
       edge_list.push_back ( tri_pos + i );
       edge_map.insert ( make_pair ( make_pair ( q1->v,q2->v ), tri_pos + i ) );
-
-      ++m_vert_degree[q1->v];
-      ++m_vert_degree[q2->v];
     }
   }
 
@@ -213,90 +206,6 @@ void TriEdge::end_adding_tris()
     }
   }
 
-
-
-  DEBUG_LOG ( "==================" );
-  DEBUG_LOG ( "Tri Versions list" );
-  DEBUG_LOG ( "------------------" );
-  DEBUG_BEGIN;
-  for ( uint i = 0 ; i < m_tri_ct;i++ )
-  {
-    logTriSet ( i*6 );
-  }
-  DEBUG_END;
-  DEBUG_LOG ( "==================" );
-
-
-  m_boundry_tri_ct = edge_map.size();
-  m_boundry_tris   = new uint[m_boundry_tri_ct];
-
-  unsigned int btrino = 0;
-
-  // pick up the boundry tris .. these are the tris that remain unpaired in the edge map
-  // remember the outer loop will execute as many times as the no of disconnected cycles
-
-  m_boundry_cycle_ct = 0;
-
-  while ( edge_map.size() != 0 )
-  {
-    uint bqstart = ( * edge_map.begin() ).second;
-
-    uint bq = bqstart;
-
-    DEBUG_LOG ( "============================================" );
-    DEBUG_LOG ( "Edge map contents before boundry computation" );
-    DEBUG_LOG ( "--------------------------------------------" );
-    DEBUG_BEGIN;
-    for ( edge_map_t::iterator it = edge_map.begin() ;it != edge_map.end(); it++ )
-    {
-      logTri ( ( *it ).second );
-    }
-    DEBUG_END;
-    DEBUG_LOG ( "--------------------------------------------" );
-    DEBUG_LOG ( "Beginning boundry traversal" );
-    DEBUG_LOG ( "--------------------------------------------" );
-
-    ++m_boundry_cycle_ct;
-
-    do
-    {
-      DEBUG_STMT ( logTri ( bq ) );
-
-      if ( edge_map.find ( make_pair ( m_tri_versions[bq].v,m_tri_versions[tri_enext ( bq ) ].v ) ) ==edge_map.end() )
-      {
-        _ERROR ( "did not find this edge in here" );
-        exit ( 1 );
-      }
-
-      edge_map.erase ( make_pair ( m_tri_versions[bq].v,m_tri_versions[tri_enext ( bq ) ].v ) );
-
-      m_boundry_tris[btrino++] = bq;
-
-      uint bqnext = tri_enext ( bq );
-
-      while ( m_tri_versions[bqnext].fnext != INVALID_VALUE )
-      {
-        bqnext = tri_enext ( m_tri_versions[bqnext].fnext );
-
-        if ( bqnext == bq )
-        {
-          _ERROR ( "Went around the boundry tri but did not find the next boundry edge" );
-          exit ( 1 );
-        }
-      }
-      bq = bqnext;
-    }
-    while ( bq !=bqstart );
-
-    DEBUG_LOG ( "--------------------------------------------" );
-    DEBUG_LOG ( "Finished boundry traversal" );
-    DEBUG_LOG ( "============================================" );
-
-
-  }
-
-  m_max_vert_degree = *max_element ( m_vert_degree,m_vert_degree+m_vert_ct );
-
   delete ( ( qaapkt* ) add_algo_pkt );
 }
 
@@ -346,7 +255,6 @@ void TriEdge::init()
   m_vert_ct = 0;
   m_edge_ct = 0;
   m_tri_ct = 0;
-  m_boundry_tri_ct = 0;
 }
 
 void TriEdge::destroy()
@@ -364,10 +272,6 @@ void TriEdge::destroy()
     delete []m_tris;
     delete []m_tri_versions;
   }
-  if ( m_boundry_tri_ct !=0 )
-  {
-    delete []m_boundry_tris;
-  }
   init();
 }
 
@@ -381,7 +285,7 @@ void TriEdge::destroy()
     exit(1);\
 }\
   )\
- 
+
 
 uint TriEdge::vertIndex ( uint q ) const
 {

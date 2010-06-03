@@ -60,16 +60,8 @@ class TriEdge
     uint *m_edges;   // index list to tris that contain {v1,v2} = {a,b}
     uint  m_edge_ct;
 
-    uint *m_tris;   // index list to tris that contain {v1,v2,v3,v4} in consistent orientation
+    uint *m_tris;   // index list to tris that contain {v1,v2,v3} in consistent orientation
     uint  m_tri_ct;
-
-    uint *m_boundry_tris; // index list to tris that are on the boundry .. only one version is stored
-    uint  m_boundry_tri_ct;
-
-    uint *m_vert_degree;
-    uint  m_max_vert_degree;
-
-    uint  m_boundry_cycle_ct;
 
   public:
     TriEdge();
