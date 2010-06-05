@@ -176,13 +176,13 @@ namespace glutils
 
   void read_off_file
       ( const char *filename,
-        vertex_list_t  vlist,
-        tri_idx_list_t tlist);
+        vertex_list_t  &vlist,
+        tri_idx_list_t &tlist);
 
   void read_tri_file
       ( const char *filename,
-        vertex_list_t  vlist,
-        tri_idx_list_t tlist);
+        vertex_list_t  &vlist,
+        tri_idx_list_t &tlist);
 
   renderable_t * create_buffered_ren_off_file
       ( const char * filename ,

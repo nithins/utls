@@ -207,7 +207,7 @@ namespace glutils
     std::copy ( extent, extent + 6, extent_out );
   }
 
-  void read_off_file ( const char *filename, vertex_list_t  vlist,tri_idx_list_t tlist)
+  void read_off_file ( const char *filename, vertex_list_t  &vlist,tri_idx_list_t &tlist)
   {
 
     std::fstream offFile ( filename, std::ios::in );
@@ -284,8 +284,8 @@ namespace glutils
 
   void read_tri_file
       ( const char *filename,
-        vertex_list_t  vlist,
-        tri_idx_list_t tlist)
+        vertex_list_t  &vlist,
+        tri_idx_list_t &tlist)
   {
     uint num_v,num_t;
 

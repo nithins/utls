@@ -164,8 +164,6 @@ namespace glutils
 
     int m_num_triangles;
 
-    double m_extent[6];
-
     static GLSLProgram * s_flat_tri_shader;
 
   public:
@@ -217,8 +215,6 @@ namespace glutils
         render_func = &buffered_flat_triangles_ren_t::render_with_color;
       }
 
-      compute_extent ( m_ver_bo, m_extent );
-
       m_num_triangles = m_tri_bo->get_num_items();
 
     }
@@ -264,15 +260,8 @@ namespace glutils
       return m_num_triangles*3;
     }
 
-
     virtual ~buffered_flat_triangles_ren_t()
     {
-    }
-
-    virtual bool get_extent ( double * extent )
-    {
-      std::copy ( m_extent, m_extent + 6, extent );
-      return true;
     }
   };
 
