@@ -22,6 +22,10 @@
 
 #include <cpputils.h>
 
+#include <boost/shared_ptr.hpp>
+
+#include <glutils.h>
+
 struct tri
 {
 
@@ -66,6 +70,8 @@ class TriEdge
   public:
     TriEdge();
 
+    ~TriEdge();
+
     void setNumVerts ( const uint & vertex_ct );
 
     void setNumTris ( const uint & tri_ct );
@@ -75,6 +81,8 @@ class TriEdge
     void add_tri ( const uint *v );
 
     void end_adding_tris();
+
+    void setup(const glutils::tri_idx_list_t &,const uint & num_verts);
 
     void logTri ( const uint &qpos ) const ;
 
@@ -93,8 +101,72 @@ class TriEdge
     uint triFnext ( uint q ) const;
 
     bool hasFnext ( uint q ) const;
-
-    static TriEdge* readFromFile ( char * filename ); // for now only ply file is supported
 };
+
+typedef boost::shared_ptr<TriEdge> tri_edge_ptr_t;
+
+class tri_cell_complex_t
+{
+  tri_edge_ptr_t m_tri_edge;
+
+public:
+
+  static const uint cc_dim = 2;
+
+  typedef uint cellid_t;
+
+  tri_cell_complex_t(tri_edge_ptr_t ptr): m_tri_edge(ptr){}
+
+  tri_cell_complex_t():m_tri_edge(new TriEdge){}
+
+  inline tri_edge_ptr_t get_tri_edge() const;
+
+  inline uint get_dim() const;
+
+  uint get_cell_dim (cellid_t c) const ;
+
+  uint get_cell_points (cellid_t  ,cellid_t   * ) const;
+
+  uint get_cell_facets (cellid_t  ,cellid_t  * ) const;
+
+  uint get_cell_co_facets (cellid_t  ,cellid_t  * ) const;
+
+  bool is_cell_boundry(cellid_t ) const;
+
+  inline uint get_num_cells ();
+
+  uint get_num_cells_dim (uint dim);
+
+  inline uint get_num_cells_max_dim (uint dim);
+};
+
+inline tri_edge_ptr_t tri_cell_complex_t::get_tri_edge() const
+{
+  return m_tri_edge;
+}
+
+inline uint tri_cell_complex_t::get_num_cells_max_dim (uint dim)
+{
+  uint n = 0;
+
+  for(uint i = 0 ; i <= dim; ++i)
+    n += get_num_cells_dim(i);
+
+  return n;
+}
+
+inline uint tri_cell_complex_t::get_num_cells ()
+{
+  return get_num_cells_max_dim(cc_dim);
+}
+
+inline uint tri_cell_complex_t::get_dim() const
+{
+  return cc_dim;
+}
+
+
+
+
 
 #endif

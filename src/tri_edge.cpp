@@ -61,6 +61,11 @@ TriEdge::TriEdge()
   init();
 }
 
+TriEdge::~TriEdge()
+{
+  destroy();
+}
+
 void TriEdge::setNumVerts ( const uint & vertex_ct )
 {
   m_vert_ct = vertex_ct;
@@ -209,6 +214,20 @@ void TriEdge::end_adding_tris()
   delete ( ( qaapkt* ) add_algo_pkt );
 }
 
+void TriEdge::setup(const glutils::tri_idx_list_t &tlist,const uint & vert_ct)
+{
+  setNumVerts(vert_ct);
+
+  setNumTris(tlist.size());
+
+  start_adding_tris();
+
+  for(uint i = 0 ;i < tlist.size(); ++i)
+    add_tri(tlist[i].data());
+
+  end_adding_tris();
+}
+
 void TriEdge::logTri ( const uint &qpos ) const
 {
   if ( m_tri_versions[qpos ].fnext != INVALID_VALUE )
@@ -325,5 +344,220 @@ bool TriEdge::hasFnext ( uint q ) const
   return ! ( m_tri_versions[q].fnext == INVALID_VALUE );
 }
 
+uint tri_cell_complex_t::get_num_cells_dim (uint dim)
+{
+  switch(dim)
+  {
+  case 0: return m_tri_edge->m_vert_ct;
+  case 1: return m_tri_edge->m_edge_ct;
+  case 2: return m_tri_edge->m_tri_ct;
+  }
 
+  throw std::runtime_error("invalid dim specified");
+}
 
+uint tri_cell_complex_t::get_cell_dim (cellid_t c) const
+{
+  if(c < m_tri_edge->m_vert_ct)
+    return 0;
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+    return 1;
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+    return 2;
+
+  throw std::runtime_error("cellid out of range");
+}
+
+uint tri_cell_complex_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
+{
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    p[0] = c;
+
+    return 1;
+  }
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+  {
+    uint t = m_tri_edge->m_edges[c];
+
+    p[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
+    p[1] = m_tri_edge->vertIndex(t);
+
+    return 2;
+  }
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+  {
+    uint t = m_tri_edge->m_tris[c];
+
+    p[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
+    p[1] = m_tri_edge->vertIndex(t); t = tri_enext(t);
+    p[2] = m_tri_edge->vertIndex(t);
+
+    return 3;
+  }
+
+  throw std::runtime_error("cellid out of range");
+}
+
+uint tri_cell_complex_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
+{
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    return 0;
+  }
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+  {
+    uint t = m_tri_edge->m_edges[c];
+
+    f[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
+    f[1] = m_tri_edge->vertIndex(t);
+
+    return 2;
+  }
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+  {
+    uint t = m_tri_edge->m_tris[c];
+
+    f[0] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t); t = tri_enext(t);
+    f[1] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t); t = tri_enext(t);
+    f[2] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
+
+    return 3;
+  }
+
+  throw std::runtime_error("cellid out of range");
+}
+
+uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
+{
+
+  std::vector<cellid_t> cf_vec;
+
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    uint tstart = m_tri_edge->m_verts[c];
+
+    uint t = tstart;
+
+    do
+    {
+      if ( !m_tri_edge->hasFnext ( t ) ) break;
+
+      t = tri_enext ( m_tri_edge->triFnext ( t ) );
+    }
+    while ( t != tstart );
+
+    uint cf_ct = 0 ;
+
+    tstart = t;
+
+    do
+    {
+      cf_vec.push_back(m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t));
+
+      t = tri_eprev ( t );
+
+      if ( !m_tri_edge->hasFnext ( t ) )
+      {
+        cf_vec.push_back(m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t));
+
+        break;
+      }
+
+      t = m_tri_edge->triFnext ( t );
+    }
+    while ( t != tstart );
+
+    if(cf_vec.size() > 20)
+      throw std::runtime_error("max cf size exceeded");
+
+    std::copy(cf_vec.begin(),cf_vec.end(),cf);
+
+    return cf_vec.size();
+  }
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+  {
+    uint cf_ct = 0 ;
+
+    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
+
+    uint t = m_tri_edge->m_edges[c];
+
+    cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex ( t )  ;
+
+    if ( m_tri_edge->hasFnext ( t ) )
+    {
+      t = m_tri_edge->triFnext ( t );
+
+      cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex ( t )  ;
+    }
+
+    return cf_ct;
+  }
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+  {
+    return 0;
+  }
+
+  throw std::runtime_error("cellid out of range");
+}
+
+bool tri_cell_complex_t::is_cell_boundry(cellid_t c) const
+{
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    uint tstart = m_tri_edge->m_verts[c];
+
+    uint t = tstart;
+
+    do
+    {
+      if ( !m_tri_edge->hasFnext ( t ) ) return true;
+
+      t = tri_enext ( m_tri_edge->triFnext ( t ) );
+    }
+    while ( t != tstart );
+
+    return false;
+  }
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+  {
+    return (!m_tri_edge->hasFnext ( m_tri_edge->m_edges[c]) );
+  }
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+  {
+    return false;
+  }
+
+  throw std::runtime_error("cellid out of range");
+}
