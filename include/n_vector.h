@@ -77,45 +77,56 @@ class n_vector_t: public boost::array<T,N>
       return r;
     }
 
-
-    inline n_vector_t operator/(const T & s) const
+    n_vector_t & operator+=(const n_vector_t &o)
     {
-      n_vector_t ret;
-
       for(size_t i = 0 ; i < N;++i )
-        ret[i] = (*this)[i]/s;
+        (*this)[i] += o[i];
 
-      return ret;
+      return *this;
     }
 
-    inline n_vector_t operator*(const T & s) const
+    const n_vector_t operator+(const n_vector_t &o) const
     {
-      n_vector_t ret;
-
-      for(size_t i = 0 ; i < N;++i )
-        ret [i]= (*this)[i] * s;
-
-      return ret;
+      return n_vector_t(*this) += o;
     }
 
-    inline n_vector_t operator-(const n_vector_t & v) const
+    n_vector_t & operator-=(const n_vector_t &o)
     {
-      n_vector_t ret;
-
       for(size_t i = 0 ; i < N;++i )
-        ret[i] = (*this)[i]-v[i];
+        (*this)[i] -= o[i];
 
-      return ret;
+      return *this;
     }
 
-    inline n_vector_t operator+(const n_vector_t & v) const
+    const n_vector_t operator-(const n_vector_t &o) const
     {
-      n_vector_t ret;
+      return n_vector_t(*this) -= o;
+    }
 
+    n_vector_t & operator*=(const T &o)
+    {
       for(size_t i = 0 ; i < N;++i )
-        ret[i] = (*this)[i]+v[i];
+        (*this)[i] *= o;
 
-      return ret;
+      return *this;
+    }
+
+    const n_vector_t operator*(const T &o) const
+    {
+      return n_vector_t(*this) *= o;
+    }
+
+    n_vector_t & operator/=(const T &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] /= o;
+
+      return *this;
+    }
+
+    const n_vector_t operator/(const T &o) const
+    {
+      return n_vector_t(*this) /= o;
     }
 
     friend std::istream &operator>>( std::istream &stream, n_vector_t &e )
