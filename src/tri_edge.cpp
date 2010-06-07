@@ -448,9 +448,6 @@ uint tri_cell_complex_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
 
 uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
 {
-
-  std::vector<cellid_t> cf_vec;
-
   if(c < m_tri_edge->m_vert_ct)
   {
     uint tstart = m_tri_edge->m_verts[c];
@@ -465,19 +462,19 @@ uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
     }
     while ( t != tstart );
 
-    uint cf_ct = 0 ;
-
     tstart = t;
+
+    uint cf_ct = 0;
 
     do
     {
-      cf_vec.push_back(m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t));
+      cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
 
       t = tri_eprev ( t );
 
       if ( !m_tri_edge->hasFnext ( t ) )
       {
-        cf_vec.push_back(m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t));
+        cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
 
         break;
       }
@@ -486,12 +483,7 @@ uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
     }
     while ( t != tstart );
 
-    if(cf_vec.size() > 20)
-      throw std::runtime_error("max cf size exceeded");
-
-    std::copy(cf_vec.begin(),cf_vec.end(),cf);
-
-    return cf_vec.size();
+    return cf_ct;
   }
 
   c -= m_tri_edge->m_vert_ct;
@@ -524,6 +516,55 @@ uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
   }
 
   throw std::runtime_error("cellid out of range");
+}
+
+uint tri_cell_complex_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
+{
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    uint tstart = m_tri_edge->m_verts[c];
+
+    uint t = tstart;
+
+    do
+    {
+      if ( !m_tri_edge->hasFnext ( t ) ) break;
+
+      t = tri_enext ( m_tri_edge->triFnext ( t ) );
+    }
+    while ( t != tstart );
+
+    tstart = t;
+
+    uint cf_ct = 0;
+
+    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
+
+    do
+    {
+      cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
+
+      t = tri_eprev ( t );
+
+      if ( !m_tri_edge->hasFnext ( t ) )
+      {
+        cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
+
+        break;
+      }
+      else
+      {
+        cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex(t);
+      }
+
+      t = m_tri_edge->triFnext ( t );
+    }
+    while ( t != tstart );
+
+    return cf_ct;
+  }
+
+  throw std::runtime_error("invalid vertex id");
 }
 
 bool tri_cell_complex_t::is_cell_boundry(cellid_t c) const

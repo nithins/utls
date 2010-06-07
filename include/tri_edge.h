@@ -36,7 +36,7 @@ struct tri
   uint e;
 
   // offsets that index into a tri cell list
-  // is implicit (ptrdiff)/8 will give the tri cell
+  // is implicit (ptrdiff)/6 will give the tri cell
 
   // offset that indexes to a trilist
   // this shares the edge (v1,v2)
@@ -130,6 +130,8 @@ public:
   uint get_cell_facets (cellid_t  ,cellid_t  * ) const;
 
   uint get_cell_co_facets (cellid_t  ,cellid_t  * ) const;
+
+  uint get_vert_star(cellid_t  ,cellid_t  * ) const;
 
   bool is_cell_boundry(cellid_t ) const;
 
