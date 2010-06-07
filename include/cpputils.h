@@ -30,6 +30,7 @@
 
 #include <boost/array.hpp>
 #include <boost/any.hpp>
+#include <boost/function.hpp>
 
 typedef unsigned int  uint;
 typedef unsigned char uchar;
@@ -76,31 +77,35 @@ class configurable_t
 {
 public:
 
+  enum eFieldType {EFT_DATA_RO,EFT_DATA_RW,EFT_ACTION};
+
   typedef n_vector_t<int,2> data_index_t;
+  typedef boost::function<void(void)> action_callback_t;
 
-  virtual int         rows()    = 0 ;
+  virtual data_index_t dim() = 0 ;
 
-  virtual int         columns() = 0 ;
+  virtual bool exchange_field(const data_index_t &,boost::any &)  = 0;
 
-  virtual bool        exchange_data(const data_index_t &,boost::any &) = 0;
+  virtual eFieldType exchange_header(const int &,boost::any &) = 0;
 
-  // should be string or vector<string>
-  virtual boost::any get_header(int i)
+  static bool s_exchange_action
+      (const action_callback_t &p_val,boost::any &c_val)
   {
-    std::stringstream ss;
-    ss<<i;
-    return ss.str();
+    if(c_val.empty())
+      c_val = boost::any(p_val);
+    else
+      throw std::logic_error("action should be called when interacted with");
+
+    return false;
   }
 
   template <typename T>
-      static bool s_exchange_rw(T &p_val,boost::any &c_val)
+      static bool s_exchange_data_rw(T &p_val,boost::any &c_val)
   {
-    bool ret = true;
+    bool ret = false;
 
     if(c_val.empty())
-    {
       c_val = boost::any(p_val);
-    }
     else
     {
       ret   = (p_val != boost::any_cast<T>(c_val));
@@ -110,16 +115,12 @@ public:
   }
 
   template <typename T>
-      static bool s_exchange_ro(const T &p_val,boost::any &c_val)
+      static bool s_exchange_data_ro(const T &p_val,boost::any &c_val)
   {
     if(c_val.empty())
-    {
       c_val = boost::any(p_val);
-    }
     else
-    {
       throw std::logic_error("read only property cannot write");
-    }
 
     return false;
   }
