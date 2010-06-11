@@ -188,14 +188,7 @@ T distance(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
 template<typename T, std::size_t N>
 n_vector_t<T,N,true> normalize(const n_vector_t<T,N,true>& v)
 {
-  T n = norm(v);
-
-  n_vector_t<T,N,true> ret;
-
-  for(size_t i = 0 ; i < N;++i )
-    ret[i] /= n;
-
-  return ret;
+  return v/norm(v);
 }
 
 template<typename T>

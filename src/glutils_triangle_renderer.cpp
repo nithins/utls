@@ -53,19 +53,18 @@ namespace glutils
 
     int m_num_triangles;
 
-    double m_extent[6];
-
-
   public:
     buffered_triangles_ren_t
         ( const bufobj_ptr_t & ver_buf,
           const bufobj_ptr_t & tri_buf,
-          const bufobj_ptr_t & col_buf )
+          const bufobj_ptr_t & col_buf,
+          const bufobj_ptr_t & nrm_buf )
     {
 
       m_ver_bo   = ver_buf;
       m_tri_bo   = tri_buf;
       m_col_bo   = col_buf;
+      m_nrm_bo   = nrm_buf;
 
       if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
       {
@@ -86,20 +85,18 @@ namespace glutils
         render_func = &buffered_triangles_ren_t::render_with_color;
       }
 
-      if(!check_indexes_in_range(m_ver_bo,m_tri_bo))
-        throw std::logic_error("the index set is indexing out of ver range");
+      if ( m_nrm_bo->id() == 0)
+      {
+        double * normals = compute_normals ( m_ver_bo, m_tri_bo );
 
-      double * normals = compute_normals ( m_ver_bo, m_tri_bo );
+        m_nrm_bo  = buf_obj_t::create_bo
+                    ( normals, GL_DOUBLE, 3, GL_ARRAY_BUFFER,
+                     sizeof ( double ) *3*m_ver_bo->get_num_items(), 0 );
 
-      m_nrm_bo  = buf_obj_t::create_bo
-                  ( normals, GL_DOUBLE, 3, GL_ARRAY_BUFFER,
-                   sizeof ( double ) *3*m_ver_bo->get_num_items(), 0 );
-
-      compute_extent ( m_ver_bo, m_extent );
+        delete []normals;
+      }
 
       m_num_triangles = m_tri_bo->get_num_items();
-
-      delete []normals;
 
     }
 
@@ -140,15 +137,8 @@ namespace glutils
       return m_num_triangles*3;
     }
 
-
     virtual ~buffered_triangles_ren_t()
     {
-    }
-
-    virtual bool get_extent ( double * extent )
-    {
-      std::copy ( m_extent, m_extent + 6, extent );
-      return true;
     }
   };
 
@@ -400,9 +390,10 @@ namespace glutils
   renderable_t * create_buffered_triangles_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
-        bufobj_ptr_t c )
+        bufobj_ptr_t c,
+        bufobj_ptr_t n )
   {
-    return new buffered_triangles_ren_t ( v, t, c );
+    return new buffered_triangles_ren_t ( v, t, c, n );
   }
 
   renderable_t * create_buffered_tristrip_ren

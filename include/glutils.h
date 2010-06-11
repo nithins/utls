@@ -155,9 +155,10 @@ namespace glutils
         bufobj_ptr_t c);
 
   renderable_t * create_buffered_triangles_ren
-      ( bufobj_ptr_t ,
-        bufobj_ptr_t ,
-        bufobj_ptr_t );
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t i,
+        bufobj_ptr_t c,
+        bufobj_ptr_t n);
 
   renderable_t * create_buffered_tristrip_ren
       ( bufobj_ptr_t ,

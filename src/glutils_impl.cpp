@@ -87,6 +87,7 @@ void DrawZArrow ()
                       glutils::buf_obj_t::create_bo
                       (a_tind,GL_UNSIGNED_INT,3,
                        GL_ELEMENT_ARRAY_BUFFER,sizeof(a_tind),0),
+                      glutils::buf_obj_t::create_bo(),
                       glutils::buf_obj_t::create_bo());
 
   }
@@ -322,11 +323,12 @@ namespace glutils
     bufobj_ptr_t v = make_buf_obj(vlist);
     bufobj_ptr_t t = make_buf_obj(tlist);
     bufobj_ptr_t c = make_buf_obj();
+    bufobj_ptr_t n = make_buf_obj();
 
     if ( use_strips )
       return  create_buffered_tristrip_ren ( v,t,c);
     else
-      return create_buffered_triangles_ren ( v,t,c);
+      return create_buffered_triangles_ren ( v,t,c,n);
 
   }
 
