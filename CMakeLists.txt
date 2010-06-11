@@ -26,7 +26,16 @@ endif(NOT FTGL_FOUND AND NOT GLUT_FOUND)
 
 # generate the headerfile containing the shader sources
 
-file(GLOB shader_FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*)
+set(shader_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_triangles.vert
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_triangles.geom
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_tetrahedrons.vert
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_tetrahedrons.geom
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/normal_ren_vert.glsl
+  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/normal_ren_geom.glsl
+  )
 
 set(shader_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/shadersources.h
@@ -63,6 +72,7 @@ set(utls_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_impl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_buffer_object.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_line_renderer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_normal_renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_text_renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_point_renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_triangle_renderer.cpp

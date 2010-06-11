@@ -189,6 +189,12 @@ protected:
 
   normal_list_t m_cell_normal;
 
+  double        m_average_length;
+
+protected:
+
+  double compute_average_length();
+
 public:
 
   void init(const tri_idx_list_t &,const vertex_list_t &);
@@ -238,6 +244,9 @@ public:
 
   inline const normal_list_t &get_cell_normals() const
   { return m_cell_normal; }
+
+  inline double get_average_edge_length() const
+  { return m_average_length;}
 
 };
 

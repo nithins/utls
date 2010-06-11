@@ -603,6 +603,23 @@ bool tri_cc_t::is_cell_boundry(cellid_t c) const
   throw std::runtime_error("cellid out of range");
 }
 
+double tri_cc_geom_t::compute_average_length()
+{
+  double avg_el = 0;
+
+  for(cellid_t c = get_num_cells_max_dim(0),c_end = get_num_cells_max_dim(1);c != c_end; ++c)
+  {
+    cellid_t pts[20];
+
+    get_cell_points(c,pts);
+
+    avg_el += euclid_distance(get_cell_position(pts[0]),get_cell_position(pts[1]));
+  }
+
+  return avg_el/get_num_cells_dim(1);
+}
+
+
 
 void tri_cc_geom_t::init(const tri_idx_list_t &tl,const vertex_list_t &vl)
 {
@@ -641,9 +658,10 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     get_cell_points(c,pts);
 
-    m_cell_normal[c] =
-        normalize(cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
-                                m_cell_pos[pts[0]] -m_cell_pos[pts[2]]));
+    m_cell_normal[c]  = cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
+                                      m_cell_pos[pts[0]] -m_cell_pos[pts[2]]);
+
+    m_cell_normal[c] /= -1*euclid_norm(m_cell_normal[c]);
   }
 
   cellid_t c = get_num_cells_max_dim(1);
@@ -664,6 +682,8 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
     m_cell_normal[c] = n/cf_ct;
   }
   while(c != 0);
+
+  m_average_length = compute_average_length();
 }
 
 void tri_cc_geom_t::clear()

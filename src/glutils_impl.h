@@ -52,6 +52,10 @@ namespace glutils
   void  compute_tri_normal (buf_obj_t &, const uint * , double *normal );
 
   void init_text_rendering();
+
+  void init_normal_renderer();
+
+  void clear_normal_renderer();
 }
 
 #endif

@@ -35,6 +35,8 @@ namespace glutils
 
   void init();
 
+  void clear();
+
   // a class that allows to buffer data on the gpu
 
   class buf_obj_t
@@ -159,6 +161,13 @@ namespace glutils
         bufobj_ptr_t i,
         bufobj_ptr_t c,
         bufobj_ptr_t n);
+
+  renderable_t * create_buffered_normals_ren
+      (bufobj_ptr_t v,
+       bufobj_ptr_t i,
+       bufobj_ptr_t c,
+       bufobj_ptr_t n,
+       double n_len = 1.0);
 
   renderable_t * create_buffered_tristrip_ren
       ( bufobj_ptr_t ,

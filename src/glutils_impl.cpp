@@ -357,6 +357,13 @@ namespace glutils
     }
 
     init_text_rendering();
+
+    init_normal_renderer();
+  }
+
+  void clear()
+  {
+    clear_normal_renderer();
   }
 
   void draw_aabb_line(vertex_t lc,vertex_t uc)
