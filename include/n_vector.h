@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <ostream>
+#include <cmath>
 
 #include <boost/array.hpp>
 
@@ -161,13 +162,50 @@ class n_vector_t: public boost::array<T,N>
     static n_vector_t one;
 };
 
-template<typename T, std::size_t N,bool O>
-T dot_product(const n_vector_t<T,N,O>& v1,const n_vector_t<T,N,O>& v2)
+template<typename T, std::size_t N>
+T dot_product(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
 {
   T ret;
 
   for(size_t i = 0 ; i < N;++i )
     ret += v1[i]*v2[i];
+
+  return ret;
+}
+
+template<typename T, std::size_t N>
+T norm(const n_vector_t<T,N,true>& v)
+{
+  return std::sqrt(dot_product(v,v));
+}
+
+template<typename T, std::size_t N>
+T distance(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
+{
+  return norm(v1-v2);
+}
+
+template<typename T, std::size_t N>
+n_vector_t<T,N,true> normalize(const n_vector_t<T,N,true>& v)
+{
+  T n = norm(v);
+
+  n_vector_t<T,N,true> ret;
+
+  for(size_t i = 0 ; i < N;++i )
+    ret[i] /= n;
+
+  return ret;
+}
+
+template<typename T>
+n_vector_t<T,3,true> cross_product(const n_vector_t<T,3,true>& v1,
+                                   const n_vector_t<T,3,true>& v2)
+{
+  n_vector_t<T,3,true> ret;
+
+  for(size_t i = 0 ; i < 3;++i )
+    ret[i] = v1[(i+1)%3]*v2[(i+2)%3] - v1[(i+2)%3]*v2[(i+1)%3];
 
   return ret;
 }

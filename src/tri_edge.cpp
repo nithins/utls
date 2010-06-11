@@ -56,23 +56,23 @@ uint tri_sym ( uint q )
   return ( q + 5 ) -2* ( q%6 );
 }
 
-TriEdge::TriEdge()
+tri_edge_t::tri_edge_t()
 {
   init();
 }
 
-TriEdge::~TriEdge()
+tri_edge_t::~tri_edge_t()
 {
   destroy();
 }
 
-void TriEdge::setNumVerts ( const uint & vertex_ct )
+void tri_edge_t::setNumVerts ( const uint & vertex_ct )
 {
   m_vert_ct = vertex_ct;
   m_verts  = new uint[vertex_ct];
 }
 
-void TriEdge::setNumTris ( const uint & tri_ct )
+void tri_edge_t::setNumTris ( const uint & tri_ct )
 {
   m_tri_ct         = tri_ct;
   m_tri_versions   = new tri[ tri_ct*6];
@@ -88,12 +88,12 @@ struct qaapkt
   qaapkt() :tri_pos ( 0 ),edge_map ( unordered_pair_comparator() ) {}
 };
 
-void TriEdge::start_adding_tris()
+void tri_edge_t::start_adding_tris()
 {
   add_algo_pkt = new qaapkt();
 }
 
-void TriEdge::add_tri ( const uint *v )
+void tri_edge_t::add_tri ( const uint *v )
 {
 
   vector<uint> &edge_list = ( ( qaapkt* ) add_algo_pkt )->edge_list;
@@ -154,7 +154,7 @@ void TriEdge::add_tri ( const uint *v )
   tri_pos+=6;
 }
 
-void TriEdge::end_adding_tris()
+void tri_edge_t::end_adding_tris()
 {
   vector<uint> &edge_list = ( ( qaapkt* ) add_algo_pkt )->edge_list;
   edge_map_t   &edge_map  = ( ( qaapkt* ) add_algo_pkt )->edge_map;
@@ -214,7 +214,7 @@ void TriEdge::end_adding_tris()
   delete ( ( qaapkt* ) add_algo_pkt );
 }
 
-void TriEdge::setup(const glutils::tri_idx_list_t &tlist,const uint & vert_ct)
+void tri_edge_t::setup(const tri_idx_list_t &tlist,const uint & vert_ct)
 {
   setNumVerts(vert_ct);
 
@@ -228,7 +228,7 @@ void TriEdge::setup(const glutils::tri_idx_list_t &tlist,const uint & vert_ct)
   end_adding_tris();
 }
 
-void TriEdge::logTri ( const uint &qpos ) const
+void tri_edge_t::logTri ( const uint &qpos ) const
 {
   if ( m_tri_versions[qpos ].fnext != INVALID_VALUE )
   {
@@ -256,7 +256,7 @@ void TriEdge::logTri ( const uint &qpos ) const
   }
 }
 
-void TriEdge::logTriSet ( const uint &trisetstart ) const
+void tri_edge_t::logTriSet ( const uint &trisetstart ) const
 {
   unsigned qstart = 6* ( trisetstart/6 );
 
@@ -269,14 +269,14 @@ void TriEdge::logTriSet ( const uint &trisetstart ) const
   _LOG ( "-------------------------------------" );
 }
 
-void TriEdge::init()
+void tri_edge_t::init()
 {
   m_vert_ct = 0;
   m_edge_ct = 0;
   m_tri_ct = 0;
 }
 
-void TriEdge::destroy()
+void tri_edge_t::destroy()
 {
   if ( m_vert_ct !=0 )
   {
@@ -306,25 +306,25 @@ void TriEdge::destroy()
   )\
 
 
-uint TriEdge::vertIndex ( uint q ) const
+uint tri_edge_t::vertIndex ( uint q ) const
 {
   CHECK_VALID_Q_VERSION ( q );
   return m_tri_versions[q].v;
 }
 
-uint TriEdge::edgeIndex ( uint q ) const
+uint tri_edge_t::edgeIndex ( uint q ) const
 {
   CHECK_VALID_Q_VERSION ( q );
   return m_tri_versions[q].e;
 }
 
-uint TriEdge::triIndex ( uint q ) const
+uint tri_edge_t::triIndex ( uint q ) const
 {
   CHECK_VALID_Q_VERSION ( q );
   return q/6;
 }
 
-uint TriEdge::triFnext ( uint q ) const
+uint tri_edge_t::triFnext ( uint q ) const
 {
   CHECK_VALID_Q_VERSION ( q );
 
@@ -339,12 +339,12 @@ uint TriEdge::triFnext ( uint q ) const
   return m_tri_versions[q].fnext;
 }
 
-bool TriEdge::hasFnext ( uint q ) const
+bool tri_edge_t::hasFnext ( uint q ) const
 {
   return ! ( m_tri_versions[q].fnext == INVALID_VALUE );
 }
 
-uint tri_cell_complex_t::get_num_cells_dim (uint dim)
+uint tri_cc_t::get_num_cells_dim (uint dim) const
 {
   switch(dim)
   {
@@ -356,7 +356,7 @@ uint tri_cell_complex_t::get_num_cells_dim (uint dim)
   throw std::runtime_error("invalid dim specified");
 }
 
-uint tri_cell_complex_t::get_cell_dim (cellid_t c) const
+uint tri_cc_t::get_cell_dim (cellid_t c) const
 {
   if(c < m_tri_edge->m_vert_ct)
     return 0;
@@ -374,7 +374,7 @@ uint tri_cell_complex_t::get_cell_dim (cellid_t c) const
   throw std::runtime_error("cellid out of range");
 }
 
-uint tri_cell_complex_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
+uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
 {
   if(c < m_tri_edge->m_vert_ct)
   {
@@ -411,7 +411,7 @@ uint tri_cell_complex_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
   throw std::runtime_error("cellid out of range");
 }
 
-uint tri_cell_complex_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
+uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
 {
   if(c < m_tri_edge->m_vert_ct)
   {
@@ -446,7 +446,7 @@ uint tri_cell_complex_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
   throw std::runtime_error("cellid out of range");
 }
 
-uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
+uint tri_cc_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
 {
   if(c < m_tri_edge->m_vert_ct)
   {
@@ -518,7 +518,7 @@ uint tri_cell_complex_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
   throw std::runtime_error("cellid out of range");
 }
 
-uint tri_cell_complex_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
+uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
 {
   if(c < m_tri_edge->m_vert_ct)
   {
@@ -567,7 +567,7 @@ uint tri_cell_complex_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
   throw std::runtime_error("invalid vertex id");
 }
 
-bool tri_cell_complex_t::is_cell_boundry(cellid_t c) const
+bool tri_cc_t::is_cell_boundry(cellid_t c) const
 {
   if(c < m_tri_edge->m_vert_ct)
   {
@@ -601,4 +601,77 @@ bool tri_cell_complex_t::is_cell_boundry(cellid_t c) const
   }
 
   throw std::runtime_error("cellid out of range");
+}
+
+
+void tri_cc_geom_t::init(const tri_idx_list_t &tl,const vertex_list_t &vl)
+{
+  tri_cc_ptr_t tcc(new tri_cc_t);
+
+  tcc->init(tl,vl.size());
+
+  init(tcc,vl);
+}
+
+void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
+{
+  m_tri_cc = tcc;
+
+  m_cell_pos.assign(vl.begin(),vl.end());
+
+  for(cellid_t c = get_num_cells_max_dim(0),c_end = get_num_cells();c != c_end; ++c)
+  {
+    cellid_t pts[20];
+
+    uint pt_ct = get_cell_points(c,pts);
+
+    vertex_t v(vertex_t::zero);
+
+    for(uint j = 0 ; j < pt_ct; ++j)
+      v += m_cell_pos[pts[j]];
+
+    m_cell_pos.push_back(v/pt_ct);
+  }
+
+  m_cell_normal.resize(get_num_cells());
+
+  for(cellid_t c = get_num_cells_max_dim(1),c_end = get_num_cells_max_dim(2);c != c_end; ++c)
+  {
+    cellid_t pts[20];
+
+    get_cell_points(c,pts);
+
+    m_cell_normal[c] =
+        normalize(cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
+                                m_cell_pos[pts[0]] -m_cell_pos[pts[2]]));
+  }
+
+  cellid_t c = get_num_cells_max_dim(1);
+
+  do
+  {
+    --c;
+
+    cellid_t cf[20];
+
+    uint cf_ct = get_cell_co_facets(c,cf);
+
+    normal_t n(normal_t::zero);
+
+    for(uint i = 0; i < cf_ct;++i)
+      n += m_cell_normal[cf[i]];
+
+    m_cell_normal[c] = n/cf_ct;
+  }
+  while(c != 0);
+}
+
+void tri_cc_geom_t::clear()
+{
+
+  m_tri_cc.reset();
+
+  m_cell_pos.clear();
+
+  m_cell_normal.clear();
 }
