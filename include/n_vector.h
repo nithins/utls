@@ -49,8 +49,7 @@ class n_vector_t: public boost::array<T,N>
     template<typename OT,bool OO>
     n_vector_t( const n_vector_t<OT,N,OO> &o)
     {
-      for(size_t i = 0 ; i < N;++i)
-        (*this)[i] = o[i];
+      (*this) = o;
     }
 
     template<typename OT1,typename OT2>
@@ -117,6 +116,19 @@ class n_vector_t: public boost::array<T,N>
       return n_vector_t(*this) *= o;
     }
 
+    n_vector_t & operator*=(const n_vector_t &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] *= o[i];
+
+      return *this;
+    }
+
+    const n_vector_t operator*(const n_vector_t &o) const
+    {
+      return n_vector_t(*this) *= o;
+    }
+
     n_vector_t & operator/=(const T &o)
     {
       for(size_t i = 0 ; i < N;++i )
@@ -126,6 +138,19 @@ class n_vector_t: public boost::array<T,N>
     }
 
     const n_vector_t operator/(const T &o) const
+    {
+      return n_vector_t(*this) /= o;
+    }
+
+    n_vector_t & operator/=(const n_vector_t &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] /= o[i];
+
+      return *this;
+    }
+
+    const n_vector_t operator/(const n_vector_t &o) const
     {
       return n_vector_t(*this) /= o;
     }
@@ -160,6 +185,25 @@ class n_vector_t: public boost::array<T,N>
     static n_vector_t zero;
 
     static n_vector_t one;
+
+    template<typename FT>
+    inline const n_vector_t apply(FT f)
+    {
+      std::transform(this->begin(),this->end(),this->begin(),f);
+
+      return (*this);
+    }
+
+
+    template<typename FT>
+    inline n_vector_t apply(FT f) const
+    {
+      n_vector_t r;
+
+      std::transform(this->begin(),this->end(),r.begin(),f);
+
+      return (r);
+    }
 };
 
 template<typename T, std::size_t N>
@@ -207,6 +251,21 @@ n_vector_t<T,N,O> n_vector_t<T,N,O>::zero = n_vector_t<T,N,O>::s_assign(0);
 
 template<typename T, std::size_t N,bool O>
 n_vector_t<T,N,O> n_vector_t<T,N,O>::one  = n_vector_t<T,N,O>::s_assign(1);
+
+namespace std
+{
+  template<typename T, std::size_t N,bool O>
+  inline n_vector_t<T,N,O> ceil(const n_vector_t<T,N,O> & c)
+  {
+    return c.apply((long double (*)(long double)) std::ceil);
+  }
+
+  template<typename T, std::size_t N,bool O>
+  inline n_vector_t<T,N,O> floor(const n_vector_t<T,N,O> & c)
+  {
+    return c.apply((long double (*)(long double)) std::floor);
+  }
+}
 
 template<class T, std::size_t N>
 bool operator< (const n_vector_t<T,N,false>& x, const n_vector_t<T,N,false>& y)
