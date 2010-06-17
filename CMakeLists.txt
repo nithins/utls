@@ -63,6 +63,7 @@ set(utls_SRCS
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/n_vector.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/n_vector.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/aabb.h
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/logutil.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/logutil.cpp
