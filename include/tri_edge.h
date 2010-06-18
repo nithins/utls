@@ -250,6 +250,8 @@ public:
 
 };
 
+typedef boost::shared_ptr<tri_cc_geom_t> tri_cc_geom_ptr_t;
+
 inline void tri_cc_t::init(const tri_idx_list_t &tl,const uint & nv)
 {
   m_tri_edge->setup(tl,nv);

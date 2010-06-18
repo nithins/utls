@@ -6,16 +6,16 @@
 namespace aabb
 {
   template <typename coord_type>
-      struct range_t:public n_vector_t<coord_type,2>
+      struct aabb_range_t:public n_vector_t<coord_type,2>
   {
-    range_t ( const coord_type &l,const coord_type &u)
+    aabb_range_t ( const coord_type &l,const coord_type &u)
     {
 
       (*this)[0] = std::min ( l,u);
       (*this)[1] = std::max ( l,u);
     }
 
-    range_t ():n_vector_t<coord_type,2>(0,0){}
+    aabb_range_t ():n_vector_t<coord_type,2>(0,0){}
 
     inline bool isInOpen(const coord_type &c) const
     {
@@ -32,26 +32,26 @@ namespace aabb
       return (( (*this)[0] == c ) || (  c == (*this)[1] ));
     }
 
-    inline bool contains(const range_t & r) const
+    inline bool contains(const aabb_range_t & r) const
     {
       return isInOpen(r[0]) && isInOpen(r[1]);
     }
 
-    inline bool intersects(const range_t & r) const
+    inline bool intersects(const aabb_range_t & r) const
     {
       return !((r[0] > (*this)[1]) || ((*this)[0] > r[1]));
     }
 
-    inline bool intersection(const range_t & r,range_t & i) const
+    inline bool intersection(const aabb_range_t & r,aabb_range_t & i) const
     {
-      i = range_t(std::max(r[0],(*this)[0]),std::min(r[1],(*this)[1]));
+      i = aabb_range_t(std::max(r[0],(*this)[0]),std::min(r[1],(*this)[1]));
 
       return intersects(r);
     }
 
-    inline range_t range_union(const range_t & r) const
+    inline aabb_range_t range_union(const aabb_range_t & r) const
     {
-      return range_t(std::min(r[0],(*this)[0]),std::max(r[1],(*this)[1]));
+      return aabb_range_t(std::min(r[0],(*this)[0]),std::max(r[1],(*this)[1]));
     }
 
     inline coord_type span() const
@@ -61,25 +61,31 @@ namespace aabb
   };
 
   template <typename coord_type,uint max_dim>
-      struct aabb_t: public n_vector_t< range_t<coord_type> ,max_dim>
+      struct aabb_t: public n_vector_t< aabb_range_t<coord_type> ,max_dim>
   {
-    typedef range_t<coord_type> aabb_range_t;
+    typedef aabb_range_t<coord_type> range_t;
 
-    typedef n_vector_t<aabb_range_t,max_dim> base_t;
+    typedef n_vector_t<range_t,max_dim> base_t;
 
     typedef n_vector_t<coord_type,max_dim> point_t;
 
-    aabb_t(const aabb_range_t &r1,const aabb_range_t &r2,const aabb_range_t &r3)
+    aabb_t(const range_t &r1,const range_t &r2,const range_t &r3)
     {
       (*this)[0] = r1;
       (*this)[1] = r2;
       (*this)[2] = r3;
     }
 
+    aabb_t(const range_t &r1,const range_t &r2)
+    {
+      (*this)[0] = r1;
+      (*this)[1] = r2;
+    }
+
     aabb_t(const point_t &p1,const point_t &p2)
     {
       for(uint i = 0 ; i < base_t::static_size; ++i)
-        (*this)[i] = aabb_range_t(p1[i],p2[i]);
+        (*this)[i] = range_t(p1[i],p2[i]);
     }
 
     aabb_t(){}

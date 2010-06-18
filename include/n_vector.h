@@ -49,7 +49,7 @@ class n_vector_t: public boost::array<T,N>
     template<typename OT,bool OO>
     n_vector_t( const n_vector_t<OT,N,OO> &o)
     {
-      (*this) = o;
+      std::copy(o.begin(),o.end(),this->begin());
     }
 
     template<typename OT1,typename OT2>
