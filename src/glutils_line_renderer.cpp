@@ -40,20 +40,31 @@ namespace glutils
 
       if ( m_lin_bo->id() == 0 && m_lin_bo->src_ptr() == NULL )
       {
-        throw std::invalid_argument
-            ( "no line index data specified neither in cpu nor gpu" );
-      }
+        if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+        {
+          render_func = &buffered_lines_ren_t::render_direct_without_color;
+        }
+        else
+        {
+          render_func = &buffered_lines_ren_t::render_direct_with_color;
+        }
 
-      if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
-      {
-        render_func = &buffered_lines_ren_t::render_without_color;
+        m_num_lines = m_ver_bo->get_num_items()/2;
       }
       else
       {
-        render_func = &buffered_lines_ren_t::render_with_color;
+        if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+        {
+          render_func = &buffered_lines_ren_t::render_indexed_without_color;
+        }
+        else
+        {
+          render_func = &buffered_lines_ren_t::render_indexed_with_color;
+        }
+
+        m_num_lines = m_lin_bo->get_num_items();
       }
 
-      m_num_lines = m_lin_bo->get_num_items();
 
     }
 
@@ -62,7 +73,7 @@ namespace glutils
       return ( this->*render_func ) ();
     }
 
-    int render_with_color() const
+    int render_indexed_with_color() const
     {
       m_col_bo->bind_to_color_pointer();
 
@@ -81,7 +92,7 @@ namespace glutils
       return m_num_lines*2;
     }
 
-    int render_without_color() const
+    int render_indexed_without_color() const
     {
       m_ver_bo->bind_to_vertex_pointer();
 
@@ -95,6 +106,33 @@ namespace glutils
 
       return m_num_lines*2;
     }
+
+    int render_direct_with_color() const
+    {
+      m_col_bo->bind_to_color_pointer();
+
+      m_ver_bo->bind_to_vertex_pointer();
+
+      glDrawArrays(GL_LINES, 0, m_num_lines*2);
+
+      m_col_bo->unbind_from_color_pointer();
+
+      m_ver_bo->unbind_from_vertex_pointer();
+
+      return m_num_lines*2;
+    }
+
+    int render_direct_without_color() const
+    {
+      m_ver_bo->bind_to_vertex_pointer();
+
+      glDrawArrays(GL_LINES, 0, m_num_lines*2);
+
+      m_ver_bo->unbind_from_vertex_pointer();
+
+      return m_num_lines*2;
+    }
+
 
     virtual ~buffered_lines_ren_t()
     {

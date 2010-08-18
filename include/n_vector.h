@@ -7,6 +7,12 @@
 #include <cmath>
 
 #include <boost/array.hpp>
+#include <boost/function.hpp>
+
+
+// this is designed for a vector of numbers of any type.
+// dont get oversmart and define a matrix as a vector of vectors..
+// you'll be surprised by the behavior of the arithmetic operators
 
 template<typename T, std::size_t N,bool O= true>
 class n_vector_t: public boost::array<T,N>
@@ -26,24 +32,9 @@ class n_vector_t: public boost::array<T,N>
     typedef typename base_t::reverse_iterator       reverse_iterator;
     typedef typename base_t::const_reverse_iterator const_reverse_iterator;
 
-    friend std::ostream &operator<< ( std::ostream &stream, const n_vector_t &e )
-    {
-      stream<<"(";
-      if(N > 0)
-      {
-        stream<<e.elems[0];
-        for(unsigned int i = 1 ; i < N ; ++i)
-        {
-          stream<<","<<e.elems[i];
-        }
-      }
-      stream<<")";
-
-      return stream;
-    }
-
     n_vector_t()
     {
+      (*this) = n_vector_t::zero;
     }
 
     template<typename OT,bool OO>
@@ -77,7 +68,17 @@ class n_vector_t: public boost::array<T,N>
       return r;
     }
 
-    n_vector_t & operator+=(const n_vector_t &o)
+    template<typename OT>
+    inline n_vector_t & operator+=(const OT &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] += o;
+
+      return *this;
+    }
+
+    template<typename OT,bool OO>
+    inline n_vector_t & operator+=(const n_vector_t<OT,N,OO> &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] += o[i];
@@ -85,12 +86,17 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator+(const n_vector_t &o) const
+    template<typename OT>
+    inline n_vector_t & operator-=(const OT &o)
     {
-      return n_vector_t(*this) += o;
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] -= o;
+
+      return *this;
     }
 
-    n_vector_t & operator-=(const n_vector_t &o)
+    template<typename OT,bool OO>
+    inline n_vector_t & operator-=(const n_vector_t<OT,N,OO> &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] -= o[i];
@@ -98,12 +104,8 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator-(const n_vector_t &o) const
-    {
-      return n_vector_t(*this) -= o;
-    }
-
-    n_vector_t & operator*=(const T &o)
+    template<typename OT>
+    inline n_vector_t & operator*=(const OT &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] *= o;
@@ -111,12 +113,8 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator*(const T &o) const
-    {
-      return n_vector_t(*this) *= o;
-    }
-
-    n_vector_t & operator*=(const n_vector_t &o)
+    template<typename OT,bool OO>
+    inline n_vector_t & operator*=(const n_vector_t<OT,N,OO> &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] *= o[i];
@@ -124,12 +122,8 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator*(const n_vector_t &o) const
-    {
-      return n_vector_t(*this) *= o;
-    }
-
-    n_vector_t & operator/=(const T &o)
+    template<typename OT>
+    inline n_vector_t & operator/=(const OT &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] /= o;
@@ -137,12 +131,8 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator/(const T &o) const
-    {
-      return n_vector_t(*this) /= o;
-    }
-
-    n_vector_t & operator/=(const n_vector_t &o)
+    template<typename OT,bool OO>
+    inline n_vector_t & operator/=(const n_vector_t<OT,N,OO> &o)
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] /= o[i];
@@ -150,9 +140,20 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    const n_vector_t operator/(const n_vector_t &o) const
+    friend std::ostream &operator<< ( std::ostream &stream, const n_vector_t &e )
     {
-      return n_vector_t(*this) /= o;
+      stream<<"(";
+      if(N > 0)
+      {
+        stream<<e.elems[0];
+        for(unsigned int i = 1 ; i < N ; ++i)
+        {
+          stream<<","<<e.elems[i];
+        }
+      }
+      stream<<")";
+
+      return stream;
     }
 
     friend std::istream &operator>>( std::istream &stream, n_vector_t &e )
@@ -186,17 +187,16 @@ class n_vector_t: public boost::array<T,N>
 
     static n_vector_t one;
 
-    template<typename FT>
-    inline const n_vector_t apply(FT f)
+    typedef boost::function<T(T)> apply_t;
+
+    inline const n_vector_t apply(apply_t f)
     {
       std::transform(this->begin(),this->end(),this->begin(),f);
 
       return (*this);
     }
 
-
-    template<typename FT>
-    inline n_vector_t apply(FT f) const
+    inline const n_vector_t apply(apply_t f) const
     {
       n_vector_t r;
 
@@ -206,10 +206,75 @@ class n_vector_t: public boost::array<T,N>
     }
 };
 
-template<typename T, std::size_t N>
-T dot_product(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
+// addition
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator+(const n_vector_t<T,N,O> & v, const OT &s)
 {
-  T ret;
+  return n_vector_t<T,N,O>(v) += s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator+(const OT &s,const n_vector_t<T,N,O> & v)
+{
+  return n_vector_t<T,N,O>(v) += s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator+(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) += v2;
+}
+
+// multiplication
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator*(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) *= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator*(const OT &s,const n_vector_t<T,N,O> & v)
+{
+  return n_vector_t<T,N,O>(v) *= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator*(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) *= v2;
+}
+
+// subtraction
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator-(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) -= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator-(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) -= v2;
+}
+
+// division
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator/(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) /= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator/(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) /= v2;
+}
+
+// vector operations
+template<typename T, std::size_t N>
+inline T dot_product(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
+{
+  T ret = 0;
 
   for(size_t i = 0 ; i < N;++i )
     ret += v1[i]*v2[i];
@@ -217,8 +282,8 @@ T dot_product(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
   return ret;
 }
 template<typename T>
-n_vector_t<T,3,true> cross_product(const n_vector_t<T,3,true>& v1,
-                                   const n_vector_t<T,3,true>& v2)
+inline n_vector_t<T,3,true> cross_product(const n_vector_t<T,3,true>& v1,
+                                          const n_vector_t<T,3,true>& v2)
 {
   n_vector_t<T,3,true> ret;
 
@@ -229,19 +294,33 @@ n_vector_t<T,3,true> cross_product(const n_vector_t<T,3,true>& v1,
 }
 
 template<typename T, std::size_t N>
-T euclid_norm(const n_vector_t<T,N,true>& v)
+inline T euclid_norm2(const n_vector_t<T,N,true>& v)
 {
-  return std::sqrt(dot_product(v,v));
+  return dot_product(v,v);
 }
 
 template<typename T, std::size_t N>
-T euclid_distance(const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
+inline T euclid_norm(const n_vector_t<T,N,true>& v)
+{
+  return std::sqrt(euclid_norm2(v));
+}
+
+template<typename T, std::size_t N>
+inline T euclid_distance
+    (const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
 {
   return euclid_norm(v1-v2);
 }
 
 template<typename T, std::size_t N>
-n_vector_t<T,N,true> euclid_normalize(const n_vector_t<T,N,true>& v)
+inline T euclid_distance2
+    (const n_vector_t<T,N,true>& v1,const n_vector_t<T,N,true>& v2)
+{
+  return euclid_norm2(v1-v2);
+}
+
+template<typename T, std::size_t N>
+inline n_vector_t<T,N,true> euclid_normalize(const n_vector_t<T,N,true>& v)
 {
   return v/euclid_norm(v);
 }
@@ -264,6 +343,12 @@ namespace std
   inline n_vector_t<T,N,O> floor(const n_vector_t<T,N,O> & c)
   {
     return c.apply((long double (*)(long double)) std::floor);
+  }
+
+  template<typename T, std::size_t N,bool O>
+  inline n_vector_t<T,N,O> abs(const n_vector_t<T,N,O> & c)
+  {
+    return c.apply((T (*)(T)) std::abs);
   }
 }
 

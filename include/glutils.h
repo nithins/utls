@@ -148,19 +148,19 @@ namespace glutils
 
   renderable_t * create_buffered_points_ren
       ( bufobj_ptr_t  v,
-        bufobj_ptr_t  i,
-        bufobj_ptr_t  c);
+        bufobj_ptr_t  i = make_buf_obj(),
+        bufobj_ptr_t  c = make_buf_obj());
 
   renderable_t * create_buffered_lines_ren
       ( bufobj_ptr_t v,
-        bufobj_ptr_t i,
-        bufobj_ptr_t c);
+        bufobj_ptr_t i = make_buf_obj(),
+        bufobj_ptr_t c = make_buf_obj());
 
   renderable_t * create_buffered_triangles_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t i,
-        bufobj_ptr_t c,
-        bufobj_ptr_t n);
+        bufobj_ptr_t c = make_buf_obj(),
+        bufobj_ptr_t n = make_buf_obj());
 
   renderable_t * create_buffered_normals_ren
       (bufobj_ptr_t v,
@@ -170,19 +170,19 @@ namespace glutils
        double n_len = 1.0);
 
   renderable_t * create_buffered_tristrip_ren
-      ( bufobj_ptr_t ,
-        bufobj_ptr_t ,
-        bufobj_ptr_t  );
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t t,
+        bufobj_ptr_t c = make_buf_obj() );
 
   renderable_t * create_buffered_flat_triangles_ren
-      ( bufobj_ptr_t ,
-        bufobj_ptr_t ,
-        bufobj_ptr_t );
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t t,
+        bufobj_ptr_t c = make_buf_obj());
 
   renderable_t * create_buffered_flat_tetrahedrons_ren
-      ( bufobj_ptr_t ,
-        bufobj_ptr_t ,
-        bufobj_ptr_t  );
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t t,
+        bufobj_ptr_t c = make_buf_obj() );
 
   void read_off_file
       ( const char *filename,
