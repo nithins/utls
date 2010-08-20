@@ -221,6 +221,13 @@ namespace glutils
           v.size()*sizeof(double)*3,0);
   }
 
+  bufobj_ptr_t make_buf_obj( const quad_idx_list_t &q)
+  {
+    return buf_obj_t::create_bo
+        ( q.data(),GL_UNSIGNED_INT,4,GL_ELEMENT_ARRAY_BUFFER,
+          q.size()*sizeof(unsigned int)*4,0);
+  }
+
   bufobj_ptr_t make_buf_obj( const tri_idx_list_t &t)
   {
     return buf_obj_t::create_bo
@@ -242,8 +249,21 @@ namespace glutils
           p.size()*sizeof(unsigned int),0);
   }
 
-  bufobj_ptr_t make_buf_obj( )
+  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const tri_idx_list_t &t)
   {
-    return buf_obj_t::create_bo();
+    normal_list_t n;
+
+    compute_vertex_normals(v,t,n);
+
+    return make_buf_obj(n);
+  }
+
+  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const quad_idx_list_t &t)
+  {
+    normal_list_t n;
+
+    compute_vertex_normals(v,t,n);
+
+    return make_buf_obj(n);
   }
 }

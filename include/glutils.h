@@ -9,7 +9,6 @@
 
 #include <n_vector.h>
 
-
 namespace glutils
 {
   typedef unsigned int             idx_t;
@@ -20,14 +19,17 @@ namespace glutils
   typedef std::vector<line_idx_t>  line_idx_list_t;
   typedef n_vector_t<idx_t,3>      tri_idx_t;
   typedef std::vector<tri_idx_t>   tri_idx_list_t;
+  typedef n_vector_t<idx_t,4>      quad_idx_t;
+  typedef std::vector<quad_idx_t>  quad_idx_list_t;
 
   typedef n_vector_t<double,3>     vertex_t;
   typedef std::vector<vertex_t>    vertex_list_t;
   typedef n_vector_t<double,3>     color_t;
   typedef std::vector<color_t>     color_list_t;
+  typedef n_vector_t<double,3>     normal_t;
+  typedef std::vector<vertex_t>    normal_list_t;
 
   typedef std::vector<std::string> string_list_t;
-
 
   class buf_obj_t;
 
@@ -128,9 +130,21 @@ namespace glutils
 
   bufobj_ptr_t make_buf_obj( const point_idx_list_t &);
 
-  bufobj_ptr_t make_buf_obj();
+  bufobj_ptr_t make_buf_obj( const quad_idx_list_t &);
 
-  void compute_extent ( bufobj_ptr_t v_buf , double *);
+  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &,const tri_idx_list_t &);
+
+  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const quad_idx_list_t &t);
+
+  void compute_vertex_normals
+      ( const vertex_list_t &vlist,
+        const tri_idx_list_t &tlist,
+        normal_list_t & nlist);
+
+  void compute_vertex_normals
+      ( const vertex_list_t   &vlist,
+        const quad_idx_list_t &qlist,
+        normal_list_t & nlist);
 
   void compute_extent ( const vertex_list_t &, double * );
 
@@ -148,19 +162,27 @@ namespace glutils
 
   renderable_t * create_buffered_points_ren
       ( bufobj_ptr_t  v,
-        bufobj_ptr_t  i = make_buf_obj(),
-        bufobj_ptr_t  c = make_buf_obj());
+        bufobj_ptr_t  i = bufobj_ptr_t(),
+        bufobj_ptr_t  c = bufobj_ptr_t());
 
   renderable_t * create_buffered_lines_ren
       ( bufobj_ptr_t v,
-        bufobj_ptr_t i = make_buf_obj(),
-        bufobj_ptr_t c = make_buf_obj());
+        bufobj_ptr_t i = bufobj_ptr_t(),
+        bufobj_ptr_t c = bufobj_ptr_t());
 
   renderable_t * create_buffered_triangles_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t i,
-        bufobj_ptr_t c = make_buf_obj(),
-        bufobj_ptr_t n = make_buf_obj());
+        bufobj_ptr_t n,
+        bufobj_ptr_t c = bufobj_ptr_t()
+        );
+
+  renderable_t * create_buffered_quads_ren
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t i,
+        bufobj_ptr_t n,
+        bufobj_ptr_t c = bufobj_ptr_t()
+        );
 
   renderable_t * create_buffered_normals_ren
       (bufobj_ptr_t v,
@@ -172,17 +194,17 @@ namespace glutils
   renderable_t * create_buffered_tristrip_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
-        bufobj_ptr_t c = make_buf_obj() );
+        bufobj_ptr_t c = bufobj_ptr_t() );
 
   renderable_t * create_buffered_flat_triangles_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
-        bufobj_ptr_t c = make_buf_obj());
+        bufobj_ptr_t c = bufobj_ptr_t());
 
   renderable_t * create_buffered_flat_tetrahedrons_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
-        bufobj_ptr_t c = make_buf_obj() );
+        bufobj_ptr_t c = bufobj_ptr_t() );
 
   void read_off_file
       ( const char *filename,

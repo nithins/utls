@@ -26,8 +26,6 @@ namespace glutils
 
     int m_num_tetrahedrons;
 
-    double m_extent[6];
-
     static GLSLProgram * s_flat_tet_shader;
 
   public:
@@ -78,8 +76,6 @@ namespace glutils
         render_func = &buffered_flat_tetrahedrons_ren_t::render_with_color;
       }
 
-      compute_extent ( m_ver_bo, m_extent );
-
       m_num_tetrahedrons = m_tet_bo->get_num_items();
 
     }
@@ -127,12 +123,6 @@ namespace glutils
     virtual ~buffered_flat_tetrahedrons_ren_t()
     {
 
-    }
-
-    virtual bool get_extent ( double * extent )
-    {
-      std::copy ( m_extent, m_extent + 6, extent );
-      return true;
     }
   };
 

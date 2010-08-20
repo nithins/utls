@@ -78,6 +78,7 @@ set(utls_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_point_renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_triangle_renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_tetrahedron_renderer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_quad_renderer.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/quad_edge.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/quad_edge.cpp

@@ -32,15 +32,15 @@ namespace glutils
       m_lin_bo   = lin_buf;
       m_col_bo   = col_buf;
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( !m_ver_bo.get())
       {
         throw std::invalid_argument
-            ( "no vertex data specified neither in cpu nor gpu" );
+            ( "no vertex data specified" );
       }
 
-      if ( m_lin_bo->id() == 0 && m_lin_bo->src_ptr() == NULL )
+      if ( !m_lin_bo.get() )
       {
-        if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+        if ( !m_col_bo.get() )
         {
           render_func = &buffered_lines_ren_t::render_direct_without_color;
         }
@@ -53,7 +53,7 @@ namespace glutils
       }
       else
       {
-        if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+        if ( !m_col_bo.get() )
         {
           render_func = &buffered_lines_ren_t::render_indexed_without_color;
         }
@@ -64,8 +64,6 @@ namespace glutils
 
         m_num_lines = m_lin_bo->get_num_items();
       }
-
-
     }
 
     virtual int render()

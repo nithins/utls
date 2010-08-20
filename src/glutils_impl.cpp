@@ -97,95 +97,6 @@ void DrawZArrow ()
 
 namespace glutils
 {
-  void  compute_tri_normal
-      ( bufobj_ptr_t v_bo,
-        const uint * v,
-        double *n )
-  {
-
-    double p[3][3];
-
-    for ( uint j = 0 ; j < 3;j++ )
-    {
-      for ( uint k = 0 ; k < 3;k++ )
-      {
-        p[j][k] = gl_get_num_val<double>
-                  ( v_bo->get_item_comp_ptr ( v[j], k ), v_bo->src_type() );
-      }
-    }
-
-    NORMALPTPTPT3 ( double, n, ( p[0] ), ( p[1] ), ( p[2] ) );
-  }
-
-  double* compute_normals ( bufobj_ptr_t v_bo, bufobj_ptr_t t_bo )
-  {
-    uint num_vers = v_bo->get_num_items();
-    uint num_tris = t_bo->get_num_items();
-
-    double * normals = new double[num_vers*3];
-
-    for ( unsigned int i = 0 ; i < num_vers;i++ )
-    {
-      SETVEC3 ( ( &normals [3*i] ), 0.0, 0.0, 0.0 );
-    }
-
-    double n[3];
-
-    uint   v[3];
-
-    for ( unsigned int i = 0 ; i < num_tris;i++ )
-    {
-
-      for ( uint j = 0 ; j < 3;j++ )
-      {
-        v[j] = gl_get_num_val<uint> ( t_bo->get_item_comp_ptr ( i, j ),
-                                      t_bo->src_type() );
-      }
-
-      compute_tri_normal ( v_bo, v, n );
-
-
-      for ( uint j = 0 ; j < 3;j++ )
-      {
-        ADDVECVEC3_ ( ( &normals[3*v[j]] ), n );
-      }
-    }
-
-    for ( unsigned int i = 0 ; i < num_vers;i++ )
-    {
-      NORMALIZEVEC3_ ( double, ( &normals[3*i] ) );
-    }
-
-    return normals;
-  }
-
-  void compute_extent ( bufobj_ptr_t v_buf , double * extent_out )
-  {
-    uint num_vers = v_buf->get_num_items();
-
-    double extent[] =
-    {
-      std::numeric_limits<double>::max(), std::numeric_limits<double>::min(),
-      std::numeric_limits<double>::max(), std::numeric_limits<double>::min(),
-      std::numeric_limits<double>::max(), std::numeric_limits<double>::min()
-    };
-
-    for ( uint i = 0 ; i < num_vers;i++ )
-    {
-
-      for ( uint k = 0 ; k < 3;k++ )
-      {
-        double p = gl_get_num_val<double>
-                   ( v_buf->get_item_comp_ptr ( i, k ), v_buf->src_type() );
-
-        extent[k*2+0] = std::min ( extent[k*2+0], p );
-        extent[k*2+1] = std::max ( extent[k*2+1], p );
-      }
-    }
-
-    std::copy ( extent, extent + 6, extent_out );
-  }
-
   void compute_extent ( const vertex_list_t &v, double * extent_out)
   {
     double extent[] =
@@ -322,13 +233,12 @@ namespace glutils
 
     bufobj_ptr_t v = make_buf_obj(vlist);
     bufobj_ptr_t t = make_buf_obj(tlist);
-    bufobj_ptr_t c = make_buf_obj();
-    bufobj_ptr_t n = make_buf_obj();
+    bufobj_ptr_t n = make_normals_buf_obj(vlist,tlist);
 
-    if ( use_strips )
-      return  create_buffered_tristrip_ren ( v,t,c);
-    else
-      return create_buffered_triangles_ren ( v,t,c,n);
+//    if ( use_strips )
+//      return  create_buffered_tristrip_ren ( v,t,c);
+//    else
+      return create_buffered_triangles_ren ( v,t,n);
 
   }
 

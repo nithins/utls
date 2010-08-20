@@ -34,7 +34,6 @@ class n_vector_t: public boost::array<T,N>
 
     n_vector_t()
     {
-      (*this) = n_vector_t::zero;
     }
 
     template<typename OT,bool OO>
@@ -57,6 +56,16 @@ class n_vector_t: public boost::array<T,N>
       (*this)[1] = e2;
       (*this)[2] = e3;
     }
+
+    template<typename OT1,typename OT2,typename OT3,typename OT4>
+    n_vector_t( const OT1 &e1,const OT2 &e2,const OT3 &e3,const OT4 &e4 )
+    {
+      (*this)[0] = e1;
+      (*this)[1] = e2;
+      (*this)[2] = e3;
+      (*this)[3] = e4;
+    }
+
 
     template<typename OT>
     static n_vector_t s_assign( const OT &o)
@@ -136,6 +145,24 @@ class n_vector_t: public boost::array<T,N>
     {
       for(size_t i = 0 ; i < N;++i )
         (*this)[i] /= o[i];
+
+      return *this;
+    }
+
+    template<typename OT>
+    inline n_vector_t & operator%=(const OT &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] %= o;
+
+      return *this;
+    }
+
+    template<typename OT,bool OO>
+    inline n_vector_t & operator%=(const n_vector_t<OT,N,OO> &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] %= o[i];
 
       return *this;
     }
@@ -269,6 +296,20 @@ inline const n_vector_t<T,N,O> operator/(const n_vector_t<T,N,O> & v1,const n_ve
 {
   return n_vector_t<T,N,O>(v1) /= v2;
 }
+
+// modulus
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator%(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) %= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator%(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) %= v2;
+}
+
 
 // vector operations
 template<typename T, std::size_t N>

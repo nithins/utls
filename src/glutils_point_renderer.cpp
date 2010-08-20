@@ -28,40 +28,40 @@ namespace glutils
     {
 
       m_ver_bo   = ver_buf;
-      m_col_bo   = col_buf;
       m_idx_bo   = idx_buf;
+      m_col_bo   = col_buf;
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( !m_ver_bo )
       {
         throw std::invalid_argument
             ( "no vertex data specified neither in cpu nor gpu" );
       }
 
-      enum e_render_func {DIRECT_WOC,DIRECT_WC,INDEXED_WOC,INDEXED_WC};
-
-      e_render_func render_func_type
-          = (e_render_func)
-            ( (( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )?(0):(1) )|
-            (( m_idx_bo->id() == 0 && m_idx_bo->src_ptr() == NULL )?(0):(2)));
-
-
-
-      switch(render_func_type)
+      if ( !m_idx_bo.get() )
       {
-      case DIRECT_WOC:
-        render_func = &buffered_points_ren_t::render_without_color_dir;
-        m_num_points = m_ver_bo->get_num_items();break;
-      case DIRECT_WC:
-        render_func = &buffered_points_ren_t::render_with_color_dir;
-        m_num_points = m_ver_bo->get_num_items();break;
-      case INDEXED_WOC:
-        render_func = &buffered_points_ren_t::render_without_color_idx;
-        m_num_points = m_idx_bo->get_num_items();break;
-      case INDEXED_WC:
-        render_func = &buffered_points_ren_t::render_with_color_idx;
-        m_num_points = m_idx_bo->get_num_items();break;
-      default:
-        throw std::logic_error("renderfunc type undetermined");
+        if ( !m_col_bo.get() )
+        {
+          render_func = &buffered_points_ren_t::render_without_color_dir;
+        }
+        else
+        {
+          render_func = &buffered_points_ren_t::render_with_color_dir;
+        }
+
+        m_num_points = m_ver_bo->get_num_items()/2;
+      }
+      else
+      {
+        if ( !m_col_bo.get() )
+        {
+          render_func = &buffered_points_ren_t::render_without_color_idx;
+        }
+        else
+        {
+          render_func = &buffered_points_ren_t::render_with_color_idx;
+        }
+
+        m_num_points = m_idx_bo->get_num_items();
       }
     }
 

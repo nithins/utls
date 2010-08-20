@@ -15,39 +15,14 @@
 
 namespace glutils
 {
-
-  bool check_indexes_in_range(bufobj_ptr_t m_ver_bo,
-                              bufobj_ptr_t m_idx_bo)
-  {
-
-    uint max_idx = m_ver_bo->get_num_items();
-
-    uint num_idxs = m_idx_bo->get_num_items();
-
-    for(uint i = 0 ;i < num_idxs;++i )
-    {
-      for(uint j = 0 ; j < m_idx_bo->src_comp();++j)
-      {
-        uint *idx = (uint*)m_idx_bo->get_item_comp_ptr(i,j);
-
-        if(*idx >= max_idx)
-          return false;
-      }
-    }
-
-    return true;
-
-  }
-
-
   class buffered_triangles_ren_t: virtual public renderable_t
   {
 
   private:
     bufobj_ptr_t m_ver_bo;
     bufobj_ptr_t m_tri_bo;
-    bufobj_ptr_t m_col_bo;
     bufobj_ptr_t m_nrm_bo;
+    bufobj_ptr_t m_col_bo;
 
     int ( buffered_triangles_ren_t::*render_func ) () const;
 
@@ -57,26 +32,31 @@ namespace glutils
     buffered_triangles_ren_t
         ( const bufobj_ptr_t & ver_buf,
           const bufobj_ptr_t & tri_buf,
-          const bufobj_ptr_t & col_buf,
-          const bufobj_ptr_t & nrm_buf )
+          const bufobj_ptr_t & nrm_buf,
+          const bufobj_ptr_t & col_buf )
     {
 
       m_ver_bo   = ver_buf;
       m_tri_bo   = tri_buf;
-      m_col_bo   = col_buf;
       m_nrm_bo   = nrm_buf;
+      m_col_bo   = col_buf;
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( m_ver_bo.get() == 0 )
       {
-        _ERROR ( "no vertex data specified neither in cpu nor gpu" );
+        throw std::runtime_error( "no vertex data specified" );
       }
 
-      if ( m_tri_bo->id() == 0 && m_tri_bo->src_ptr() == NULL )
+      if ( m_tri_bo.get() == 0)
       {
-        _ERROR ( "no triangle index data specified neither in cpu nor gpu" );
+        throw std::runtime_error( "no triangle index data specified" );
       }
 
-      if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+      if ( m_nrm_bo.get() == 0)
+      {
+        throw std::runtime_error ("no normal data specified" );
+      }
+
+      if ( m_col_bo.get() == 0 )
       {
         render_func = &buffered_triangles_ren_t::render_without_color;
       }
@@ -85,19 +65,7 @@ namespace glutils
         render_func = &buffered_triangles_ren_t::render_with_color;
       }
 
-      if ( m_nrm_bo->id() == 0)
-      {
-        double * normals = compute_normals ( m_ver_bo, m_tri_bo );
-
-        m_nrm_bo  = buf_obj_t::create_bo
-                    ( normals, GL_DOUBLE, 3, GL_ARRAY_BUFFER,
-                     sizeof ( double ) *3*m_ver_bo->get_num_items(), 0 );
-
-        delete []normals;
-      }
-
       m_num_triangles = m_tri_bo->get_num_items();
-
     }
 
     virtual int render()
@@ -264,8 +232,6 @@ namespace glutils
 
     GLuint m_render_dl;
 
-    double m_extent[6];
-
   public:
     buffered_tristrip_ren_t
         ( const bufobj_ptr_t & ver_buf,
@@ -295,24 +261,28 @@ namespace glutils
         use_color = false;
       }
 
-      double * normals = compute_normals ( ver_bo, tri_bo );
+//      double * normals = compute_normals ( ver_bo, tri_bo );
 
-      nrm_bo = buf_obj_t::create_bo
-          ( normals, GL_DOUBLE, 3, GL_ARRAY_BUFFER,
-            sizeof ( double ) *3*ver_bo->get_num_items(), 0 );
+//      nrm_bo = buf_obj_t::create_bo
+//          ( normals, GL_DOUBLE, 3, GL_ARRAY_BUFFER,
+//            sizeof ( double ) *3*ver_bo->get_num_items(), 0 );
+
+      throw std::runtime_error("implement normal computation here ..dummy");
 
       triangle_stripper::indices t_inds_vec;
 
-      for ( unsigned int i = 0 ; i < tri_bo->get_num_items();i++ )
-      {
-        for ( uint j = 0 ; j < 3;j++ )
-        {
-          t_inds_vec.push_back
-              ( glutils::gl_get_num_val<uint>
-                ( tri_bo->get_item_comp_ptr ( i, j ), tri_bo->src_type() )
-                );
-        }
-      }
+//      for ( unsigned int i = 0 ; i < tri_bo->get_num_items();i++ )
+//      {
+//        for ( uint j = 0 ; j < 3;j++ )
+//        {
+//          t_inds_vec.push_back
+//              ( glutils::gl_get_num_val<uint>
+//                ( tri_bo->get_item_comp_ptr ( i, j ), tri_bo->src_type() )
+//                );
+//        }
+//      }
+
+      throw std::runtime_error("tristripping computation here ..dummy");
 
       triangle_stripper::primitive_vector prims_vec;
 
@@ -356,9 +326,9 @@ namespace glutils
       if ( use_color )
         col_bo->unbind_from_color_pointer();
 
-      compute_extent ( ver_bo, m_extent );
+//      delete []normals;
 
-      delete []normals;
+      throw std::runtime_error("delete normals");
 
     }
 
@@ -377,23 +347,42 @@ namespace glutils
 
       m_render_dl = 0;
     }
-
-    virtual bool get_extent ( double * extent )
-    {
-      std::copy ( m_extent, m_extent + 6, extent );
-      return true;
-    }
   };
 
+  void compute_vertex_normals
+      ( const vertex_list_t &vlist,const tri_idx_list_t &tlist,normal_list_t & nlist)
+  {
+    nlist.resize(vlist.size());
 
+    memset(nlist.data(),0,nlist.size()*sizeof(normal_list_t::value_type));
+
+    for(int i = 0 ; i< tlist.size();i++)
+    {
+      tri_idx_t t = tlist[i];
+
+      normal_t  u = vlist[t[0]] - vlist[t[1]];
+      normal_t  v = vlist[t[0]] - vlist[t[2]];
+
+      normal_t  n = euclid_normalize(cross_product(u,v));
+
+      nlist[t[0]] += n;
+      nlist[t[1]] += n;
+      nlist[t[2]] += n;
+    }
+
+    for(int i = 0 ; i < nlist.size();++i)
+    {
+      nlist[i] = euclid_normalize(nlist[i]);
+    }
+  }
 
   renderable_t * create_buffered_triangles_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
-        bufobj_ptr_t c,
-        bufobj_ptr_t n )
+        bufobj_ptr_t n,
+        bufobj_ptr_t c )
   {
-    return new buffered_triangles_ren_t ( v, t, c, n );
+    return new buffered_triangles_ren_t ( v, t, n, c );
   }
 
   renderable_t * create_buffered_tristrip_ren
