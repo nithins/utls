@@ -32,7 +32,7 @@ for filename in sys.argv[2:len(sys.argv)]:
   for line in inlines:
     if line[len(line)-1] == '\n':
       line = line[:len(line)-1]      
-    line = "\"" + line[0:len(line)] + "\\n\"" + "\\\n"      
+    line = "\"" + (line[0:len(line)]).replace("\"","\\\"") + "\\n\"" + "\\\n"      
     srclines.append(line)
     
   srclines.append(";\n\n")
