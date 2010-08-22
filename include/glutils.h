@@ -43,6 +43,7 @@ namespace glutils
 
   class buf_obj_t
   {
+  protected:
     GLuint        m_id; // vbo/pbo id
     const GLvoid *m_src_ptr;
     GLenum        m_src_type;
@@ -91,6 +92,16 @@ namespace glutils
       return m_src_comp;
     }
 
+    inline GLenum size()
+    {
+      return m_size;
+    }
+
+    inline GLuint stride()
+    {
+      return m_stride;
+    }
+
     uint     get_num_items() const;
 
     GLvoid  *get_item_comp_ptr ( const uint &itemno, const uint &compno ) const;
@@ -121,6 +132,8 @@ namespace glutils
 
   // create a buffered from list data
   // list can be destroyed after this call.
+
+  bufobj_ptr_t recast_buf_obj_num_components( bufobj_ptr_t, GLuint nc);
 
   bufobj_ptr_t make_buf_obj( const vertex_list_t &);
 

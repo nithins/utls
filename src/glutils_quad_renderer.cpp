@@ -112,8 +112,13 @@ namespace glutils
 
       normal_t  u = vlist[q[0]] - vlist[q[1]];
       normal_t  v = vlist[q[0]] - vlist[q[2]];
+      normal_t  n = cross_product(u,v);
 
-      normal_t  n = euclid_normalize(cross_product(u,v));
+      u  = vlist[q[0]] - vlist[q[2]];
+      v  = vlist[q[0]] - vlist[q[3]];
+      n += cross_product(u,v);
+
+      n = euclid_normalize(n);
 
       nlist[q[0]] += n;
       nlist[q[1]] += n;

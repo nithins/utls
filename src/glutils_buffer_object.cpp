@@ -266,4 +266,30 @@ namespace glutils
 
     return make_buf_obj(n);
   }
+
+  class buf_obj_recast_t:public buf_obj_t
+  {
+    bufobj_ptr_t m_orig;
+  public:
+
+    buf_obj_recast_t(bufobj_ptr_t ptr ,const GLuint nc)
+    {
+      m_id       = ptr->id();
+      m_src_ptr  = ptr->src_ptr();
+      m_src_type = ptr->src_type();
+      m_src_comp = nc;
+      m_target   = ptr->target();
+      m_size     = ptr->size();
+      m_stride   = ptr->stride();
+
+      m_orig     = ptr;// hold on to this till you die.
+    }
+  };
+
+  bufobj_ptr_t recast_buf_obj_num_components(bufobj_ptr_t optr, GLuint nc)
+  {
+    bufobj_ptr_t ptr(new buf_obj_recast_t(optr,nc));
+
+    return ptr;
+  }
 }
