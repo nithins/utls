@@ -2,7 +2,7 @@ import sys
 import os
 
 headerfilename = sys.argv[1]+'.h'
-cppfilename    = sys.argv[1]+'.cpp'
+srcfilename    = sys.argv[1]+'.cpp'
 
 headerfile_basename = os.path.basename(headerfilename)
 
@@ -39,11 +39,41 @@ for filename in sys.argv[2:len(sys.argv)]:
   
 headerlines.append("#endif\n");
 
-headerfile = open(headerfilename,"w")
-headerfile.writelines(headerlines);
-headerfile.close();
+def write_to_file_if_not_same(lines,fname):    
+  file_dir = os.path.dirname(fname)
+  
+  if os.path.isdir(file_dir) == False:
+    os.makedirs(file_dir)
+    
+  tmp_fname = fname+".tmp"    
+  
+  tmp_file  = open(tmp_fname,"w")
+  tmp_file.writelines(lines);
+  tmp_file.close();
+  
+  need_move = True
+  
+  old_lines = None
+  
+  if os.path.isfile(fname):
+    old_file  = open(fname,"r")
+    old_lines = old_file.readlines()
+    old_file.close()
 
-srcfile = open(cppfilename,"w")
-srcfile.writelines(srclines);
-srcfile.close();
+  
+  if old_lines :
+    tmp_file  = open(tmp_fname,"r")
+    tmp_lines = tmp_file.readlines();
+    tmp_file.close();
+    
+    if tmp_lines == old_lines:
+      need_move = False
+      
+  if need_move:
+    os.rename(tmp_fname,fname)
+  else:
+    os.remove(tmp_fname)    
+    
+write_to_file_if_not_same(headerlines,headerfilename)
+write_to_file_if_not_same(srclines,srcfilename)    
 
