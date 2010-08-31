@@ -164,10 +164,14 @@ namespace glutils
   class renderable_t
   {
   public:
-    virtual int  render() = 0 ;
+    virtual int    render() = 0 ;
+    virtual void   gl_init(){}
+
     virtual bool get_extent ( double * ){return false;}
     virtual ~renderable_t() {}
   };
+
+  typedef boost::shared_ptr<renderable_t> renderable_ptr_t;
 
   renderable_t * create_buffered_text_ren
       (const string_list_t &s,
