@@ -57,17 +57,17 @@ namespace glutils
         _LOG_VAR ( flat_tet_shader_log );
       }
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( m_ver_bo == NULL )
       {
         _ERROR ( "no vertex data specified neither in cpu nor gpu" );
       }
 
-      if ( m_tet_bo->id() == 0 && m_tet_bo->src_ptr() == NULL )
+      if ( m_tet_bo == NULL )
       {
         _ERROR ( "no triangle index data specified neither in cpu nor gpu" );
       }
 
-      if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+      if ( m_col_bo == NULL )
       {
         render_func = &buffered_flat_tetrahedrons_ren_t::render_without_color;
       }

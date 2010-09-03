@@ -154,17 +154,17 @@ namespace glutils
 
       }
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( m_ver_bo == NULL )
       {
         _ERROR ( "no vertex data specified neither in cpu nor gpu" );
       }
 
-      if ( m_tri_bo->id() == 0 && m_tri_bo->src_ptr() == NULL )
+      if ( m_tri_bo == NULL )
       {
         _ERROR ( "no triangle index data specified neither in cpu nor gpu" );
       }
 
-      if ( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )
+      if ( m_col_bo == NULL )
       {
         render_func = &buffered_flat_triangles_ren_t::render_without_color;
       }
@@ -244,19 +244,19 @@ namespace glutils
       bufobj_ptr_t col_bo = col_buf;
       bufobj_ptr_t nrm_bo;
 
-      if ( ver_bo->id() == 0 && ver_bo->src_ptr() == NULL )
+      if ( ver_bo == NULL )
       {
         _ERROR ( "no vertex data specified neither in cpu nor gpu" );
       }
 
-      if ( tri_bo->id() == 0 && tri_bo->src_ptr() == NULL )
+      if ( tri_bo == NULL )
       {
         _ERROR ( "no triangle index data specified neither in cpu nor gpu" );
       }
 
       bool use_color = true;
 
-      if ( col_bo->id() == 0 && col_bo->src_ptr() == NULL )
+      if ( col_bo == NULL )
       {
         use_color = false;
       }
