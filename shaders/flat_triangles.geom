@@ -26,6 +26,7 @@ void main()
     float NdotL,NdotHV;
     vec4  color  = ambient;
 
+    if(dot(n,vec3(0,0,1))<0) n = -n;
 
     NdotL = max(dot(n,lightDir),0.0);
 

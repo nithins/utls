@@ -45,6 +45,9 @@ class n_vector_t: public boost::array<T,N>
     template<typename OT1,typename OT2>
     n_vector_t( const OT1 &e1, const OT2 &e2 )
     {
+#ifndef NDEBUG
+      if(N != 2) throw std::runtime_error("use this ctor only for N=2");
+#endif
       (*this)[0] = e1;
       (*this)[1] = e2;
     }
@@ -52,6 +55,9 @@ class n_vector_t: public boost::array<T,N>
     template<typename OT1,typename OT2,typename OT3>
     n_vector_t( const OT1 &e1,const OT2 &e2,const OT3 &e3 )
     {
+#ifndef NDEBUG
+      if(N != 3) throw std::runtime_error("use this ctor only for N=3");
+#endif
       (*this)[0] = e1;
       (*this)[1] = e2;
       (*this)[2] = e3;
@@ -60,6 +66,9 @@ class n_vector_t: public boost::array<T,N>
     template<typename OT1,typename OT2,typename OT3,typename OT4>
     n_vector_t( const OT1 &e1,const OT2 &e2,const OT3 &e3,const OT4 &e4 )
     {
+#ifndef NDEBUG
+      if(N != 4) throw std::runtime_error("use this ctor only for N=4");
+#endif
       (*this)[0] = e1;
       (*this)[1] = e2;
       (*this)[2] = e3;

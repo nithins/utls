@@ -29,6 +29,9 @@ namespace glutils
   typedef n_vector_t<double,3>     normal_t;
   typedef std::vector<vertex_t>    normal_list_t;
 
+  typedef n_vector_t<float,4>      color4f_t;
+  typedef n_vector_t<float,4>      vertex4f_t;
+
   typedef std::vector<std::string> string_list_t;
 
   class buf_obj_t;
@@ -128,6 +131,46 @@ namespace glutils
     void bind_to_normal_pointer() const;
     void unbind_from_normal_pointer() const;
 
+  };
+
+  struct material_properties_t
+  {
+    color4f_t  ambient;
+    color4f_t  diffuse;
+    color4f_t  specular;
+    color4f_t  emission;
+    int        shininess;
+
+    // face is GL_FRONT or GL_BACK or GL_FRONT_AND_BACK
+    inline void render_all(GLenum face) const
+    {
+      glMaterialfv ( face, GL_AMBIENT, ambient.data() );
+      glMaterialfv ( face, GL_DIFFUSE, diffuse.data() );
+      glMaterialfv ( face, GL_SPECULAR, specular.data() );
+      glMaterialfv ( face, GL_EMISSION, emission.data() );
+      glMateriali  ( face, GL_SHININESS, shininess );
+    }
+
+    // face is GL_FRONT or GL_BACK
+    inline void read_all(GLenum face)
+    {
+      glGetMaterialfv( face, GL_AMBIENT, ambient.data() );
+      glGetMaterialfv( face, GL_DIFFUSE, diffuse.data() );
+      glGetMaterialfv( face, GL_SPECULAR, specular.data() );
+      glGetMaterialfv( face, GL_EMISSION, emission.data() );
+      glGetMaterialiv( face, GL_SHININESS, &shininess );
+    }
+  };
+
+  struct light_properties_t
+  {
+    color4f_t   ambient;
+    color4f_t   diffuse;
+    color4f_t   specular;
+    vertex4f_t  position;
+    float       att_constant;
+    float       att_linear;
+    float       att_quadratic;
   };
 
   // create a buffered from list data
