@@ -168,9 +168,28 @@ namespace glutils
     color4f_t   diffuse;
     color4f_t   specular;
     vertex4f_t  position;
+
     float       att_constant;
     float       att_linear;
     float       att_quadratic;
+
+    bool        enabled;
+
+    inline void render(int n) const
+    {
+      if(enabled)
+        glEnable(GL_LIGHT0+n);
+      else
+        glDisable(GL_LIGHT0+n);
+
+      glLightfv(GL_LIGHT0+n, GL_AMBIENT,  ambient.data());
+      glLightfv(GL_LIGHT0+n, GL_DIFFUSE,  diffuse.data());
+      glLightfv(GL_LIGHT0+n, GL_SPECULAR, specular.data());
+      glLightfv(GL_LIGHT0+n, GL_POSITION, position.data());
+      glLightf( GL_LIGHT0+n, GL_CONSTANT_ATTENUATION, att_constant);
+      glLightf( GL_LIGHT0+n, GL_LINEAR_ATTENUATION, att_linear);
+      glLightf( GL_LIGHT0+n, GL_QUADRATIC_ATTENUATION, att_quadratic);
+    }
   };
 
   // create a buffered from list data
