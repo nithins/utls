@@ -47,7 +47,7 @@ std::cerr <<"WARNING  ::" << logstr <<std::endl
 //std::cout <<"LOG V    ::" << logstr <<std::endl
 
 #define _LOG_VAR(var)\
-std::cout<<#var<<" = "<<var<<"\n";
+std::cout<<#var<<" = "<<var<<std::endl;
 
 #define _LOG_FILE_N_FUNC() _LOG(__FILE__<<"::"<<__func__);
 
