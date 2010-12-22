@@ -48,7 +48,7 @@ namespace glutils
           render_func = &buffered_points_ren_t::render_with_color_dir;
         }
 
-        m_num_points = m_ver_bo->get_num_items()/2;
+        m_num_points = m_ver_bo->get_num_items();
       }
       else
       {
