@@ -147,6 +147,20 @@ void split_string ( const std::string & line_str,
                     std::vector<std::string> & tokens,
                     const std::string & split_str );
 
+// for some reason this is not in c++ 99 or 03 .. remove if c++0x
+namespace std
+{
+  template<class In, class Out, class Pred>
+  Out copy_if(In first, In last, Out res, Pred p)
+  {
+          while (first != last) {
+                  if (p(*first)) *res++ = *first;
+                  ++first;
+          }
+          return res;
+  }
+}
+
 
 
 

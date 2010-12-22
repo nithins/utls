@@ -73,13 +73,13 @@ namespace glutils
 
       m_normal_length = n_len;
 
-      if ( m_ver_bo->id() == 0 && m_ver_bo->src_ptr() == NULL )
+      if ( m_ver_bo == NULL)
       {
         throw std::invalid_argument
             ( "no vertex data specified neither in cpu nor gpu" );
       }
 
-      if ( m_nrm_bo->id() == 0 && m_nrm_bo->src_ptr() == NULL )
+      if ( m_nrm_bo == NULL )
       {
         throw std::invalid_argument
             ( "no normal data specified neither in cpu nor gpu" );
@@ -88,8 +88,7 @@ namespace glutils
 
       e_render_func render_func_type
           = (e_render_func)
-            ( (( m_col_bo->id() == 0 && m_col_bo->src_ptr() == NULL )?(0):(1) )|
-            (( m_idx_bo->id() == 0 && m_idx_bo->src_ptr() == NULL )?(0):(2)));
+            ( (( m_col_bo == NULL)?(0):(1) )|(( m_idx_bo == NULL )?(0):(2)));
 
 
       switch(render_func_type)

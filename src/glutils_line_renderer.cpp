@@ -38,9 +38,9 @@ namespace glutils
             ( "no vertex data specified" );
       }
 
-      if ( !m_lin_bo.get() )
+      if ( m_lin_bo == NULL)
       {
-        if ( !m_col_bo.get() )
+        if ( m_col_bo == NULL )
         {
           render_func = &buffered_lines_ren_t::render_direct_without_color;
         }
@@ -53,7 +53,7 @@ namespace glutils
       }
       else
       {
-        if ( !m_col_bo.get() )
+        if ( m_col_bo.get() == NULL)
         {
           render_func = &buffered_lines_ren_t::render_indexed_without_color;
         }

@@ -29,6 +29,9 @@ namespace glutils
   typedef n_vector_t<double,3>     normal_t;
   typedef std::vector<vertex_t>    normal_list_t;
 
+  typedef n_vector_t<float,4>      color4f_t;
+  typedef n_vector_t<float,4>      vertex4f_t;
+
   typedef std::vector<std::string> string_list_t;
 
   class buf_obj_t;
@@ -130,6 +133,65 @@ namespace glutils
 
   };
 
+  struct material_properties_t
+  {
+    color4f_t  ambient;
+    color4f_t  diffuse;
+    color4f_t  specular;
+    color4f_t  emission;
+    int        shininess;
+
+    // face is GL_FRONT or GL_BACK or GL_FRONT_AND_BACK
+    inline void render_all(GLenum face) const
+    {
+      glMaterialfv ( face, GL_AMBIENT, ambient.data() );
+      glMaterialfv ( face, GL_DIFFUSE, diffuse.data() );
+      glMaterialfv ( face, GL_SPECULAR, specular.data() );
+      glMaterialfv ( face, GL_EMISSION, emission.data() );
+      glMateriali  ( face, GL_SHININESS, shininess );
+    }
+
+    // face is GL_FRONT or GL_BACK
+    inline void read_all(GLenum face)
+    {
+      glGetMaterialfv( face, GL_AMBIENT, ambient.data() );
+      glGetMaterialfv( face, GL_DIFFUSE, diffuse.data() );
+      glGetMaterialfv( face, GL_SPECULAR, specular.data() );
+      glGetMaterialfv( face, GL_EMISSION, emission.data() );
+      glGetMaterialiv( face, GL_SHININESS, &shininess );
+    }
+  };
+
+  struct light_properties_t
+  {
+    color4f_t   ambient;
+    color4f_t   diffuse;
+    color4f_t   specular;
+    vertex4f_t  position;
+
+    float       att_constant;
+    float       att_linear;
+    float       att_quadratic;
+
+    bool        enabled;
+
+    inline void render(int n) const
+    {
+      if(enabled)
+        glEnable(GL_LIGHT0+n);
+      else
+        glDisable(GL_LIGHT0+n);
+
+      glLightfv(GL_LIGHT0+n, GL_AMBIENT,  ambient.data());
+      glLightfv(GL_LIGHT0+n, GL_DIFFUSE,  diffuse.data());
+      glLightfv(GL_LIGHT0+n, GL_SPECULAR, specular.data());
+      glLightfv(GL_LIGHT0+n, GL_POSITION, position.data());
+      glLightf( GL_LIGHT0+n, GL_CONSTANT_ATTENUATION, att_constant);
+      glLightf( GL_LIGHT0+n, GL_LINEAR_ATTENUATION, att_linear);
+      glLightf( GL_LIGHT0+n, GL_QUADRATIC_ATTENUATION, att_quadratic);
+    }
+  };
+
   // create a buffered from list data
   // list can be destroyed after this call.
 
@@ -164,10 +226,14 @@ namespace glutils
   class renderable_t
   {
   public:
-    virtual int  render() = 0 ;
+    virtual int    render() = 0 ;
+    virtual void   gl_init(){}
+
     virtual bool get_extent ( double * ){return false;}
     virtual ~renderable_t() {}
   };
+
+  typedef boost::shared_ptr<renderable_t> renderable_ptr_t;
 
   renderable_t * create_buffered_text_ren
       (const string_list_t &s,
