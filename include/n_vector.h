@@ -175,14 +175,14 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    template<typename OT>
-    inline n_vector_t & operator&=(const OT &o)
-    {
-      for(size_t i = 0 ; i < N;++i )
-        (*this)[i] &= o;
+//    template<typename OT>
+//    inline n_vector_t & operator&=(const OT &o)
+//    {
+//      for(size_t i = 0 ; i < N;++i )
+//        (*this)[i] &= o;
 
-      return *this;
-    }
+//      return *this;
+//    }
 
     template<typename OT,bool OO>
     inline n_vector_t & operator&=(const n_vector_t<OT,N,OO> &o)
@@ -193,14 +193,14 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
-    template<typename OT>
-    inline n_vector_t & operator|=(const OT &o)
-    {
-      for(size_t i = 0 ; i < N;++i )
-        (*this)[i] |= o;
+//    template<typename OT>
+//    inline n_vector_t & operator|=(const OT &o)
+//    {
+//      for(size_t i = 0 ; i < N;++i )
+//        (*this)[i] |= o;
 
-      return *this;
-    }
+//      return *this;
+//    }
 
     template<typename OT,bool OO>
     inline n_vector_t & operator|=(const n_vector_t<OT,N,OO> &o)
@@ -355,17 +355,17 @@ inline const n_vector_t<T,N,O> operator%(const n_vector_t<T,N,O> & v1,const n_ve
 }
 
 // binary and
-template<typename T, std::size_t N,bool O,typename OT>
-inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v, const OT &s)
-{
-  return n_vector_t<T,N,O>(v) &= s;
-}
+//template<typename T, std::size_t N,bool O,typename OT>
+//inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v, const OT &s)
+//{
+//  return n_vector_t<T,N,O>(v) &= s;
+//}
 
-template<typename T, std::size_t N,bool O,typename OT>
-inline const n_vector_t<T,N,O> operator&(const OT &s,const n_vector_t<T,N,O> & v)
-{
-  return n_vector_t<T,N,O>(v) &= s;
-}
+//template<typename T, std::size_t N,bool O,typename OT>
+//inline const n_vector_t<T,N,O> operator&(const OT &s,const n_vector_t<T,N,O> & v)
+//{
+//  return n_vector_t<T,N,O>(v) &= s;
+//}
 
 template<typename T, std::size_t N,bool O,typename OT,bool OO>
 inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
@@ -374,17 +374,17 @@ inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v1,const n_ve
 }
 
 // binary or
-template<typename T, std::size_t N,bool O,typename OT>
-inline const n_vector_t<T,N,O> operator|(const n_vector_t<T,N,O> & v, const OT &s)
-{
-  return n_vector_t<T,N,O>(v) |= s;
-}
+//template<typename T, std::size_t N,bool O,typename OT>
+//inline const n_vector_t<T,N,O> operator|(const n_vector_t<T,N,O> & v, const OT &s)
+//{
+//  return n_vector_t<T,N,O>(v) |= s;
+//}
 
-template<typename T, std::size_t N,bool O,typename OT>
-inline const n_vector_t<T,N,O> operator|(const OT &s,const n_vector_t<T,N,O> & v)
-{
-  return n_vector_t<T,N,O>(v) |= s;
-}
+//template<typename T, std::size_t N,bool O,typename OT>
+//inline const n_vector_t<T,N,O> operator|(const OT &s,const n_vector_t<T,N,O> & v)
+//{
+//  return n_vector_t<T,N,O>(v) |= s;
+//}
 
 template<typename T, std::size_t N,bool O,typename OT,bool OO>
 inline const n_vector_t<T,N,O> operator|(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
@@ -470,7 +470,7 @@ namespace std
   template<typename T, std::size_t N,bool O>
   inline n_vector_t<T,N,O> abs(const n_vector_t<T,N,O> & c)
   {
-    return c.apply((T (*)(T)) std::abs);
+    return c.apply((long double (*)(long double)) std::abs);
   }
 }
 
