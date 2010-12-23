@@ -13,7 +13,6 @@
 // this is designed for a vector of numbers of any type.
 // dont get oversmart and define a matrix as a vector of vectors..
 // you'll be surprised by the behavior of the arithmetic operators
-
 template<typename T, std::size_t N,bool O= true>
 class n_vector_t: public boost::array<T,N>
 {
@@ -176,6 +175,42 @@ class n_vector_t: public boost::array<T,N>
       return *this;
     }
 
+    template<typename OT>
+    inline n_vector_t & operator&=(const OT &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] &= o;
+
+      return *this;
+    }
+
+    template<typename OT,bool OO>
+    inline n_vector_t & operator&=(const n_vector_t<OT,N,OO> &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] &= o[i];
+
+      return *this;
+    }
+
+    template<typename OT>
+    inline n_vector_t & operator|=(const OT &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] |= o;
+
+      return *this;
+    }
+
+    template<typename OT,bool OO>
+    inline n_vector_t & operator|=(const n_vector_t<OT,N,OO> &o)
+    {
+      for(size_t i = 0 ; i < N;++i )
+        (*this)[i] |= o[i];
+
+      return *this;
+    }
+
     friend std::ostream &operator<< ( std::ostream &stream, const n_vector_t &e )
     {
       stream<<"(";
@@ -319,6 +354,43 @@ inline const n_vector_t<T,N,O> operator%(const n_vector_t<T,N,O> & v1,const n_ve
   return n_vector_t<T,N,O>(v1) %= v2;
 }
 
+// binary and
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) &= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator&(const OT &s,const n_vector_t<T,N,O> & v)
+{
+  return n_vector_t<T,N,O>(v) &= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator&(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) &= v2;
+}
+
+// binary or
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator|(const n_vector_t<T,N,O> & v, const OT &s)
+{
+  return n_vector_t<T,N,O>(v) |= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT>
+inline const n_vector_t<T,N,O> operator|(const OT &s,const n_vector_t<T,N,O> & v)
+{
+  return n_vector_t<T,N,O>(v) |= s;
+}
+
+template<typename T, std::size_t N,bool O,typename OT,bool OO>
+inline const n_vector_t<T,N,O> operator|(const n_vector_t<T,N,O> & v1,const n_vector_t<OT,N,OO> & v2)
+{
+  return n_vector_t<T,N,O>(v1) |= v2;
+}
 
 // vector operations
 template<typename T, std::size_t N>
