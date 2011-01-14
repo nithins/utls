@@ -54,6 +54,10 @@ std::cout<<#var<<" = "<<var<<std::endl;
 #define _SSTR(EXP)\
 ((std::stringstream&)((std::stringstream())<<EXP)).str()
 
+#define _LOG_IF(pred,str) if(pred) _LOG(str);
+
+#define _LOG_VAR_IF(pred,str) if(pred) _LOG(#str<<" = "<<str);
+
 
 
 template <typename iter_t>
