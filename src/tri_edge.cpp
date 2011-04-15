@@ -567,6 +567,78 @@ uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
   throw std::runtime_error("invalid vertex id");
 }
 
+bool tri_cc_t::is_adjacent(cellid_t  c,cellid_t p) const
+{
+  if(c > p)
+    std::swap(c,p);
+
+  if(c < m_tri_edge->m_vert_ct)
+  {
+    uint tstart = m_tri_edge->m_verts[c];
+
+    uint t = tstart;
+
+    do
+    {
+      if ( !m_tri_edge->hasFnext ( t ) ) break;
+
+      t = tri_enext ( m_tri_edge->triFnext ( t ) );
+    }
+    while ( t != tstart );
+
+    tstart = t;
+
+    do
+    {
+      if (p == m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t)) return true;
+
+      t = tri_eprev ( t );
+
+      if ( !m_tri_edge->hasFnext ( t ) )
+      {
+        if( p == m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t)) return true;
+
+        break;
+      }
+
+      t = m_tri_edge->triFnext ( t );
+    }
+    while ( t != tstart );
+
+    return false;
+  }
+
+  c -= m_tri_edge->m_vert_ct;
+
+  if(c < m_tri_edge->m_edge_ct)
+  {
+    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
+
+    uint t = m_tri_edge->m_edges[c];
+
+    if (p == tri_id_bias + m_tri_edge->triIndex ( t )) return true;
+
+    if ( m_tri_edge->hasFnext ( t ) )
+    {
+      t = m_tri_edge->triFnext ( t );
+
+      if (p == tri_id_bias + m_tri_edge->triIndex ( t )) return true;
+    }
+
+    return false;
+  }
+
+  c -= m_tri_edge->m_edge_ct;
+
+  if(c < m_tri_edge->m_tri_ct)
+  {
+    return false;
+  }
+
+  throw std::runtime_error("cellid out of range");
+  return false;
+}
+
 bool tri_cc_t::is_cell_boundry(cellid_t c) const
 {
   if(c < m_tri_edge->m_vert_ct)

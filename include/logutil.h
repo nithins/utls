@@ -70,9 +70,9 @@ inline void log_range ( iter_t begin,iter_t end,const char * title = NULL,bool w
     std::string ln1_str ( title_str.size(),'=' );
     std::string ln2_str ( title_str.size(),'-' );
 
-    _LOG ( ln1_str );
-    _LOG ( title_str );
-    _LOG ( ln2_str );
+    std::cout<< ( ln1_str );
+    std::cout<< ( title_str );
+    std::cout<< ( ln2_str );
   }
 
   std::stringstream ss;
@@ -92,14 +92,16 @@ inline void log_range ( iter_t begin,iter_t end,const char * title = NULL,bool w
 
     ss<<ss_temp.str();
   }
-  _LOG ( ss.str() );
+  std::cout<< ( ss.str() );
 
   if ( title != NULL )
   {
     std::string title_str ( title );
     std::string ln1_str ( title_str.size(),'=' );
-    _LOG ( ln1_str );
+    std::cout<< ( ln1_str );
   }
+
+  std::cout<<std::endl;
 }
 
 template <typename iter_t,typename get_val_ftor_t>
@@ -112,9 +114,9 @@ inline void log_range ( iter_t begin,iter_t end,get_val_ftor_t get_val_ftor,cons
     std::string ln1_str ( title_str.size(),'=' );
     std::string ln2_str ( title_str.size(),'-' );
 
-    _LOG ( ln1_str );
-    _LOG ( title_str );
-    _LOG ( ln2_str );
+    std::cout<<( ln1_str );
+    std::cout<<( title_str );
+    std::cout<<( ln2_str );
   }
 
 
@@ -135,14 +137,16 @@ inline void log_range ( iter_t begin,iter_t end,get_val_ftor_t get_val_ftor,cons
 
     ss<<ss_temp.str();
   }
-  _LOG ( ss.str() );
+  std::cout<< ( ss.str() );
 
   if ( title != NULL )
   {
     std::string title_str ( title );
     std::string ln1_str ( title_str.size(),'=' );
-    _LOG ( ln1_str );
+    std::cout<< ( ln1_str );
   }
+
+  std::cout<<std::endl;
 }
 
 #endif

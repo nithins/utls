@@ -149,6 +149,8 @@ public:
 
   uint get_vert_star(cellid_t  ,cellid_t  * ) const;
 
+  bool is_adjacent(cellid_t  ,cellid_t ) const;
+
   bool is_cell_boundry(cellid_t ) const;
 
   inline uint get_num_cells () const;
