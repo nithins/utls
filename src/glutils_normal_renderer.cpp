@@ -18,7 +18,7 @@ namespace glutils
       return;
 
     s_normal_shader = GLSLProgram::createFromSourceStrings
-                      (normal_ren_vert_glsl,normal_ren_geom_glsl,std::string(),
+                      (normal_ren_vert_glsl,normal_ren_geom_glsl,normal_ren_frag_glsl,
                        GL_POINTS,GL_LINE_STRIP);
 
     std::string log;
