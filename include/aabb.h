@@ -69,18 +69,18 @@ namespace aabb
 
     typedef n_vector_t<coord_type,max_dim> point_t;
 
-    aabb_t(const range_t &r1,const range_t &r2,const range_t &r3)
-    {
-      (*this)[0] = r1;
-      (*this)[1] = r2;
-      (*this)[2] = r3;
-    }
+//    aabb_t(const range_t &r1,const range_t &r2,const range_t &r3)
+//    {
+//      (*this)[0] = r1;
+//      (*this)[1] = r2;
+//      (*this)[2] = r3;
+//    }
 
-    aabb_t(const range_t &r1,const range_t &r2)
-    {
-      (*this)[0] = r1;
-      (*this)[1] = r2;
-    }
+//    aabb_t(const range_t &r1,const range_t &r2)
+//    {
+//      (*this)[0] = r1;
+//      (*this)[1] = r2;
+//    }
 
     aabb_t(const point_t &p1,const point_t &p2)
     {
@@ -92,12 +92,9 @@ namespace aabb
 
     inline point_t size() const
     {
-      point_t ret;
+      throw std::runtime_error("use span instead");
 
-      for(size_t i = 0 ; i < base_t::static_size;++i )
-        ret[i] = (*this)[i][1]-(*this)[i][0];
-
-      return ret;
+      return point_t();
     }
 
 
@@ -196,9 +193,41 @@ namespace aabb
       return c;
     }
 
+    typedef int64_t offset_t;
+
+    inline offset_t point_offset(const point_t &p) const
+    {
+      n_vector_t<offset_t,base_t::static_size> slice_size;
+
+      slice_size[0] = 1;
+
+      for(size_t i = 1 ; i < base_t::static_size;++i )
+        slice_size[i] = span()[i-1]*slice_size[i-1];
+
+      offset_t o = 0;
+
+      for(size_t i = 0 ; i < base_t::static_size;++i )
+        o += slice_size[i]*p[i];
+
+      return o;
+    }
+
+    inline offset_t volume() const
+    {
+      point_t s = span();
+
+      offset_t v = 1;
+
+      for(size_t i = 0 ; i < base_t::static_size;++i )
+        v *= s[i];
+
+      return v;
+    }
+
+
     coord_type eff_dim() const
     {
-      coord_type d;
+      coord_type d = 0 ;
 
       for(size_t i = 0 ; i < base_t::static_size;++i )
         d += ((*this)[i][1] != (*this)[i][0]) ?(1):(0);
@@ -209,3 +238,4 @@ namespace aabb
 }
 
 #endif
+
