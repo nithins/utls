@@ -295,6 +295,11 @@ namespace glutils
         vertex_list_t  &vlist,
         tri_idx_list_t &tlist);
 
+  void read_tri_file
+      ( const char *filename,
+        vertex_list_t  &vlist);
+
+
   renderable_t * create_buffered_ren_off_file
       ( const char * filename ,
         bool use_strips = true );

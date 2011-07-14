@@ -196,6 +196,29 @@ namespace glutils
 
   void read_tri_file
       ( const char *filename,
+        vertex_list_t  &vlist)
+  {
+    uint num_v,num_t;
+
+    std::fstream tri_file ( filename, std::fstream::in );
+
+    if(tri_file.is_open() == false)
+      throw std::runtime_error("unable to open tri file");
+
+    tri_file >> num_v >> num_t;
+
+    vlist.resize(num_v);
+
+    for ( uint i = 0; i < num_v; ++i )
+      for ( uint j = 0; j < 3; ++j )
+        tri_file >> vlist[i][j];
+
+    tri_file.close();
+  }
+
+
+  void read_tri_file
+      ( const char *filename,
         vertex_list_t  &vlist,
         tri_idx_list_t &tlist)
   {
