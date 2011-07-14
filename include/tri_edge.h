@@ -158,6 +158,8 @@ public:
   uint get_num_cells_dim (uint dim) const;
 
   inline uint get_num_cells_max_dim (uint dim) const;
+
+  void save(std::ostream & os,const glutils::vertex_list_t& v,const std::vector<double> & fn) const;
 };
 
 typedef boost::shared_ptr<tri_cc_t> tri_cc_ptr_t;

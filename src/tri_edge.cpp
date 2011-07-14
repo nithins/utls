@@ -543,6 +543,7 @@ uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
     do
     {
       cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
+      cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex(t);
 
       t = tri_eprev ( t );
 
@@ -551,10 +552,6 @@ uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
         cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
 
         break;
-      }
-      else
-      {
-        cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex(t);
       }
 
       t = m_tri_edge->triFnext ( t );
@@ -673,6 +670,45 @@ bool tri_cc_t::is_cell_boundry(cellid_t c) const
   }
 
   throw std::runtime_error("cellid out of range");
+}
+
+void tri_cc_t::save(std::ostream & os,const glutils::vertex_list_t& v,const std::vector<double> & fn) const
+{
+  os<<"# This is an auxialiary data file that saves data corressponding "<<endl;
+  os<<"# to various cells of the input mesh"<<endl;
+  os<<"# the first line saves the number of verts edges and tris"<<endl;
+  os<<"# a list vertex xyz values and the function value at the vertex follows"<<endl;
+  os<<"# a list of edge vertices follows"<<endl;
+  os<<"# a list of tri vertices follows"<<endl;
+  os<<"#"<<endl;
+  os<<"#"<<endl;
+  os<<"# num_verts num_edges num_tris"<<endl;
+  os<<"# cellid vert_x vert_y vert_z func"<<endl;
+  os<<"# ..."<<endl;
+  os<<"# cellid(ctd) v1 v2"<<endl;
+  os<<"# ..."<<endl;
+  os<<"# cellid(ctd) v1 v2 v3"<<endl;
+  os<<"# ..."<<endl;
+  os<<m_tri_edge->m_vert_ct<<" "<<m_tri_edge->m_edge_ct<<" "<<m_tri_edge->m_tri_ct<<endl;
+
+  for(int i =0; i <m_tri_edge->m_vert_ct; ++i )
+    os<<i<<" "<<v[i][0]<<" "<<v[i][1]<<" "<<v[i][2]<<" "<<fn[i]<<endl;
+
+  int num_cells = get_num_cells();
+
+  for(int i = m_tri_edge->m_vert_ct ; i < num_cells;++i)
+  {
+    uint verts[4];
+
+    int vc = get_cell_points(i,verts);
+
+    switch(vc)
+    {
+    case 2:os<<i<<" "<<verts[0]<<" "<<verts[1]<<endl;break;
+    case 3:os<<i<<" "<<verts[0]<<" "<<verts[1]<<" "<<verts[2]<<endl;break;
+    };
+  }
+
 }
 
 double tri_cc_geom_t::compute_average_length()

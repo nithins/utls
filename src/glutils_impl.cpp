@@ -217,7 +217,14 @@ namespace glutils
 
     for ( uint i = 0; i < num_t; i++ )
       for ( uint j = 0; j < 3; ++j )
+      {
         tri_file >> tlist[i][j];
+
+        if(tlist[i][j] >= num_v||tlist[i][j] < 0)
+        {
+          throw std::runtime_error("invalid index");
+        }
+      }
 
     tri_file.close();
   }
