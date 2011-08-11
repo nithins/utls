@@ -127,3 +127,17 @@ bool ordered_pair_comparator::operator() ( const std::pair<uint, uint> &p1, cons
     return ( p1.first < p2.first );
 }
 
+assertion_error::assertion_error(const std::string& s):ss(new stringstream)
+{
+  (*ss)<<s;
+}
+
+assertion_error::~assertion_error() throw()
+{
+}
+
+const char* assertion_error::what() const throw()
+{
+  return (*ss).str().c_str();
+}
+
