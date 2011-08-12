@@ -42,17 +42,22 @@ namespace aabb
       return !((r[0] > (*this)[1]) || ((*this)[0] > r[1]));
     }
 
-    inline bool intersection(const aabb_range_t & r,aabb_range_t & i) const
+    inline aabb_range_t intersection(const aabb_range_t & r) const
     {
-      i = aabb_range_t(std::max(r[0],(*this)[0]),std::min(r[1],(*this)[1]));
+      ASSERT(((*this)[0] <= r[1])||(r[0] <= (*this)[1]));
 
-      return intersects(r);
+      return aabb_range_t(std::max(r[0],(*this)[0]),std::min(r[1],(*this)[1]));
     }
 
-    inline aabb_range_t range_union(const aabb_range_t & r) const
+    inline bool is_valid()
     {
-      return aabb_range_t(std::min(r[0],(*this)[0]),std::max(r[1],(*this)[1]));
+      return ((*this)[0] >= (*this)[1]);
     }
+
+//    inline aabb_range_t range_union(const aabb_range_t & r) const
+//    {
+//      return aabb_range_t(std::min(r[0],(*this)[0]),std::max(r[1],(*this)[1]));
+//    }
 
     inline coord_type span() const
     {
@@ -143,25 +148,25 @@ namespace aabb
       return ret;
     }
 
-    bool intersection(const aabb_t & r,aabb_t &ixn) const
-    {
-      bool ret = true;
-
-      for(size_t i = 0 ; i < base_t::static_size;++i )
-        ret &= (*this)[i].intersection(r[i],ixn[i]);
-
-      return ret;
-    }
-
-    aabb_t bounding_box(const aabb_t & r) const
+    aabb_t intersection(const aabb_t & r) const
     {
       aabb_t ret;
 
       for(size_t i = 0 ; i < base_t::static_size;++i )
-        ret[i] = (*this)[i].range_union(r[i]);
+        ret[i] = (*this)[i].intersection(r[i]);
 
       return ret;
     }
+
+//    aabb_t bounding_box(const aabb_t & r) const
+//    {
+//      aabb_t ret;
+
+//      for(size_t i = 0 ; i < base_t::static_size;++i )
+//        ret[i] = (*this)[i].range_union(r[i]);
+
+//      return ret;
+//    }
 
     point_t lower_corner() const
     {
