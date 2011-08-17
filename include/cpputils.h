@@ -26,8 +26,6 @@
 #include <ostream>
 #include <vector>
 
-#include <n_vector.h>
-
 #include <boost/array.hpp>
 #include <boost/any.hpp>
 #include <boost/function.hpp>
@@ -73,60 +71,6 @@ class num_generator_t
     }
 };
 
-
-class configurable_t
-{
-public:
-
-  enum eFieldType {EFT_DATA_RO,EFT_DATA_RW,EFT_ACTION};
-
-  typedef n_vector_t<int,2> data_index_t;
-  typedef boost::function<void(void)> action_callback_t;
-
-  virtual data_index_t dim() = 0 ;
-
-  virtual bool exchange_field(const data_index_t &,boost::any &)  = 0;
-
-  virtual eFieldType exchange_header(const int &,boost::any &) = 0;
-
-  static bool s_exchange_action
-      (const action_callback_t &p_val,boost::any &c_val)
-  {
-    if(c_val.empty())
-      c_val = boost::any(p_val);
-    else
-      throw std::logic_error("action should be called when interacted with");
-
-    return false;
-  }
-
-  template <typename T>
-      static bool s_exchange_data_rw(T &p_val,boost::any &c_val)
-  {
-    bool ret = false;
-
-    if(c_val.empty())
-      c_val = boost::any(p_val);
-    else
-    {
-      ret   = (p_val != boost::any_cast<T>(c_val));
-      p_val = boost::any_cast<T>(c_val);
-    }
-    return ret;
-  }
-
-  template <typename T>
-      static bool s_exchange_data_ro(const T &p_val,boost::any &c_val)
-  {
-    if(c_val.empty())
-      c_val = boost::any(p_val);
-    else
-      throw std::logic_error("read only property cannot write");
-
-    return false;
-  }
-};
-
 std::string stripLineComments ( const std::string& line, const char& comment_char = '#' );
 
 std::string stripLeadingWS ( const std::string& line );
@@ -156,31 +100,25 @@ ss << t;
 return ss.str();
 }
 
+template <> inline std::string to_string (const std::string& t)
+{
+  return t;
+}
+
 class assertion_error:public std::exception
 {
-  boost::shared_ptr<std::stringstream> ss;
 
 public:
-
   /** Takes a character string describing the error.  */
   assertion_error(const std::string& );
-
-  virtual
-  ~assertion_error() throw();
+  virtual ~assertion_error() throw();
 
   /** Returns a C-style character string describing the general cause of
    *  the current error (the same string passed to the ctor).  */
   virtual const char*
   what() const throw();
 
-  template<typename T>
-  std::ostream &operator<< ( const T &s )
-  {
-    (*ss)<<s;
-
-    return (*ss);
-  }
-
+  void push(const std::string & s);
 };
 
 #define two_power(i)   (std::pow(2,(i)))
@@ -193,12 +131,16 @@ inline std::string __format_ffl(const char *file,const char* func,int line)
 }
 
 #define FILEFUNCLINE __format_ffl(__FILE__,__func__,__LINE__)
-#define VARSTR(v) (std::string()+#v+" = "+to_string(v))
+
+#define SVAR(v)         (std::string(#v)+" = "+to_string(v))
+#define SVAR1(v1)       (SVAR(v1))
+#define SVAR2(v1,v2)    (SVAR(v1)+" "+SVAR(v2))
+#define SVAR3(v1,v2,v3) (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v2))
 
 template<typename T>
 inline void __ensure(bool c, std::string s,const char * file, const char *func, const int &line)
 {
-  if(!c) throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s+"\n");
+  if(!c) throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s);
 }
 
 #define ensure(c,s)    __ensure<std::runtime_error>(c,s,__FILE__,__func__,__LINE__)
@@ -206,12 +148,13 @@ inline void __ensure(bool c, std::string s,const char * file, const char *func, 
 #define ensure_oe(c,s) __ensure<std::overflow_error>(c,s,__FILE__,__func__,__LINE__ )
 #define ensure_ia(c,s) __ensure<std::invalid_argument>(c,s,__FILE__,__func__,__LINE__)
 
+#ifndef NDEBUG
 #define ASSERT(c) __ensure<assertion_error>((c),std::string("Assertion failure: ")+#c,__FILE__,__func__,__LINE__)
+#else
+#define ASSERT(c)
+#endif
 
 #define is_in_range(i,b,e) (((b) <= (i)) && ((i) <= (e)))
-
-
-
 
 // for some reason this is not in c++ 99 or 03 .. remove if c++0x
 namespace std

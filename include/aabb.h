@@ -2,6 +2,7 @@
 #define RECT_H_INCLUDED
 
 #include <cpputils.h>
+#include <n_vector.h>
 
 namespace aabb
 {
@@ -186,6 +187,16 @@ namespace aabb
         c[i]= (*this)[i][1];
 
       return c;
+    }
+
+    inline point_t lc() const
+    {
+      return lower_corner();
+    }
+
+    inline point_t uc() const
+    {
+      return upper_corner();
     }
 
     inline point_t span() const
