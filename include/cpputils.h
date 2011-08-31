@@ -140,7 +140,8 @@ inline std::string __format_ffl(const char *file,const char* func,int line)
 template<typename T>
 inline void __ensure(bool c, std::string s,const char * file, const char *func, const int &line)
 {
-  if(!c) throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s);
+  if(!c)
+    throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s);
 }
 
 #define ensure(c,s)    __ensure<std::runtime_error>(c,s,__FILE__,__func__,__LINE__)

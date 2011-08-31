@@ -129,6 +129,17 @@ namespace aabb
       return ( contains ( p ) && !isInInterior ( p ) );
     }
 
+    int boundryCount( const point_t & p ) const
+    {
+      int ret = 0;
+
+      for(size_t i = 0 ; i < base_t::static_size;++i )
+        ret += ((*this)[i].isOnBndry(p[i]))?(1):(0);
+
+      return ret;
+    }
+
+
     bool contains ( const aabb_t &r ) const
     {
       bool ret = true;
