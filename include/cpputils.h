@@ -118,7 +118,7 @@ public:
   virtual const char*
   what() const throw();
 
-  void push(const std::string & s);
+  assertion_error& push(const std::string & s);
 };
 
 #define two_power(i)   (std::pow(2,(i)))
@@ -150,7 +150,15 @@ inline void __ensure(bool c, std::string s,const char * file, const char *func, 
 #define ensure_ia(c,s) __ensure<std::invalid_argument>(c,s,__FILE__,__func__,__LINE__)
 
 #ifndef NDEBUG
-#define ASSERT(c) __ensure<assertion_error>((c),std::string("Assertion failure: ")+#c,__FILE__,__func__,__LINE__)
+
+inline void __assert(bool c, const char * s,const char * file, const char *func, const int &line)
+{
+  if(!c)
+    throw assertion_error(std::string("\n Assertion failure: ")+__format_ffl(file,func,line)+"\n"+s);
+}
+
+#define ASSERT(c) __assert((c),#c,__FILE__,__func__,__LINE__)
+
 #else
 #define ASSERT(c)
 #endif

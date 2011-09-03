@@ -140,9 +140,11 @@ std::vector<std::string> s_exp_messages;
 
 std::string s_final_msg;
 
-void assertion_error::push(const std::string & s)
+assertion_error& assertion_error::push(const std::string & s)
 {
   s_exp_messages.push_back(s);
+
+  return *this;
 }
 
 const char* assertion_error::what() const throw()
