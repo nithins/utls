@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <cpputils.h>
+#include <boost/thread.hpp>
 
 using namespace std;
 
@@ -142,6 +143,9 @@ std::string s_final_msg;
 
 assertion_error& assertion_error::push(const std::string & s)
 {
+  static boost::mutex mutex;
+  boost::mutex::scoped_lock scoped_lock(mutex);
+
   s_exp_messages.push_back(s);
 
   return *this;

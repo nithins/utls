@@ -244,15 +244,6 @@ class n_vector_t: public boost::array<T,N>
       return stream;
     }
 
-    std::string to_string()
-    {
-      std::stringstream ss;
-
-      ((std::ostream&)ss)<<(*this);
-
-      return ss.str();
-    }
-
     static n_vector_t zero;
 
     static n_vector_t one;

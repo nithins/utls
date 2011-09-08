@@ -25,6 +25,7 @@
 #include <sstream>
 #include <ostream>
 #include <vector>
+#include <iostream>
 
 #include <boost/array.hpp>
 #include <boost/any.hpp>
@@ -91,18 +92,20 @@ void tokenize_string ( const std::string& , std::vector<std::string>& ,
 void split_string ( const std::string & line_str,
                     std::vector<std::string> & tokens,
                     const std::string & split_str );
-
-template <class T>
-inline std::string to_string (const T& t)
+namespace utls
 {
-std::stringstream ss;
-ss << t;
-return ss.str();
-}
+  template <class T>
+  inline std::string to_string (const T& t)
+  {
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+  }
 
-template <> inline std::string to_string (const std::string& t)
-{
-  return t;
+  template <> inline std::string to_string (const std::string& t)
+  {
+    return t;
+  }
 }
 
 class assertion_error:public std::exception
@@ -122,17 +125,17 @@ public:
 };
 
 #define two_power(i)   (std::pow(2,(i)))
-#define divide_rz(a,b) (int((a)/(b)))
-#define divide_ri(a,b) (int(((a)+(b)-1)/(b)))
+#define divide_rz(a,b) ((a)/(b))
+#define divide_ri(a,b) (((a)+(b)-1)/(b))
 
 inline std::string __format_ffl(const char *file,const char* func,int line)
 {
-  return (std::string("(")+basename(file)+","+func+","+to_string(line)+")");
+  return (std::string("(")+basename(file)+","+func+","+utls::to_string(line)+")");
 }
 
 #define FILEFUNCLINE __format_ffl(__FILE__,__func__,__LINE__)
 
-#define SVAR(v)         (std::string(#v)+" = "+to_string(v))
+#define SVAR(v)         (std::string(#v)+" = "+utls::to_string(v))
 #define SVAR1(v1)       (SVAR(v1))
 #define SVAR2(v1,v2)    (SVAR(v1)+" "+SVAR(v2))
 #define SVAR3(v1,v2,v3) (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v2))
@@ -163,7 +166,7 @@ inline void __assert(bool c, const char * s,const char * file, const char *func,
 #define ASSERT(c)
 #endif
 
-#define is_in_range(i,b,e) (((b) <= (i)) && ((i) <= (e)))
+#define is_in_range(i,b,e) (((b) <= (i)) && ((i) < (e)))
 
 // for some reason this is not in c++ 99 or 03 .. remove if c++0x
 namespace std
