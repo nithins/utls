@@ -128,6 +128,11 @@ bool ordered_pair_comparator::operator() ( const std::pair<uint, uint> &p1, cons
     return ( p1.first < p2.first );
 }
 
+std::string __format_ffl(const char *file,const char* func,int line)
+{
+  return (std::string("(")+basename(file)+","+func+","+utls::to_string(line)+")");
+}
+
 assertion_error::assertion_error(const std::string& s)
 {
   push(s);

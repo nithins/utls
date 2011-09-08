@@ -27,11 +27,6 @@
 #include <vector>
 #include <iostream>
 
-#include <boost/array.hpp>
-#include <boost/any.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
 typedef unsigned int  uint;
 typedef unsigned char uchar;
 
@@ -128,10 +123,7 @@ public:
 #define divide_rz(a,b) ((a)/(b))
 #define divide_ri(a,b) (((a)+(b)-1)/(b))
 
-inline std::string __format_ffl(const char *file,const char* func,int line)
-{
-  return (std::string("(")+basename(file)+","+func+","+utls::to_string(line)+")");
-}
+std::string __format_ffl(const char *file,const char* func,int line);
 
 #define FILEFUNCLINE __format_ffl(__FILE__,__func__,__LINE__)
 

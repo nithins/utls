@@ -6,11 +6,9 @@
 #include <ostream>
 #include <cmath>
 
-#include <cpputils.h>
-
 #include <boost/array.hpp>
-#include <boost/function.hpp>
 
+#include <cpputils.h>
 
 // this is designed for a vector of numbers of any type.
 // dont get oversmart and define a matrix as a vector of vectors..
@@ -248,23 +246,23 @@ class n_vector_t: public boost::array<T,N>
 
     static n_vector_t one;
 
-    typedef boost::function<T(T)> apply_t;
+//    typedef boost::function<T(T)> apply_t;
 
-    inline const n_vector_t apply(apply_t f)
-    {
-      std::transform(this->begin(),this->end(),this->begin(),f);
+//    inline const n_vector_t apply(apply_t f)
+//    {
+//      std::transform(this->begin(),this->end(),this->begin(),f);
 
-      return (*this);
-    }
+//      return (*this);
+//    }
 
-    inline const n_vector_t apply(apply_t f) const
-    {
-      n_vector_t r;
+//    inline const n_vector_t apply(apply_t f) const
+//    {
+//      n_vector_t r;
 
-      std::transform(this->begin(),this->end(),r.begin(),f);
+//      std::transform(this->begin(),this->end(),r.begin(),f);
 
-      return (r);
-    }
+//      return (r);
+//    }
 };
 
 // addition
