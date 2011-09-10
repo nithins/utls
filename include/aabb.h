@@ -95,13 +95,6 @@ namespace aabb
 
     aabb_t(){}
 
-    inline point_t size() const
-    {
-      throw std::runtime_error("use span instead");
-
-      return point_t();
-    }
-
 
     bool isInInterior ( const point_t & p ) const
     {
