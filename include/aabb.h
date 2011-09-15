@@ -253,6 +253,19 @@ namespace aabb
 
       return d;
     }
+
+    point_t get_normal() const
+    {
+      ASSERT(eff_dim() ==base_t::static_size-1);
+
+      point_t n;
+
+      for( int d = 0 ; d < base_t::static_size;++d)
+        n[d] = ((*this)[d][0] == (*this)[d][1])?(1):(0);
+
+      return n;
+    }
+
   };
 }
 
