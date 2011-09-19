@@ -132,6 +132,8 @@ std::string __format_ffl(const char *file,const char* func,int line);
 #define SVAR2(v1,v2)    (SVAR(v1)+" "+SVAR(v2))
 #define SVAR3(v1,v2,v3) (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v2))
 
+#define PUSHVAR(v) push(SVAR(v))
+
 template<typename T>
 inline void __ensure(bool c, std::string s,const char * file, const char *func, const int &line)
 {
