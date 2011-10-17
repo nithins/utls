@@ -37,6 +37,8 @@ set(${PROJECT_NAME}_SRCS
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/timer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/timer.cpp
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/configurable.h
   )
 
 option(NO_OPENGL "build without opengl" OFF)

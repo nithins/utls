@@ -12,6 +12,7 @@
 #include <shadersources.h>
 
 #include <logutil.h>
+#include <cstring>
 
 namespace glutils
 {
