@@ -3,6 +3,8 @@
 
 #include <iterator>
 
+#include <boost/iterator/reverse_iterator.hpp>
+
 #include <n_vector.h>
 
 namespace aabb
@@ -271,15 +273,34 @@ namespace aabb
     class pt_iterator:public std::iterator
         <std::bidirectional_iterator_tag,point_t,int,point_t,point_t>
     {
+    protected:
+      friend class aabb_t;
+
+      static inline int num_points(const aabb_t & a)
+      {
+        int e = 1;
+        point_t s = a.span()+1;
+
+        for(int i = 0; i < (int)max_dim; ++i)
+          e *= s[i];
+
+        return e;
+      }
     public:
       pt_iterator(aabb_t aabb, int i = 0):m_i(i),m_aabb(aabb){};
       int m_i;
       aabb_t m_aabb;
 
-      inline pt_iterator& operator++(){++m_i; return *this;}
-      inline pt_iterator& operator--(){--m_i; return *this;}
+      inline pt_iterator& operator++()
+      {++m_i; ASSERT(is_in_range(m_i,0,num_points(m_aabb)+1));return *this;}
+
+      inline pt_iterator& operator--()
+      {--m_i; ASSERT(is_in_range(m_i,0,num_points(m_aabb)));return *this;}
+
       inline point_t operator*() const
       {
+        ASSERT(is_in_range(m_i,0,num_points(m_aabb)));
+
         n_vector_t<int,max_dim> c,s = m_aabb.span()+1;
 
         for(int i = 0; i < int(max_dim); ++i)
@@ -298,30 +319,28 @@ namespace aabb
       }
 
       inline bool operator== (const pt_iterator &rhs) const
-      {return (m_i == rhs.m_i);}
+      {ASSERT(m_aabb == rhs.m_aabb); return (m_i == rhs.m_i);}
 
       inline bool operator!= (const pt_iterator &rhs) const
-      {return !(*this == rhs);}
+      {ASSERT(m_aabb == rhs.m_aabb); return !(*this == rhs);}
 
       inline int operator-(const pt_iterator &rhs) const
-      {return m_i-rhs.m_i;}
-
+      {ASSERT(m_aabb == rhs.m_aabb); return m_i-rhs.m_i;}
     };
+
+    typedef boost::reverse_iterator<pt_iterator> pt_riterator;
 
     inline pt_iterator pt_begin() const
     {return pt_iterator(*this,0);}
 
     inline pt_iterator pt_end() const
-    {
-      int e = 1;
+    {return pt_iterator(*this,pt_iterator::num_points(*this));}
 
-      point_t s = span()+1;
+    inline pt_riterator pt_rbegin() const
+    {return pt_riterator(pt_end());}
 
-      for(int i = 0; i < (int)max_dim; ++i)
-        e *= s[i];
-
-      return pt_iterator(*this,e);
-    }
+    inline pt_riterator pt_rend() const
+    {return pt_riterator(pt_begin());}
 
   };
 
