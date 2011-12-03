@@ -127,7 +127,7 @@ std::string __format_ffl(const char *file,const char* func,int line);
 
 #define FILEFUNCLINE __format_ffl(__FILE__,__func__,__LINE__)
 
-#define SVAR(v)         (std::string(#v)+" = "+utls::to_string(v))
+#define SVAR(v)         (std::string(#v)+" = "+utls::to_string(v)+" ")
 #define SVAR1(v1)       (SVAR(v1))
 #define SVAR2(v1,v2)    (SVAR(v1)+" "+SVAR(v2))
 #define SVAR3(v1,v2,v3) (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v2))

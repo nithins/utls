@@ -160,7 +160,7 @@ const char* assertion_error::what() const throw()
 {
   std::stringstream ss;
 
-  for( int i = 0 ; i < s_exp_messages.size(); ++i)
+  for( uint i = 0 ; i < s_exp_messages.size(); ++i)
     ss<<s_exp_messages[i]<<endl;
 
   s_final_msg = ss.str();
