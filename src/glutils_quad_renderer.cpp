@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstring>
 
 #include <GL/glew.h>
 
@@ -104,7 +105,7 @@ namespace glutils
   {
     nlist.resize(vlist.size());
 
-    memset(nlist.data(),0,nlist.size()*sizeof(normal_list_t::value_type));
+    std::memset(nlist.data(),0,nlist.size()*sizeof(normal_list_t::value_type));
 
     for(int i = 0 ; i< qlist.size();i++)
     {

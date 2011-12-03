@@ -446,13 +446,23 @@ namespace std
   template<typename T, std::size_t N,bool O>
   inline n_vector_t<T,N,O> ceil(const n_vector_t<T,N,O> & c)
   {
-    return c.apply((long double (*)(long double)) std::ceil);
+    n_vector_t<T,N,O> ret;
+
+    for(int i = 0 ; i < N; ++i)
+      ret[i] = ceil(c[i]);
+
+    return ret;
   }
 
   template<typename T, std::size_t N,bool O>
   inline n_vector_t<T,N,O> floor(const n_vector_t<T,N,O> & c)
   {
-    return c.apply((long double (*)(long double)) std::floor);
+    n_vector_t<T,N,O> ret;
+
+    for(int i = 0 ; i < N; ++i)
+      ret[i] = floor(c[i]);
+
+    return ret;
   }
 
   template<typename T, std::size_t N,bool O>
