@@ -93,6 +93,14 @@ if(NOT NO_OPENGL)
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/normal_ren_vert.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/normal_ren_geom.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/normal_ren_frag.glsl
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cylinder_vert.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cylinder_geom.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/cylinder_frag.glsl
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_vert.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_geom.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_frag.glsl
     )
 
   set(utls_shader_SRCS

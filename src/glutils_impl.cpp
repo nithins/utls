@@ -299,6 +299,8 @@ namespace glutils
     init_text_rendering();
 
     init_normal_renderer();
+
+    init_common_shaders();
   }
 
   void clear()

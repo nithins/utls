@@ -769,7 +769,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
     m_cell_normal[c]  = cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
                                       m_cell_pos[pts[0]] -m_cell_pos[pts[2]]);
 
-    m_cell_normal[c] /= -1*euclid_norm(m_cell_normal[c]);
+    m_cell_normal[c] /= euclid_norm(m_cell_normal[c]);
   }
 
   cellid_t c = get_num_cells_max_dim(1);

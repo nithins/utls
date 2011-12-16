@@ -8,8 +8,11 @@
 #include <GL/glew.h>
 
 #include "logutil.h"
+#include "cpputils.h"
 #include "GLSLProgram.h"
 #include "GLSLShader.h"
+
+#include "shadersources.h"
 
 using namespace std;
 
@@ -493,7 +496,7 @@ void GLSLProgram::createFromSourceStrings
 
   if ( vertexShader.size() != 0 )
   {
-    prog.vertex_ = new GLSLShader (  GL_VERTEX_SHADER_ARB );  
+    prog.vertex_ = new GLSLShader (  GL_VERTEX_SHADER_ARB );
     prog.vertex_->setShaderSource ( vertexShader );
     prog.vertex_->compile();
     prog.attach ( prog.vertex_ );
@@ -501,7 +504,7 @@ void GLSLProgram::createFromSourceStrings
 
   if ( geometryShader.size() != 0 )
   {
-    prog.geometry_ = new GLSLShader (  GL_GEOMETRY_SHADER_EXT );  
+    prog.geometry_ = new GLSLShader (  GL_GEOMETRY_SHADER_EXT );
     prog.geometry_->setShaderSource ( geometryShader );
     prog.geometry_->compile();
     prog.attach ( prog.geometry_ );
@@ -509,7 +512,7 @@ void GLSLProgram::createFromSourceStrings
 
   if ( fragmentShader.size() != 0 )
   {
-    prog.fragment_ = new GLSLShader (  GL_FRAGMENT_SHADER_ARB );  
+    prog.fragment_ = new GLSLShader (  GL_FRAGMENT_SHADER_ARB );
     prog.fragment_->setShaderSource ( fragmentShader );
     prog.fragment_->compile();
     prog.attach ( prog.fragment_ );
@@ -594,4 +597,31 @@ GLSLProgram * GLSLProgram::createFromSourceStrings
   GLSLProgram::createFromSourceStrings ( *prog, shader, shaderType, geomIn, geomOut );
 
   return prog;
+}
+
+glsl_program_ptr_t g_sphere_shader;
+glsl_program_ptr_t g_cylinder_shader;
+
+namespace glutils
+{
+void init_common_shaders()
+{
+  std::string log;
+
+  g_sphere_shader.reset
+      (GLSLProgram::createFromSourceStrings
+       (sphere_vert_glsl,sphere_geom_glsl,sphere_frag_glsl,GL_POINTS,GL_QUADS));
+
+  g_sphere_shader->GetProgramLog(log);
+
+  ensure(log.size() == 0,"---sphere_shader compile error---\n"+log);
+
+  g_cylinder_shader.reset
+      (GLSLProgram::createFromSourceStrings
+      (cylinder_vert_glsl,cylinder_geom_glsl,cylinder_frag_glsl,GL_LINES,GL_TRIANGLES));
+
+  g_cylinder_shader->GetProgramLog(log);
+
+//  ensure(log.size() == 0,"---cylinder_shader compile error---\n"+log);
+}
 }

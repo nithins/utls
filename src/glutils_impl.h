@@ -10,6 +10,8 @@ namespace glutils
   void init_normal_renderer();
 
   void clear_normal_renderer();
+
+  void init_common_shaders();
 }
 
 #endif
