@@ -308,6 +308,7 @@ namespace glutils
 
   void draw_aabb_line(vertex_t lc,vertex_t uc);
 
+  void smooth_lines(vertex_list_t &vl, const line_idx_list_t &ll,int NITER = 2);
 }
 
 void DrawAxes();

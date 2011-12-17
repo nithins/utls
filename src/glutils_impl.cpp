@@ -7,6 +7,7 @@
 #include <logutil.h>
 #include <vecutils.h>
 #include <limits>
+#include <numeric>
 
 void DrawAxes()
 {
@@ -358,4 +359,48 @@ namespace glutils
     glEnd();
 
   }
+
+
+void smooth_lines(vertex_list_t &vl, const line_idx_list_t &ll,int NITER)
+{
+  using namespace std;
+
+  int V = vl.size();
+  int E = ll.size();
+
+  vector<int> off(V+1,0);
+
+  for(int i = 0 ; i < E; ++i) {off[ll[i][0]] += 1;off[ll[i][1]] += 1;}
+
+  partial_sum(off.begin(),off.end(),off.begin());
+
+  vector<int> adj(off[V-1],-1);
+
+  for(int i = 0 ; i < E; ++i)
+  {int u = ll[i][0],v = ll[i][1]; adj[--off[u]] = v;adj[--off[v]] = u;}
+
+  off[V] = adj.size();
+
+  vertex_list_t out_vl(V);
+
+  for( int iteration = 0 ; iteration < NITER; ++iteration)
+  {
+  for( int i = 0 ; i < V; ++i)
+  {
+    out_vl[i] = vl[i];
+
+    int n = off[i+1] - off[i];
+
+    if (n != 2) continue;
+
+    for(int b = off[i],e = off[i +1]; b!=e  ;++b)
+      out_vl[i] += vl[adj[b]];
+
+    out_vl[i] /= (n+1);
+  }
+  copy(out_vl.begin(),out_vl.end(),vl.begin());
+  }
+
+  return;
+}
 }
