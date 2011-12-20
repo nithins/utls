@@ -23,143 +23,75 @@
 #include <cpputils.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/iterator/counting_iterator.hpp>
 
 #include <glutils.h>
 
-struct tri
-{
-
-  // offsets that index into a vertex cell list
-  uint v;
-
-  // offsets that index into an edge cell list
-  uint e;
-
-  // offsets that index into a tri cell list
-  // is implicit (ptrdiff)/6 will give the tri cell
-
-  // offset that indexes to a trilist
-  // this shares the edge (v1,v2)
-  uint fnext;
-};
-
-uint tri_enext ( uint q );
-
-uint tri_eprev ( uint q );
-
-uint tri_sym ( uint q );
-
-class tri_edge_t
-{
-public:
-
-  typedef uint                    cellid_t;
-
-  typedef glutils::tri_idx_list_t tri_idx_list_t;
-
-  typedef glutils::tri_idx_t      tri_idx_t;
-
-private:
-  tri *m_tri_versions;   // all versions of all tri.. 8 of each
-
-  void * add_algo_pkt;
-
-public:
-
-  uint *m_verts;   // index list to tris that contain {v1} = {a}
-  uint  m_vert_ct;
-
-  uint *m_edges;   // index list to tris that contain {v1,v2} = {a,b}
-  uint  m_edge_ct;
-
-  uint *m_tris;   // index list to tris that contain {v1,v2,v3} in consistent orientation
-  uint  m_tri_ct;
-
-public:
-  tri_edge_t();
-
-  ~tri_edge_t();
-
-  void setNumVerts ( const uint & vertex_ct );
-
-  void setNumTris ( const uint & tri_ct );
-
-  void start_adding_tris();
-
-  void add_tri ( const uint *v );
-
-  void end_adding_tris();
-
-  void setup(const tri_idx_list_t &,const uint & num_verts);
-
-  void logTri ( const uint &qpos ) const ;
-
-  void logTriSet ( const uint &trisetstart ) const;
-
-  void init();
-
-  void destroy();
-
-  uint vertIndex ( uint q ) const;
-
-  uint edgeIndex ( uint q ) const;
-
-  uint triIndex ( uint q ) const;
-
-  uint triFnext ( uint q ) const;
-
-  bool hasFnext ( uint q ) const;
-};
-
-typedef boost::shared_ptr<tri_edge_t> tri_edge_ptr_t;
-
 class tri_cc_t
-{  
+{
 public:
 
-  typedef uint                       cellid_t;
+  static const int cc_dim = 2;
+  static const uint INVALID_VALUE=0xffffffff;
 
-  typedef tri_edge_t::tri_idx_list_t tri_idx_list_t;
+  struct tri
+  {
+    uint v;
+    uint e;
+    uint fnext;
+  };
 
-  typedef tri_edge_t::tri_idx_t      tri_idx_t;
+  typedef uint                     cellid_t;
 
-  static const uint cc_dim = 2;
+  typedef std::vector<cellid_t>    cellid_list_t;
+  typedef std::vector<tri>         tri_list_t;
 
-protected:
+  typedef glutils::tri_idx_t       tri_idx_t;
+  typedef glutils::tri_idx_list_t  tri_idx_list_t;
 
-  tri_edge_ptr_t m_tri_edge;
+  tri_list_t    m_tris;   // all versions of all tri.. 3 of each
+  cellid_list_t m_verts;   // index list to tris that contain {v1} = {a}
+  cellid_list_t m_edges;   // index list to tris that contain {v1,v2} = {a,b}
 
-public:
+  tri_cc_t();
+  ~tri_cc_t();
 
-  tri_cc_t():m_tri_edge(new tri_edge_t){}
+  void init(const tri_idx_list_t &,const uint & num_verts);
+  void clear();
 
-  inline void init(const tri_idx_list_t &,const uint & num_verts);
+  void logTri(const uint &qpos , std::ostream &os = std::cout) const ;
+  void logTriSet(const uint &trisetstart, std::ostream &os = std::cout) const;
 
-  inline void clear();
+  inline uint vertIndex ( uint t ) const {ASSERT(is_in_range(t,0,m_tris.size()));return m_tris[t].v;}
+  inline uint edgeIndex ( uint t ) const {ASSERT(is_in_range(t,0,m_tris.size()));return m_tris[t].e;}
+  inline uint triIndex ( uint t ) const  {ASSERT(is_in_range(t,0,m_tris.size()));return t/3;}
 
-  inline uint get_dim() const;
+  inline uint fnext ( uint t ) const {ASSERT(is_in_range(t,0,m_tris.size()) && has_fnext(t));return m_tris[t].fnext;}
+  bool has_fnext ( uint t ) const    {ASSERT(is_in_range(t,0,m_tris.size()));return ! ( m_tris[t].fnext == INVALID_VALUE );}
 
-  uint get_cell_dim (cellid_t c) const ;
+  inline int vert_ct() const {return m_verts.size();}
+  inline int edge_ct() const {return m_edges.size();}
+  inline int tri_ct() const {return m_tris.size()/3;}
 
-  uint get_cell_points (cellid_t  ,cellid_t   * ) const;
-
-  uint get_cell_facets (cellid_t  ,cellid_t  * ) const;
-
-  uint get_cell_co_facets (cellid_t  ,cellid_t  * ) const;
-
+  uint get_cell_dim(cellid_t c) const ;
+  uint get_cell_points(cellid_t  ,cellid_t   * ) const;
+  uint get_cell_facets(cellid_t  ,cellid_t  * ) const;
+  uint get_cell_co_facets(cellid_t  ,cellid_t  * ) const;
   uint get_vert_star(cellid_t  ,cellid_t  * ) const;
+  cellid_t get_opp_cell(cellid_t c, cellid_t cf) const;
 
   bool is_adjacent(cellid_t  ,cellid_t ) const;
-
   bool is_cell_boundry(cellid_t ) const;
 
   inline uint get_num_cells () const;
-
-  uint get_num_cells_dim (uint dim) const;
-
+  inline uint get_num_cells_dim (uint dim) const;
   inline uint get_num_cells_max_dim (uint dim) const;
 
-  void save(std::ostream & os,const glutils::vertex_list_t& v,const std::vector<double> & fn) const;
+  typedef boost::counting_iterator<int> iterator;
+  inline iterator begin() const;
+  inline iterator end() const;
+  inline iterator begin(int i) const;
+  inline iterator end(int i) const;
 };
 
 typedef boost::shared_ptr<tri_cc_t> tri_cc_ptr_t;
@@ -207,9 +139,6 @@ public:
 
   void clear();
 
-  inline uint get_dim() const
-  { return m_tri_cc->get_dim();  }
-
   inline uint get_cell_dim (cellid_t c) const
   { return m_tri_cc->get_cell_dim(c);  }
 
@@ -256,34 +185,45 @@ public:
 
 typedef boost::shared_ptr<tri_cc_geom_t> tri_cc_geom_ptr_t;
 
-inline void tri_cc_t::init(const tri_idx_list_t &tl,const uint & nv)
-{
-  m_tri_edge->setup(tl,nv);
-}
-
-inline void tri_cc_t::clear()
-{
-  m_tri_edge->destroy();
-}
-
 inline uint tri_cc_t::get_num_cells_max_dim (uint dim) const
 {
   uint n = 0;
 
-  for(uint i = 0 ; i <= dim; ++i)
-    n += get_num_cells_dim(i);
+  switch(dim)
+  {
+  case 2: n += tri_ct();
+  case 1: n += edge_ct();
+  case 0: n += vert_ct();
+    return n;
+  }
+  ASSERT(false&&"invalid dim");return -1;
+}
 
-  return n;
+uint tri_cc_t::get_num_cells_dim (uint dim) const
+{
+  switch(dim)
+  {
+  case 2: return tri_ct();
+  case 1: return edge_ct();
+  case 0: return vert_ct();
+  }
+  ASSERT(false&&"invalid dim");return -1;
 }
 
 inline uint tri_cc_t::get_num_cells () const
-{
-  return get_num_cells_max_dim(cc_dim);
-}
+{return get_num_cells_max_dim(cc_dim);}
 
-inline uint tri_cc_t::get_dim() const
-{
-  return cc_dim;
-}
+inline tri_cc_t::iterator tri_cc_t::begin() const
+{return iterator(0);}
+
+inline tri_cc_t::iterator tri_cc_t::end() const
+{return iterator(get_num_cells());}
+
+inline tri_cc_t::iterator tri_cc_t::begin(int i) const
+{return iterator(get_num_cells_max_dim(i) - get_num_cells_dim(i));}
+
+inline tri_cc_t::iterator tri_cc_t::end(int i) const
+{return iterator(get_num_cells_max_dim(i));}
+
 
 #endif

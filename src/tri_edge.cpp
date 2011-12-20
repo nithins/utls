@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <map>
+#include <set>
 #include <vector>
 #include <queue>
 #include <iostream>
@@ -32,343 +33,131 @@
 
 #include <tri_edge.h>
 
-#define INVALID_VALUE 0xffffffff
-
-#define DEBUG_BEGIN if(false) {
-#define DEBUG_END }
-#define DEBUG_STMT(x) DEBUG_BEGIN x; DEBUG_END;
-#define DEBUG_LOG(x) DEBUG_STMT(_LOG(x))
-
 using namespace std;
 
-uint tri_enext ( uint q )
+inline uint enext ( uint t ){return ( 3* ( t/3 ) + ( t+1 ) %3 );}
+inline uint eprev ( uint t ){ return ( 3* ( t/3 ) + ( t+2 ) %3 );}
+
+tri_cc_t::tri_cc_t(){}
+
+tri_cc_t::~tri_cc_t(){clear();}
+
+typedef n_vector_t<int,2>   int_pair_t;
+
+void check_tlist(const glutils::tri_idx_list_t &tlist,const uint & N);
+void check_verts(const tri_cc_t &te);
+void check_tris(const tri_cc_t &te);
+void check_edges(const tri_cc_t &te);
+
+void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
 {
-  return ( 3* ( q/3 ) + ( q+1 ) %3 );
-}
+  typedef map<int_pair_t,int> int_pair_int_map_t;
 
-uint tri_eprev ( uint q )
-{
-  return ( 3* ( q/3 ) + ( q+2 ) %3 );
-}
+  check_tlist(tlist,N);
 
-uint tri_sym ( uint q )
-{
-  return ( q + 5 ) -2* ( q%6 );
-}
+  int T = tlist.size();
 
-tri_edge_t::tri_edge_t()
-{
-  init();
-}
+  int_pair_int_map_t edge_map;
 
-tri_edge_t::~tri_edge_t()
-{
-  destroy();
-}
+  m_verts.resize(N,INVALID_VALUE);
+  m_tris.resize(T*3);
 
-void tri_edge_t::setNumVerts ( const uint & vertex_ct )
-{
-  m_vert_ct = vertex_ct;
-  m_verts  = new uint[vertex_ct];
-}
-
-void tri_edge_t::setNumTris ( const uint & tri_ct )
-{
-  m_tri_ct         = tri_ct;
-  m_tri_versions   = new tri[ tri_ct*6];
-}
-
-typedef map< pair<uint,uint>,uint,unordered_pair_comparator > edge_map_t;
-struct qaapkt
-{
-  uint           tri_pos;
-  edge_map_t     edge_map;
-  vector<uint>   edge_list;// list of tris that have {v1,v2} = {u,v}
-
-  qaapkt() :tri_pos ( 0 ),edge_map ( unordered_pair_comparator() ) {}
-};
-
-void tri_edge_t::start_adding_tris()
-{
-  add_algo_pkt = new qaapkt();
-}
-
-void tri_edge_t::add_tri ( const uint *v )
-{
-
-  vector<uint> &edge_list = ( ( qaapkt* ) add_algo_pkt )->edge_list;
-  edge_map_t   &edge_map  = ( ( qaapkt* ) add_algo_pkt )->edge_map;
-  uint         &tri_pos  = ( ( qaapkt* ) add_algo_pkt )->tri_pos;
-
-  // each tri has 6 versions
-
-  // the first four versions
-  for ( int i = 0 ; i < 3 ; i++ )
+  for ( int ti = 0 ; ti < T; ++ti )
   {
-    m_tri_versions[ tri_pos + i].v = v[i];
-    m_verts[v[i]] = tri_pos + i;
-  }
+    tri_idx_t t = tlist[ti];
 
-  for ( int i = 0 ; i < 3 ; i++ )
-  {
-    tri *q1 = &m_tri_versions[ tri_pos + i];
-    tri *q2 = &m_tri_versions[ tri_pos + ( i+1 ) %3];
+    if(edge_map.count(int_pair_t(t[0],t[1])) == 1 ||
+       edge_map.count(int_pair_t(t[1],t[2])) == 1 ||
+       edge_map.count(int_pair_t(t[2],t[0])) == 1)
+      std::swap(t[0],t[1]);
 
-    edge_map_t::iterator it = edge_map.find ( make_pair ( q1->v, q2->v ) );
-
-    if ( it != edge_map.end() )
+    for( int vi = 0 ; vi < 3 ; ++vi)
     {
-      q1->fnext = ( m_tri_versions[ ( *it ).second].v == q2->v ) ? ( ( *it ).second ) : ( tri_sym ( ( *it ).second ) );
-      m_tri_versions[q1->fnext].fnext = tri_pos + i;
-      q1->e = m_tri_versions[q1->fnext].e;
-      edge_map.erase ( it );
-    }
-    else
-    {
-      q1->e = edge_list.size();
-      q1->fnext = INVALID_VALUE;
-      edge_list.push_back ( tri_pos + i );
-      edge_map.insert ( make_pair ( make_pair ( q1->v,q2->v ), tri_pos + i ) );
-    }
-  }
+      int tvi = 3*ti + vi;
 
-  // the next four are just reflections
-  for ( int i = 0 ; i < 3 ; i++ )
-  {
-    uint qpos = tri_pos + 3 + i;
-    tri *q = &m_tri_versions[qpos];
+      m_tris[tvi].v = t[vi];
+      m_verts[t[vi]] = tvi;
 
-    q->v     = m_tri_versions[tri_enext ( tri_sym ( qpos ) ) ].v;
-    q->e     = m_tri_versions[tri_sym ( qpos ) ].e;
+      int_pair_t e (t[vi],t[(vi+1)%3]);
+      int_pair_t e_(t[(vi+1)%3],t[vi]);
 
-    if ( m_tri_versions[tri_sym ( qpos ) ].fnext != INVALID_VALUE )
-    {
-      q->fnext = tri_sym ( m_tri_versions[tri_sym ( qpos ) ].fnext );
-      m_tri_versions[q->fnext].fnext = qpos;
-    }
-    else
-    {
-      q->fnext = INVALID_VALUE;
-    }
-  }
-  tri_pos+=6;
-}
+      ASSERT(edge_map.count(e) == 0 && "non manifold tri attachment");
 
-void tri_edge_t::end_adding_tris()
-{
-  vector<uint> &edge_list = ( ( qaapkt* ) add_algo_pkt )->edge_list;
-  edge_map_t   &edge_map  = ( ( qaapkt* ) add_algo_pkt )->edge_map;
-  //uint         &tri_pos  = ( ( qaapkt* ) add_algo_pkt )->tri_pos;
-
-
-  m_edge_ct = edge_list.size();
-  m_edges = new uint[m_edge_ct];
-
-  for ( uint i = 0 ; i < m_edge_ct;i++ )
-  {
-    m_edges[i] = edge_list [i];
-  }
-
-  m_tris = new uint[m_tri_ct];
-  for ( uint i = 0 ; i < m_tri_ct;i++ )
-  {
-    m_tris[i] = m_tri_ct*6;
-  }
-
-  // this is done so that the versions of the tris we look at are cyclically consistant
-  // the outer loop will invoke the inner loop once for each connected component
-  for ( uint i = 0 ; i < m_tri_ct;i++ )
-  {
-    if ( m_tris[i] == m_tri_ct*6 )
-    {
-      queue<uint> tri_queue;
-
-      tri_queue.push ( i*6 );
-
-      while ( tri_queue.size() !=0 )
+      if(edge_map.count(e_) == 1)
       {
-        uint q = tri_queue.front();
-        tri_queue.pop();
+        int tvj = edge_map[e_];
 
-        m_tris[q/6] = ( q/6 ) *6 + ( ( q%6 ) /3 ) *3;
+        ASSERT(m_tris[tvj].fnext == INVALID_VALUE);
 
-        for ( int i = 0 ; i< 3;i++ )
-        {
-          q = tri_enext ( q );
+        m_tris[tvi].fnext = tvj;
+        m_tris[tvj].fnext = tvi;
+        m_tris[tvi].e     = m_tris[tvj].e;
 
-          uint qfnext = m_tri_versions[q].fnext;
+        edge_map.erase(e_);
+      }
+      else
+      {
+        m_tris[tvi].fnext = INVALID_VALUE;
+        m_tris[tvi].e     = m_edges.size();
 
-          if ( qfnext != INVALID_VALUE )
-          {
-            if ( ( m_tris[qfnext/6] == m_tri_ct*6 ) )
-            {
-              m_tris[qfnext/6] = 0;
-              tri_queue.push ( qfnext );
-            }
-          }
-        }
+        m_edges.push_back(tvi);
+
+        edge_map[e] = tvi;
       }
     }
   }
 
-  delete ( ( qaapkt* ) add_algo_pkt );
+  for(int_pair_int_map_t::iterator it = edge_map.begin(); it != edge_map.end(); ++it)
+    m_verts[m_tris[it->second].v] = it->second;
+
+  check_verts(*this);
+  check_edges(*this);
+  check_tris(*this);
 }
 
-void tri_edge_t::setup(const tri_idx_list_t &tlist,const uint & vert_ct)
+void tri_cc_t::logTri ( const uint &t , std::ostream &os) const
 {
-  setNumVerts(vert_ct);
-
-  setNumTris(tlist.size());
-
-  start_adding_tris();
-
-  for(uint i = 0 ;i < tlist.size(); ++i)
-    add_tri(tlist[i].data());
-
-  end_adding_tris();
+  os<<"#"<<t<<"\t("<<
+  m_tris[t].v<<","<<
+  m_tris[enext ( t ) ].v<<","<<
+  m_tris[enext ( enext ( t ) ) ].v<<")"<<
+  "\te = "   <<m_tris[t].e<<
+  "\tfnext ="<<m_tris[t].fnext;
+  os<<endl;
 }
 
-void tri_edge_t::logTri ( const uint &qpos ) const
+void tri_cc_t::logTriSet ( const uint &trisetstart , std::ostream &os) const
 {
-  if ( m_tri_versions[qpos ].fnext != INVALID_VALUE )
-  {
+  unsigned qstart = 3* ( trisetstart/3 );
 
-    _LOG
-    (
-      "#"<<qpos<<" ("<<
-      m_tri_versions[qpos].v<<" "<<
-      m_tri_versions[tri_enext ( qpos ) ].v<<" "<<
-      m_tri_versions[tri_enext ( tri_enext ( qpos ) ) ].v<<") "<<
-      " e ="<<m_tri_versions[qpos].e<<
-      " fnext ="<<m_tri_versions[qpos].fnext
-    );
-  }
-  else
-  {
-    _LOG
-    (
-      "#"<<qpos<<" ("<<
-      m_tri_versions[qpos].v<<" "<<
-      m_tri_versions[tri_enext ( qpos ) ].v<<" "<<
-      m_tri_versions[tri_enext ( tri_enext ( qpos ) ) ].v<<") "<<
-      " e ="<<m_tri_versions[qpos].e
-    );
-  }
-}
-
-void tri_edge_t::logTriSet ( const uint &trisetstart ) const
-{
-  unsigned qstart = 6* ( trisetstart/6 );
-
-  for ( int i = 0 ; i < 6 ; i++ )
+  for ( int i = 0 ; i < 3 ; i++ )
   {
     uint qpos = qstart + i;
-    logTri ( qpos );
+    logTri ( qpos,os);
   }
-
-  _LOG ( "-------------------------------------" );
+  os<<endl;
 }
 
-void tri_edge_t::init()
+void tri_cc_t::clear()
 {
-  m_vert_ct = 0;
-  m_edge_ct = 0;
-  m_tri_ct = 0;
-}
-
-void tri_edge_t::destroy()
-{
-  if ( m_vert_ct !=0 )
-  {
-    delete []m_verts;
-  }
-  if ( m_edge_ct !=0 )
-  {
-    delete []m_edges;
-  }
-  if ( m_tri_ct !=0 )
-  {
-    delete []m_tris;
-    delete []m_tri_versions;
-  }
-  init();
-}
-
-#define CHECK_VALID_Q_VERSION(q) \
-  DEBUG_STMT(\
-  if ( (q) >= m_tri_ct*6 )\
-{\
-    _ERROR ( "Tri version index out of range" );\
-    _ERROR ( "q         = "<<(q) );\
-    _ERROR ( "m_tri_ct = "<<m_tri_ct );\
-    exit(1);\
-}\
-  )\
-
-
-uint tri_edge_t::vertIndex ( uint q ) const
-{
-  CHECK_VALID_Q_VERSION ( q );
-  return m_tri_versions[q].v;
-}
-
-uint tri_edge_t::edgeIndex ( uint q ) const
-{
-  CHECK_VALID_Q_VERSION ( q );
-  return m_tri_versions[q].e;
-}
-
-uint tri_edge_t::triIndex ( uint q ) const
-{
-  CHECK_VALID_Q_VERSION ( q );
-  return q/6;
-}
-
-uint tri_edge_t::triFnext ( uint q ) const
-{
-  CHECK_VALID_Q_VERSION ( q );
-
-  DEBUG_BEGIN
-  if ( !hasFnext ( q ) )
-  {
-    _ERROR ( "invalid fnext requested" );
-    exit ( 1 );
-  }
-  DEBUG_END
-
-  return m_tri_versions[q].fnext;
-}
-
-bool tri_edge_t::hasFnext ( uint q ) const
-{
-  return ! ( m_tri_versions[q].fnext == INVALID_VALUE );
-}
-
-uint tri_cc_t::get_num_cells_dim (uint dim) const
-{
-  switch(dim)
-  {
-  case 0: return m_tri_edge->m_vert_ct;
-  case 1: return m_tri_edge->m_edge_ct;
-  case 2: return m_tri_edge->m_tri_ct;
-  }
-
-  throw std::runtime_error("invalid dim specified");
+  m_tris.clear();
+  m_edges.clear();
+  m_verts.clear();
 }
 
 uint tri_cc_t::get_cell_dim (cellid_t c) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
     return 0;
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
     return 1;
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
     return 2;
 
   throw std::runtime_error("cellid out of range");
@@ -376,34 +165,34 @@ uint tri_cc_t::get_cell_dim (cellid_t c) const
 
 uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
     p[0] = c;
 
     return 1;
   }
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
   {
-    uint t = m_tri_edge->m_edges[c];
+    uint t = m_edges[c];
 
-    p[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
-    p[1] = m_tri_edge->vertIndex(t);
+    p[0] = vertIndex(t); t = enext(t);
+    p[1] = vertIndex(t);
 
     return 2;
   }
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
   {
-    uint t = m_tri_edge->m_tris[c];
+    uint t = c*3;
 
-    p[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
-    p[1] = m_tri_edge->vertIndex(t); t = tri_enext(t);
-    p[2] = m_tri_edge->vertIndex(t);
+    p[0] = vertIndex(t);
+    p[1] = vertIndex(t+1);
+    p[2] = vertIndex(t+2);
 
     return 3;
   }
@@ -413,32 +202,32 @@ uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
 
 uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
     return 0;
   }
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
   {
-    uint t = m_tri_edge->m_edges[c];
+    uint t = m_edges[c];
 
-    f[0] = m_tri_edge->vertIndex(t); t = tri_enext(t);
-    f[1] = m_tri_edge->vertIndex(t);
+    f[0] = vertIndex(t); t = enext(t);
+    f[1] = vertIndex(t);
 
     return 2;
   }
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
   {
-    uint t = m_tri_edge->m_tris[c];
+    uint t = c*3;
 
-    f[0] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t); t = tri_enext(t);
-    f[1] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t); t = tri_enext(t);
-    f[2] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
+    f[0] = vert_ct() + edgeIndex(t);
+    f[1] = vert_ct() + edgeIndex(t+1);
+    f[2] = vert_ct() + edgeIndex(t+2);
 
     return 3;
   }
@@ -448,69 +237,47 @@ uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
 
 uint tri_cc_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
-    uint tstart = m_tri_edge->m_verts[c];
-
-    uint t = tstart;
+    uint tstart = m_verts[c],t = tstart,cf_ct = 0;
 
     do
     {
-      if ( !m_tri_edge->hasFnext ( t ) ) break;
+      cf[cf_ct++] = vert_ct() + edgeIndex(t);
+      t = eprev(t);
 
-      t = tri_enext ( m_tri_edge->triFnext ( t ) );
-    }
-    while ( t != tstart );
-
-    tstart = t;
-
-    uint cf_ct = 0;
-
-    do
-    {
-      cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
-
-      t = tri_eprev ( t );
-
-      if ( !m_tri_edge->hasFnext ( t ) )
+      if(!has_fnext(t))
       {
-        cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
-
+        cf[cf_ct++] = vert_ct() + edgeIndex(t);
         break;
       }
-
-      t = m_tri_edge->triFnext ( t );
+      t = fnext(t);
     }
-    while ( t != tstart );
+    while(t != tstart);
 
     return cf_ct;
   }
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
   {
-    uint cf_ct = 0 ;
+    uint cf_ct = 0,tri_id_bias = edge_ct()+vert_ct(),t = m_edges[c] ;
 
-    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
+    cf[cf_ct++] = tri_id_bias + triIndex(t);
 
-    uint t = m_tri_edge->m_edges[c];
-
-    cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex ( t )  ;
-
-    if ( m_tri_edge->hasFnext ( t ) )
+    if(has_fnext(t))
     {
-      t = m_tri_edge->triFnext ( t );
-
-      cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex ( t )  ;
+      t = fnext(t);
+      cf[cf_ct++] = tri_id_bias + triIndex(t);
     }
 
     return cf_ct;
   }
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
   {
     return 0;
   }
@@ -520,43 +287,25 @@ uint tri_cc_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
 
 uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
-    uint tstart = m_tri_edge->m_verts[c];
-
-    uint t = tstart;
+    uint tstart = m_verts[c],t = tstart,cf_ct = 0, toff = edge_ct() + vert_ct();
 
     do
     {
-      if ( !m_tri_edge->hasFnext ( t ) ) break;
+      cf[cf_ct++] = vert_ct() + edgeIndex(t);
+      cf[cf_ct++] = toff + triIndex(t);
 
-      t = tri_enext ( m_tri_edge->triFnext ( t ) );
-    }
-    while ( t != tstart );
+      t = eprev(t);
 
-    tstart = t;
-
-    uint cf_ct = 0;
-
-    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
-
-    do
-    {
-      cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
-      cf[cf_ct++] = tri_id_bias + m_tri_edge->triIndex(t);
-
-      t = tri_eprev ( t );
-
-      if ( !m_tri_edge->hasFnext ( t ) )
+      if(!has_fnext(t))
       {
-        cf[cf_ct++] = m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t);
-
+        cf[cf_ct++] = vert_ct() + edgeIndex(t);
         break;
       }
-
-      t = m_tri_edge->triFnext ( t );
+      t = fnext(t);
     }
-    while ( t != tstart );
+    while (t != tstart);
 
     return cf_ct;
   }
@@ -569,65 +318,52 @@ bool tri_cc_t::is_adjacent(cellid_t  c,cellid_t p) const
   if(c > p)
     std::swap(c,p);
 
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
-    uint tstart = m_tri_edge->m_verts[c];
-
-    uint t = tstart;
+    uint tstart = m_verts[c], t = tstart;
 
     do
     {
-      if ( !m_tri_edge->hasFnext ( t ) ) break;
+      if (p == vert_ct() + edgeIndex(t))
+        return true;
 
-      t = tri_enext ( m_tri_edge->triFnext ( t ) );
-    }
-    while ( t != tstart );
+      t = eprev(t);
 
-    tstart = t;
-
-    do
-    {
-      if (p == m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t)) return true;
-
-      t = tri_eprev ( t );
-
-      if ( !m_tri_edge->hasFnext ( t ) )
+      if(!has_fnext(t))
       {
-        if( p == m_tri_edge->m_vert_ct + m_tri_edge->edgeIndex(t)) return true;
-
+        if(p == vert_ct() + edgeIndex(t))
+          return true;
         break;
       }
-
-      t = m_tri_edge->triFnext ( t );
+      t = fnext ( t );
     }
-    while ( t != tstart );
+    while(t != tstart);
 
     return false;
   }
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
   {
-    uint tri_id_bias = m_tri_edge->m_edge_ct + m_tri_edge->m_vert_ct;
+    uint toff = edge_ct() + vert_ct(),t = m_edges[c];
 
-    uint t = m_tri_edge->m_edges[c];
+    if(p == toff + triIndex(t))
+      return true;
 
-    if (p == tri_id_bias + m_tri_edge->triIndex ( t )) return true;
-
-    if ( m_tri_edge->hasFnext ( t ) )
+    if(has_fnext(t))
     {
-      t = m_tri_edge->triFnext ( t );
-
-      if (p == tri_id_bias + m_tri_edge->triIndex ( t )) return true;
+      t = fnext(t);
+      if (p == toff + triIndex(t))
+        return true;
     }
 
     return false;
   }
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
   {
     return false;
   }
@@ -638,33 +374,21 @@ bool tri_cc_t::is_adjacent(cellid_t  c,cellid_t p) const
 
 bool tri_cc_t::is_cell_boundry(cellid_t c) const
 {
-  if(c < m_tri_edge->m_vert_ct)
+  if(c < vert_ct())
   {
-    uint tstart = m_tri_edge->m_verts[c];
-
-    uint t = tstart;
-
-    do
-    {
-      if ( !m_tri_edge->hasFnext ( t ) ) return true;
-
-      t = tri_enext ( m_tri_edge->triFnext ( t ) );
-    }
-    while ( t != tstart );
-
-    return false;
+    return (!has_fnext(m_verts[c]));
   }
 
-  c -= m_tri_edge->m_vert_ct;
+  c -= vert_ct();
 
-  if(c < m_tri_edge->m_edge_ct)
+  if(c < edge_ct())
   {
-    return (!m_tri_edge->hasFnext ( m_tri_edge->m_edges[c]) );
+    return (!has_fnext(m_edges[c]));
   }
 
-  c -= m_tri_edge->m_edge_ct;
+  c -= edge_ct();
 
-  if(c < m_tri_edge->m_tri_ct)
+  if(c < tri_ct())
   {
     return false;
   }
@@ -672,42 +396,42 @@ bool tri_cc_t::is_cell_boundry(cellid_t c) const
   throw std::runtime_error("cellid out of range");
 }
 
-void tri_cc_t::save(std::ostream & os,const glutils::vertex_list_t& v,const std::vector<double> & fn) const
+tri_cc_t::cellid_t tri_cc_t::get_opp_cell(cellid_t c, cellid_t cf) const
 {
-  os<<"# This is an auxialiary data file that saves data corressponding "<<endl;
-  os<<"# to various cells of the input mesh"<<endl;
-  os<<"# the first line saves the number of verts edges and tris"<<endl;
-  os<<"# a list vertex xyz values and the function value at the vertex follows"<<endl;
-  os<<"# a list of edge vertices follows"<<endl;
-  os<<"# a list of tri vertices follows"<<endl;
-  os<<"#"<<endl;
-  os<<"#"<<endl;
-  os<<"# num_verts num_edges num_tris"<<endl;
-  os<<"# cellid vert_x vert_y vert_z func"<<endl;
-  os<<"# ..."<<endl;
-  os<<"# cellid(ctd) v1 v2"<<endl;
-  os<<"# ..."<<endl;
-  os<<"# cellid(ctd) v1 v2 v3"<<endl;
-  os<<"# ..."<<endl;
-  os<<m_tri_edge->m_vert_ct<<" "<<m_tri_edge->m_edge_ct<<" "<<m_tri_edge->m_tri_ct<<endl;
+  ASSERT(get_cell_dim(c)+1 == get_cell_dim(cf));
 
-  for(int i =0; i <m_tri_edge->m_vert_ct; ++i )
-    os<<i<<" "<<v[i][0]<<" "<<v[i][1]<<" "<<v[i][2]<<" "<<fn[i]<<endl;
-
-  int num_cells = get_num_cells();
-
-  for(int i = m_tri_edge->m_vert_ct ; i < num_cells;++i)
+  if(c < vert_ct())
   {
-    uint verts[4];
+    cf -= vert_ct();
 
-    int vc = get_cell_points(i,verts);
+    cellid_t u = m_tris[m_edges[cf]].v;
+    cellid_t v = m_tris[enext(m_edges[cf])].v;
 
-    switch(vc)
-    {
-    case 2:os<<i<<" "<<verts[0]<<" "<<verts[1]<<endl;break;
-    case 3:os<<i<<" "<<verts[0]<<" "<<verts[1]<<" "<<verts[2]<<endl;break;
-    };
+    ASSERT(u == c || v == c);
+
+    return (c == u)?(v):(u);
   }
+
+  c -= vert_ct();
+
+  if (c < edge_ct())
+  {
+    cf -= vert_ct() + edge_ct();
+
+    cellid_t e1 = m_tris[cf*3].e;
+    cellid_t e2 = m_tris[cf*3+1].e;
+    cellid_t e3 = m_tris[cf*3+2].e;
+
+    cellid_t u = m_tris[cf*3].v;
+    cellid_t v = m_tris[cf*3+1].v;
+    cellid_t w = m_tris[cf*3+2].v;
+
+    ASSERT( c == e1 || c == e2 || c == e3);
+
+    return (c == e1)?(w):((c == e2)?(u):(v));
+  }
+
+  ASSERT(false && "invalid cellid");
 
 }
 
@@ -802,4 +526,73 @@ void tri_cc_geom_t::clear()
   m_cell_pos.clear();
 
   m_cell_normal.clear();
+}
+
+// a bunch of routines to ensure that tri_cc_t is consistent.
+
+void check_tlist(const glutils::tri_idx_list_t &tlist,const uint & N)
+{
+  for ( int t = 0 ; t < tlist.size(); ++t )
+  {
+    for( int v = 0 ; v < 3 ; ++v)
+    {
+      try{ensure(is_in_range(tlist[t][v],0,N), "tri vertex out of range");}
+      catch (runtime_error e){cerr<<SVAR(t)<<SVAR(tlist[t][v])<<endl; throw;}
+    }
+  }
+}
+
+void check_verts(const tri_cc_t &te)
+{
+  for( int i = 0 ; i < te.vert_ct(); ++i)
+  {
+    try{ensure(is_in_range(te.m_verts[i],0,te.m_tris.size()),"Isolated vertex found");}
+    catch (runtime_error e){cerr<<SVAR(i)<<endl; throw;}
+  }
+}
+
+void check_tris(const tri_cc_t &te)
+{
+  vector<int> vert_tri_ct(te.vert_ct(),0);
+
+  for( int i = 0 ; i < te.m_tris.size(); ++i)
+  {
+    vert_tri_ct[te.m_tris[i].v]++;
+  }
+
+  for( int i = 0 ; i < te.vert_ct(); ++i)
+  {
+    int tstart = te.m_verts[i],t = tstart,t_no = 0;
+
+    do
+    {
+      t_no++;
+      t = eprev(t);
+      if (!te.has_fnext(t)) break;
+      t = te.fnext(t);
+    } while(t != tstart);
+
+    try{ensure(t_no == vert_tri_ct[i],"Non manifold vertex found");}
+    catch (runtime_error e){cerr<<SVAR(i)<<endl; throw;}
+  }
+}
+
+void check_edges(const tri_cc_t &te)
+{
+  set<int_pair_t> eset;
+
+  for( int i = 0 ; i < te.edge_ct(); ++i)
+  {
+    uint t = te.m_edges[i];
+
+    uint u = te.m_tris[t].v;
+    uint v = te.m_tris[enext(t)].v;
+
+    int_pair_t uv(u,v);
+
+    try{ensure(eset.count(uv) == 0,"2 edges with same induced orientation found");}
+    catch (runtime_error e){cerr<<SVAR(u)<<SVAR(v)<<endl; throw;}
+
+    eset.insert(uv);
+  }
 }

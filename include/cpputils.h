@@ -135,7 +135,7 @@ std::string __format_ffl(const char *file,const char* func,int line);
 #define PUSHVAR(v) push(SVAR(v))
 
 template<typename T>
-inline void __ensure(bool c, std::string s,const char * file, const char *func, const int &line)
+inline void __ensure(bool c, const char * s,const char * file, const char *func, const int &line)
 {
   if(!c)
     throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s);

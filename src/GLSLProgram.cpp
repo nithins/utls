@@ -614,7 +614,8 @@ void init_common_shaders()
 
   g_sphere_shader->GetProgramLog(log);
 
-  ensure(log.size() == 0,"---sphere_shader compile error---\n"+log);
+  try{ensure(log.size() == 0,"---sphere_shader compile error---\n");}
+  catch (runtime_error e){cerr<<SVAR(log)<<endl;throw;}
 
   g_cylinder_shader.reset
       (GLSLProgram::createFromSourceStrings
