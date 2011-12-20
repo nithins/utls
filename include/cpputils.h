@@ -42,31 +42,6 @@ struct ordered_pair_comparator
                     const std::pair<uint, uint> &p2 ) const;
 };
 
-template<typename data_t>
-void delete_ftor ( data_t * ptr )
-{
-  delete ptr;
-}
-
-template <typename num_t>
-class num_generator_t
-{
-    num_t incr;
-    num_t cur_val;
-
-  public:
-
-    num_generator_t ( num_t _incr = 1, num_t start = 0 ) :
-        incr ( _incr ), cur_val ( start ) {}
-
-    num_t operator() ()
-    {
-      num_t retval = cur_val;
-      cur_val += incr;
-      return retval;
-    }
-};
-
 std::string stripLineComments ( const std::string& line, const char& comment_char = '#' );
 
 std::string stripLeadingWS ( const std::string& line );
@@ -89,18 +64,15 @@ void split_string ( const std::string & line_str,
                     const std::string & split_str );
 namespace utls
 {
-  template <class T>
-  inline std::string to_string (const T& t)
-  {
-  std::stringstream ss;
-  ss << t;
-  return ss.str();
-  }
+  template <class T> inline std::string to_string (const T& t)
+  {std::stringstream ss;ss << t;return ss.str();}
 
-  template <> inline std::string to_string (const std::string& t)
-  {
-    return t;
-  }
+  template <> inline std::string to_string (const std::string& t) {return t;}
+
+  template<typename Titer>
+  typename std::iterator_traits<Titer>::difference_type count(Titer b, Titer e)
+  { typename std::iterator_traits<Titer>::difference_type val = 0;
+    for( ; b != e; ++b) ++val; return val;}
 }
 
 class assertion_error:public std::exception
@@ -175,8 +147,4 @@ namespace std
           return res;
   }
 }
-
-
-
-
 #endif
