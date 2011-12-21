@@ -44,7 +44,7 @@ tri_cc_t::~tri_cc_t(){clear();}
 
 typedef n_vector_t<int,2>   int_pair_t;
 
-void check_tlist(const glutils::tri_idx_list_t &tlist,const uint & N);
+void check_tlist(const tri_cc_t::tri_idx_list_t &tlist,const uint & N);
 void check_verts(const tri_cc_t &te);
 void check_tris(const tri_cc_t &te);
 void check_edges(const tri_cc_t &te);
@@ -520,7 +520,6 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
 void tri_cc_geom_t::clear()
 {
-
   m_tri_cc.reset();
 
   m_cell_pos.clear();
@@ -530,7 +529,7 @@ void tri_cc_geom_t::clear()
 
 // a bunch of routines to ensure that tri_cc_t is consistent.
 
-void check_tlist(const glutils::tri_idx_list_t &tlist,const uint & N)
+void check_tlist(const tri_cc_t::tri_idx_list_t &tlist,const uint & N)
 {
   for ( int t = 0 ; t < tlist.size(); ++t )
   {

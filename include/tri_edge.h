@@ -20,12 +20,10 @@
 #ifndef __TRI_EDGE_H_INCLUDED__
 #define __TRI_EDGE_H_INCLUDED__
 
-#include <cpputils.h>
+#include <n_vector.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/counting_iterator.hpp>
-
-#include <glutils.h>
 
 class tri_cc_t
 {
@@ -46,8 +44,9 @@ public:
   typedef std::vector<cellid_t>    cellid_list_t;
   typedef std::vector<tri>         tri_list_t;
 
-  typedef glutils::tri_idx_t       tri_idx_t;
-  typedef glutils::tri_idx_list_t  tri_idx_list_t;
+  typedef unsigned int             idx_t;
+  typedef n_vector_t<idx_t,3>      tri_idx_t;
+  typedef std::vector<tri_idx_t>   tri_idx_list_t;
 
   tri_list_t    m_tris;   // all versions of all tri.. 3 of each
   cellid_list_t m_verts;   // index list to tris that contain {v1} = {a}
@@ -107,13 +106,11 @@ public:
 
   typedef tri_cc_t::tri_idx_t      tri_idx_t;
 
-  typedef glutils::vertex_t        vertex_t;
+  typedef n_vector_t<double,3>     vertex_t;
+  typedef std::vector<vertex_t>    vertex_list_t;
 
-  typedef glutils::vertex_list_t   vertex_list_t;
-
-  typedef glutils::vertex_t        normal_t;
-
-  typedef glutils::vertex_list_t   normal_list_t;
+  typedef n_vector_t<double,3>     normal_t;
+  typedef std::vector<vertex_t>    normal_list_t;
 
   static const uint cc_dim =       tri_cc_t::cc_dim;
 
