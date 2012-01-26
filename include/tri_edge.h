@@ -91,6 +91,9 @@ public:
   inline iterator end() const;
   inline iterator begin(int i) const;
   inline iterator end(int i) const;
+
+  template<typename Oi>
+  inline Oi cellid_to_output(cellid_t ,Oi o);
 };
 
 typedef boost::shared_ptr<tri_cc_t> tri_cc_ptr_t;
@@ -221,6 +224,34 @@ inline tri_cc_t::iterator tri_cc_t::begin(int i) const
 
 inline tri_cc_t::iterator tri_cc_t::end(int i) const
 {return iterator(get_num_cells_max_dim(i));}
+
+inline uint enext ( uint t ){return ( 3* ( t/3 ) + ( t+1 ) %3 );}
+inline uint eprev ( uint t ){ return ( 3* ( t/3 ) + ( t+2 ) %3 );}
+
+template<typename Oi>
+inline Oi tri_cc_t::cellid_to_output(cellid_t c,Oi o)
+{
+  switch(get_cell_dim(c))
+  {
+  case 0:
+    *o++ = c; break;
+  case 1:
+  {
+    cellid_t t  = m_edges[c-vert_ct()];
+
+    *o++ = vertIndex(t);
+    *o++ = vertIndex(enext(t));
+    *o++ = triIndex(t);
+    *o++ = (has_fnext(t))?(triIndex(fnext(t))):(-1);
+    break;
+  }
+  case 2:
+    *o++ = c-vert_ct()-edge_ct();
+    break;
+  }
+  return o;
+}
+
 
 
 #endif

@@ -35,9 +35,6 @@
 
 using namespace std;
 
-inline uint enext ( uint t ){return ( 3* ( t/3 ) + ( t+1 ) %3 );}
-inline uint eprev ( uint t ){ return ( 3* ( t/3 ) + ( t+2 ) %3 );}
-
 tri_cc_t::tri_cc_t(){}
 
 tri_cc_t::~tri_cc_t(){clear();}
@@ -160,7 +157,7 @@ uint tri_cc_t::get_cell_dim (cellid_t c) const
   if(c < tri_ct())
     return 2;
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
 }
 
 uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
@@ -197,7 +194,7 @@ uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
     return 3;
   }
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
 }
 
 uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
@@ -232,7 +229,7 @@ uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
     return 3;
   }
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
 }
 
 uint tri_cc_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
@@ -282,7 +279,7 @@ uint tri_cc_t::get_cell_co_facets (cellid_t c ,cellid_t  * cf) const
     return 0;
   }
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
 }
 
 uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
@@ -368,7 +365,7 @@ bool tri_cc_t::is_adjacent(cellid_t  c,cellid_t p) const
     return false;
   }
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
   return false;
 }
 
@@ -393,7 +390,7 @@ bool tri_cc_t::is_cell_boundry(cellid_t c) const
     return false;
   }
 
-  throw std::runtime_error("cellid out of range");
+  ASSERT(false&&"cellid out of range");
 }
 
 tri_cc_t::cellid_t tri_cc_t::get_opp_cell(cellid_t c, cellid_t cf) const
