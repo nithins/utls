@@ -67,12 +67,23 @@ namespace utls
   template <class T> inline std::string to_string (const T& t)
   {std::stringstream ss;ss << t;return ss.str();}
 
-  template <> inline std::string to_string (const std::string& t) {return t;}
+  template <> inline std::string to_string (const std::string& t){return t;}
+  
+  template <typename T,typename U> inline std::string to_string (const std::pair<T,U>& t)
+  {return to_string<T>(t.first)+":"+to_string<U>(t.second);}
 
   template<typename Titer>
   typename std::iterator_traits<Titer>::difference_type count(Titer b, Titer e)
-  { typename std::iterator_traits<Titer>::difference_type val = 0;
-    for( ; b != e; ++b) ++val; return val;}
+  { 
+    typename std::iterator_traits<Titer>::difference_type val = 0;
+    for( ; b != e; ++b) ++val; return val;
+  }
+    
+  template<typename T>
+  inline void set_vec_value(std::vector<T> & vec, int i,const T& v){vec[i] = v;}
+
+  template<typename T>
+  inline const T& get_vec_value(const std::vector<T> & vec, int i){return vec[i];}
 }
 
 class assertion_error:public std::exception
@@ -140,11 +151,25 @@ namespace std
   template<class In, class Out, class Pred>
   Out copy_if(In first, In last, Out res, Pred p)
   {
-          while (first != last) {
-                  if (p(*first)) *res++ = *first;
-                  ++first;
-          }
-          return res;
+    while (first != last)
+    {
+      if (p(*first))
+        *res++ = *first;
+      ++first;
+    }
+    return res;
+  }
+
+  template <class In1,class In2,class Out,class Pred,class BinOp>
+  const Out Transform_if(In1 b1,const In1 e1, In2 b2,Out r,const Pred pred,const BinOp binop)
+  {
+    while (b1 != e1)
+    {
+      if(pred(*b1,*b2))
+        *r++ = binop(*b1,*b2);
+      ++b1;++b2;
+    }
+    return r;
   }
 }
 #endif

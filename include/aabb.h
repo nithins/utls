@@ -110,7 +110,7 @@ namespace aabb
       return ret;
     }
 
-    bool contains ( const point_t & p ) const
+    bool contains_point ( const point_t & p ) const
     {
       bool ret = true;
 
@@ -119,6 +119,8 @@ namespace aabb
 
       return ret;
     }
+
+    inline bool contains ( const point_t & p ) const {return contains_point(p);}
 
     bool isOnBoundry ( const point_t & p ) const
     {
