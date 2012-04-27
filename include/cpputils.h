@@ -68,17 +68,17 @@ namespace utls
   {std::stringstream ss;ss << t;return ss.str();}
 
   template <> inline std::string to_string (const std::string& t){return t;}
-  
+
   template <typename T,typename U> inline std::string to_string (const std::pair<T,U>& t)
   {return to_string<T>(t.first)+":"+to_string<U>(t.second);}
 
   template<typename Titer>
   typename std::iterator_traits<Titer>::difference_type count(Titer b, Titer e)
-  { 
+  {
     typename std::iterator_traits<Titer>::difference_type val = 0;
     for( ; b != e; ++b) ++val; return val;
   }
-    
+
   template<typename T>
   inline void set_vec_value(std::vector<T> & vec, int i,const T& v){vec[i] = v;}
 
@@ -148,6 +148,8 @@ inline void __assert(bool c, const char * s,const char * file, const char *func,
 // for some reason this is not in c++ 99 or 03 .. remove if c++0x
 namespace std
 {
+#ifndef __GXX_EXPERIMENTAL_CXX0X__
+
   template<class In, class Out, class Pred>
   Out copy_if(In first, In last, Out res, Pred p)
   {
@@ -159,6 +161,7 @@ namespace std
     }
     return res;
   }
+#endif
 
   template <class In1,class In2,class Out,class Pred,class BinOp>
   const Out Transform_if(In1 b1,const In1 e1, In2 b2,Out r,const Pred pred,const BinOp binop)
@@ -171,5 +174,6 @@ namespace std
     }
     return r;
   }
+
 }
 #endif
