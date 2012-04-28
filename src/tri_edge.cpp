@@ -39,22 +39,49 @@ tri_cc_t::tri_cc_t(){}
 
 tri_cc_t::~tri_cc_t(){clear();}
 
-typedef n_vector_t<int,2>   int_pair_t;
+typedef bblas::bounded_vector<int,2> edge_t;
+
+template<typename T>
+inline edge_t mk_edge(const T& u,const T& v)
+{edge_t e; e[0] = u;e[1] = v; return e;}
+
+inline tri_cc_geom_t::vertex_t
+cross_product(const tri_cc_geom_t::vertex_t &u,const tri_cc_geom_t::vertex_t &v)
+{
+  tri_cc_geom_t::vertex_t p;
+
+  p[0] = u[1]*v[2]-v[1]*u[2];
+  p[1] = u[2]*v[0]-v[2]*u[0];
+  p[2] = u[0]*v[1]-v[0]*u[1];
+
+  return p;
+}
 
 void check_tlist(const tri_cc_t::tri_idx_list_t &tlist,const uint & N);
 void check_verts(const tri_cc_t &te);
 void check_tris(const tri_cc_t &te);
 void check_edges(const tri_cc_t &te);
 
+struct edge_cmp
+{
+bool operator()(const edge_t &a,const edge_t &b) const
+{
+  if( a[0] != b[0]) return a[0] <b[0];
+  return a[1] <b[1];
+}
+};
+
 void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
 {
-  typedef map<int_pair_t,int> int_pair_int_map_t;
+  typedef map<edge_t,int,edge_cmp> edge_map_t;
 
   check_tlist(tlist,N);
 
   int T = tlist.size();
 
-  int_pair_int_map_t edge_map;
+  edge_cmp cmp;
+
+  edge_map_t edge_map(cmp);
 
   m_verts.resize(N,INVALID_VALUE);
   m_tris.resize(T*3);
@@ -63,9 +90,9 @@ void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
   {
     tri_idx_t t = tlist[ti];
 
-    if(edge_map.count(int_pair_t(t[0],t[1])) == 1 ||
-       edge_map.count(int_pair_t(t[1],t[2])) == 1 ||
-       edge_map.count(int_pair_t(t[2],t[0])) == 1)
+    if(edge_map.count(mk_edge(t[0],t[1])) == 1 ||
+       edge_map.count(mk_edge(t[1],t[2])) == 1 ||
+       edge_map.count(mk_edge(t[2],t[0])) == 1)
       std::swap(t[0],t[1]);
 
     for( int vi = 0 ; vi < 3 ; ++vi)
@@ -75,8 +102,8 @@ void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
       m_tris[tvi].v = t[vi];
       m_verts[t[vi]] = tvi;
 
-      int_pair_t e (t[vi],t[(vi+1)%3]);
-      int_pair_t e_(t[(vi+1)%3],t[vi]);
+      edge_t e = mk_edge(t[vi],t[(vi+1)%3]);
+      edge_t e_= mk_edge(t[(vi+1)%3],t[vi]);
 
       ASSERT(edge_map.count(e) == 0 && "non manifold tri attachment");
 
@@ -104,7 +131,7 @@ void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
     }
   }
 
-  for(int_pair_int_map_t::iterator it = edge_map.begin(); it != edge_map.end(); ++it)
+  for(edge_map_t::iterator it = edge_map.begin(); it != edge_map.end(); ++it)
     m_verts[m_tris[it->second].v] = it->second;
 
   check_verts(*this);
@@ -442,7 +469,8 @@ double tri_cc_geom_t::compute_average_length()
 
     get_cell_points(c,pts);
 
-    avg_el += euclid_distance(get_cell_position(pts[0]),get_cell_position(pts[1]));
+    avg_el += bblas::norm_2
+        (get_cell_position(pts[0])-get_cell_position(pts[1]));
   }
 
   return avg_el/get_num_cells_dim(1);
@@ -471,7 +499,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     uint pt_ct = get_cell_points(c,pts);
 
-    vertex_t v(vertex_t::zero);
+    vertex_t v(0);
 
     for(uint j = 0 ; j < pt_ct; ++j)
       v += m_cell_pos[pts[j]];
@@ -490,7 +518,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
     m_cell_normal[c]  = cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
                                       m_cell_pos[pts[0]] -m_cell_pos[pts[2]]);
 
-    m_cell_normal[c] /= euclid_norm(m_cell_normal[c]);
+    m_cell_normal[c] /= bblas::norm_2(m_cell_normal[c]);
   }
 
   cellid_t c = get_num_cells_max_dim(1);
@@ -503,7 +531,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     uint cf_ct = get_cell_co_facets(c,cf);
 
-    normal_t n(normal_t::zero);
+    normal_t n(0);
 
     for(uint i = 0; i < cf_ct;++i)
       n += m_cell_normal[cf[i]];
@@ -575,7 +603,9 @@ void check_tris(const tri_cc_t &te)
 
 void check_edges(const tri_cc_t &te)
 {
-  set<int_pair_t> eset;
+  edge_cmp cmp;
+
+  set<edge_t,edge_cmp> eset(cmp);
 
   for( int i = 0 ; i < te.edge_ct(); ++i)
   {
@@ -584,7 +614,7 @@ void check_edges(const tri_cc_t &te)
     uint u = te.m_tris[t].v;
     uint v = te.m_tris[enext(t)].v;
 
-    int_pair_t uv(u,v);
+    edge_t uv = mk_edge(u,v);
 
     try{ensure(eset.count(uv) == 0,"2 edges with same induced orientation found");}
     catch (runtime_error e){cerr<<SVAR(u)<<SVAR(v)<<endl; throw;}
