@@ -224,6 +224,58 @@ uint tri_cc_t::get_cell_points (cellid_t  c,cellid_t   *p ) const
   ASSERT(false&&"cellid out of range");
 }
 
+uint tri_cc_t::get_cell_tris(cellid_t  c,cellid_t   *p ) const
+{
+  int tbias = vert_ct() + edge_ct();
+
+  if(c < vert_ct())
+  {
+    uint tstart = m_verts[c],t = tstart,ct = 0;
+
+    do
+    {
+      p[ct++] = tbias + triIndex(t);
+      t = eprev(t);
+
+      if(!has_fnext(t)) {break;}
+
+      t = fnext(t);
+    }
+    while(t != tstart);
+
+    return ct;
+  }
+
+  c -= vert_ct();
+
+  if(c < edge_ct())
+  {
+    uint t = m_edges[c];
+
+    p[0] = tbias + triIndex(t);
+    if(has_fnext(t) )
+    {
+      t = fnext(t);
+      p[1] = tbias + triIndex(t);
+      return 2;
+    }
+    else
+    {
+      return 1;
+    }
+  }
+
+  c -= edge_ct();
+
+  if(c < tri_ct())
+  {
+    p[0] = c;
+    return 1;
+  }
+
+  ASSERT(false&&"cellid out of range");
+}
+
 uint tri_cc_t::get_cell_facets (cellid_t  c,cellid_t  * f) const
 {
   if(c < vert_ct())

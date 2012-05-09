@@ -79,6 +79,7 @@ public:
 
   uint get_cell_dim(cellid_t c) const ;
   uint get_cell_points(cellid_t  ,cellid_t   * ) const;
+  uint get_cell_tris(cellid_t  ,cellid_t   * ) const;
   uint get_cell_facets(cellid_t  ,cellid_t  * ) const;
   uint get_cell_co_facets(cellid_t  ,cellid_t  * ) const;
   uint get_vert_star(cellid_t  ,cellid_t  * ) const;
