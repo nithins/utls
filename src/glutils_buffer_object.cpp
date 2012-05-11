@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <typeinfo>
 
+#include <boost/foreach.hpp>
+
 #include <glutils.h>
 
 
@@ -214,11 +216,11 @@ namespace glutils
     }
   }
 
-  bufobj_ptr_t make_buf_obj( const vertex_list_t &v)
+  bufobj_ptr_t make_buf_obj( const vertex_list_t &vec)
   {
     return buf_obj_t::create_bo
-        ( v.data(),GL_DOUBLE,3,GL_ARRAY_BUFFER,
-          v.size()*sizeof(double)*3,0);
+        ( ((void*)vec.data()) + 8 ,GL_DOUBLE,3,GL_ARRAY_BUFFER,
+          vec.size()*sizeof(double)*4,32);
   }
 
   bufobj_ptr_t make_buf_obj( const quad_idx_list_t &q)
@@ -228,11 +230,20 @@ namespace glutils
           q.size()*sizeof(unsigned int)*4,0);
   }
 
-  bufobj_ptr_t make_buf_obj( const tri_idx_list_t &t)
+  bufobj_ptr_t make_buf_obj( const tri_idx_list_t &vec)
   {
+    std::vector<unsigned int> uivec;
+
+    BOOST_FOREACH(tri_idx_t tri,vec)
+    {
+      uivec.push_back(tri[0]);
+      uivec.push_back(tri[1]);
+      uivec.push_back(tri[2]);
+    }
+
     return buf_obj_t::create_bo
-        ( t.data(),GL_UNSIGNED_INT,3,GL_ELEMENT_ARRAY_BUFFER,
-          t.size()*sizeof(unsigned int)*3,0);
+        ( uivec.data(),GL_UNSIGNED_INT,3,GL_ELEMENT_ARRAY_BUFFER,
+          vec.size()*sizeof(unsigned int)*3,0);
   }
 
   bufobj_ptr_t make_buf_obj( const line_idx_list_t &l)

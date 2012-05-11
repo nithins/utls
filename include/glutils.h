@@ -7,7 +7,8 @@
 
 #include <GL/gl.h>
 
-#include <n_vector.h>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 namespace glutils
 {
@@ -15,24 +16,33 @@ namespace glutils
 
   typedef idx_t                    point_idx_t;
   typedef std::vector<point_idx_t> point_idx_list_t;
-  typedef n_vector_t<idx_t,2>      line_idx_t;
+  typedef boost::numeric::ublas::bounded_vector<idx_t,2>      line_idx_t;
   typedef std::vector<line_idx_t>  line_idx_list_t;
-  typedef n_vector_t<idx_t,3>      tri_idx_t;
+  typedef boost::numeric::ublas::bounded_vector<idx_t,3>      tri_idx_t;
   typedef std::vector<tri_idx_t>   tri_idx_list_t;
-  typedef n_vector_t<idx_t,4>      quad_idx_t;
+  typedef boost::numeric::ublas::bounded_vector<idx_t,4>      quad_idx_t;
   typedef std::vector<quad_idx_t>  quad_idx_list_t;
 
-  typedef n_vector_t<double,3>     vertex_t;
+  typedef boost::numeric::ublas::bounded_vector<double,3>     vertex_t;
   typedef std::vector<vertex_t>    vertex_list_t;
-  typedef n_vector_t<double,3>     color_t;
+  typedef boost::numeric::ublas::bounded_vector<double,3>     color_t;
   typedef std::vector<color_t>     color_list_t;
-  typedef n_vector_t<double,3>     normal_t;
+  typedef boost::numeric::ublas::bounded_vector<double,3>     normal_t;
   typedef std::vector<vertex_t>    normal_list_t;
 
-  typedef n_vector_t<float,4>      color4f_t;
-  typedef n_vector_t<float,4>      vertex4f_t;
+  typedef boost::numeric::ublas::bounded_vector<float,4>      color4f_t;
+  typedef boost::numeric::ublas::bounded_vector<float,4>      vertex4f_t;
 
   typedef std::vector<std::string> string_list_t;
+
+  template<typename T>
+  inline vertex_t mk_vertex(const T&a , const T&b ,const T&c)
+  { vertex_t v; v[0] = a; v[1] = b; v[2] = c; return v;}
+
+  template<typename T>
+  inline vertex_t mk_line_idx(const T&a , const T&b)
+  { line_idx_t v; v[0] = a; v[1] = b; return v;}
+
 
   class buf_obj_t;
 
@@ -144,20 +154,20 @@ namespace glutils
     // face is GL_FRONT or GL_BACK or GL_FRONT_AND_BACK
     inline void render_all(GLenum face) const
     {
-      glMaterialfv ( face, GL_AMBIENT, ambient.data() );
-      glMaterialfv ( face, GL_DIFFUSE, diffuse.data() );
-      glMaterialfv ( face, GL_SPECULAR, specular.data() );
-      glMaterialfv ( face, GL_EMISSION, emission.data() );
+      glMaterialfv ( face, GL_AMBIENT, &ambient[0] );
+      glMaterialfv ( face, GL_DIFFUSE, &diffuse[0] );
+      glMaterialfv ( face, GL_SPECULAR, &specular[0] );
+      glMaterialfv ( face, GL_EMISSION, &emission[0] );
       glMateriali  ( face, GL_SHININESS, shininess );
     }
 
     // face is GL_FRONT or GL_BACK
     inline void read_all(GLenum face)
     {
-      glGetMaterialfv( face, GL_AMBIENT, ambient.data() );
-      glGetMaterialfv( face, GL_DIFFUSE, diffuse.data() );
-      glGetMaterialfv( face, GL_SPECULAR, specular.data() );
-      glGetMaterialfv( face, GL_EMISSION, emission.data() );
+      glGetMaterialfv( face, GL_AMBIENT, &ambient[0] );
+      glGetMaterialfv( face, GL_DIFFUSE, &diffuse[0] );
+      glGetMaterialfv( face, GL_SPECULAR, &specular[0] );
+      glGetMaterialfv( face, GL_EMISSION, &emission[0] );
       glGetMaterialiv( face, GL_SHININESS, &shininess );
     }
   };
@@ -182,10 +192,10 @@ namespace glutils
       else
         glDisable(GL_LIGHT0+n);
 
-      glLightfv(GL_LIGHT0+n, GL_AMBIENT,  ambient.data());
-      glLightfv(GL_LIGHT0+n, GL_DIFFUSE,  diffuse.data());
-      glLightfv(GL_LIGHT0+n, GL_SPECULAR, specular.data());
-      glLightfv(GL_LIGHT0+n, GL_POSITION, position.data());
+      glLightfv(GL_LIGHT0+n, GL_AMBIENT,  &ambient[0]);
+      glLightfv(GL_LIGHT0+n, GL_DIFFUSE,  &diffuse[0]);
+      glLightfv(GL_LIGHT0+n, GL_SPECULAR, &specular[0]);
+      glLightfv(GL_LIGHT0+n, GL_POSITION, &position[0]);
       glLightf( GL_LIGHT0+n, GL_CONSTANT_ATTENUATION, att_constant);
       glLightf( GL_LIGHT0+n, GL_LINEAR_ATTENUATION, att_linear);
       glLightf( GL_LIGHT0+n, GL_QUADRATIC_ATTENUATION, att_quadratic);
@@ -222,6 +232,7 @@ namespace glutils
         normal_list_t & nlist);
 
   void compute_extent ( const vertex_list_t &, double * );
+  vertex_t compute_center ( const vertex_list_t &);
 
   class renderable_t
   {
@@ -309,6 +320,17 @@ namespace glutils
   void draw_aabb_line(vertex_t lc,vertex_t uc);
 
   void smooth_lines(vertex_list_t &vl, const line_idx_list_t &ll,int NITER = 2);
+
+  inline vertex_t cross_product(const vertex_t &u,const vertex_t &v)
+  {
+    vertex_t p;
+
+    p[0] = u[1]*v[2]-v[1]*u[2];
+    p[1] = u[2]*v[0]-v[2]*u[0];
+    p[2] = u[0]*v[1]-v[0]*u[1];
+
+    return p;
+  }
 }
 
 void DrawAxes();

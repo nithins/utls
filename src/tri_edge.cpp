@@ -39,7 +39,7 @@ tri_cc_t::tri_cc_t(){}
 
 tri_cc_t::~tri_cc_t(){clear();}
 
-typedef bblas::bounded_vector<int,2> edge_t;
+typedef boost::numeric::ublas::bounded_vector<int,2> edge_t;
 
 template<typename T>
 inline edge_t mk_edge(const T& u,const T& v)
@@ -521,7 +521,7 @@ double tri_cc_geom_t::compute_average_length()
 
     get_cell_points(c,pts);
 
-    avg_el += bblas::norm_2
+    avg_el += boost::numeric::ublas::norm_2
         (get_cell_position(pts[0])-get_cell_position(pts[1]));
   }
 
@@ -551,7 +551,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     uint pt_ct = get_cell_points(c,pts);
 
-    vertex_t v(0);
+    vertex_t v; v[0] = 0; v[1] = 0;v[2] = 0;
 
     for(uint j = 0 ; j < pt_ct; ++j)
       v += m_cell_pos[pts[j]];
@@ -570,7 +570,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
     m_cell_normal[c]  = cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
                                       m_cell_pos[pts[0]] -m_cell_pos[pts[2]]);
 
-    m_cell_normal[c] /= bblas::norm_2(m_cell_normal[c]);
+    m_cell_normal[c] /= boost::numeric::ublas::norm_2(m_cell_normal[c]);
   }
 
   cellid_t c = get_num_cells_max_dim(1);
@@ -583,7 +583,7 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     uint cf_ct = get_cell_co_facets(c,cf);
 
-    normal_t n(0);
+    normal_t n; n[0] = 0; n[1] = 0; n[2] = 0;
 
     for(uint i = 0; i < cf_ct;++i)
       n += m_cell_normal[cf[i]];

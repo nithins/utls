@@ -120,6 +120,23 @@ namespace glutils
     std::copy ( extent, extent + 6, extent_out );
   }
 
+  vertex_t compute_center ( const vertex_list_t &v)
+  {
+    vertex_t center;
+
+    center[0] = 0;
+    center[1] = 0;
+    center[2] = 0;
+
+    for ( uint i = 0 ; i < v.size();i++ )
+    {
+      center += v[i];
+    }
+
+    return center/v.size();
+  }
+
+
   void read_off_file ( const char *filename, vertex_list_t  &vlist,tri_idx_list_t &tlist)
   {
 
@@ -314,47 +331,47 @@ namespace glutils
 
     vertex_t cube_pts []=
     {
-      vertex_t(lc[0],lc[1],lc[2]),
-      vertex_t(uc[0],lc[1],lc[2]),
-      vertex_t(lc[0],uc[1],lc[2]),
-      vertex_t(uc[0],uc[1],lc[2]),
-      vertex_t(lc[0],lc[1],uc[2]),
-      vertex_t(uc[0],lc[1],uc[2]),
-      vertex_t(lc[0],uc[1],uc[2]),
-      vertex_t(uc[0],uc[1],uc[2]),
+      mk_vertex(lc[0],lc[1],lc[2]),
+      mk_vertex(uc[0],lc[1],lc[2]),
+      mk_vertex(lc[0],uc[1],lc[2]),
+      mk_vertex(uc[0],uc[1],lc[2]),
+      mk_vertex(lc[0],lc[1],uc[2]),
+      mk_vertex(uc[0],lc[1],uc[2]),
+      mk_vertex(lc[0],uc[1],uc[2]),
+      mk_vertex(uc[0],uc[1],uc[2]),
     };
 
     glBegin(GL_LINE_LOOP);
 
-    glVertex3dv(cube_pts[0].data());
-    glVertex3dv(cube_pts[1].data());
-    glVertex3dv(cube_pts[3].data());
-    glVertex3dv(cube_pts[2].data());
+    glVertex3dv(&(cube_pts[0][0]));
+    glVertex3dv(&(cube_pts[1][0]));
+    glVertex3dv(&(cube_pts[3][0]));
+    glVertex3dv(&(cube_pts[2][0]));
 
     glEnd();
 
     glBegin(GL_LINE_LOOP);
 
-    glVertex3dv(cube_pts[4].data());
-    glVertex3dv(cube_pts[5].data());
-    glVertex3dv(cube_pts[7].data());
-    glVertex3dv(cube_pts[6].data());
+    glVertex3dv(&(cube_pts[4][0]));
+    glVertex3dv(&(cube_pts[5][0]));
+    glVertex3dv(&(cube_pts[7][0]));
+    glVertex3dv(&(cube_pts[6][0]));
 
     glEnd();
 
     glBegin(GL_LINES);
 
-    glVertex3dv(cube_pts[0].data());
-    glVertex3dv(cube_pts[4].data());
+    glVertex3dv(&(cube_pts[0][0]));
+    glVertex3dv(&(cube_pts[4][0]));
 
-    glVertex3dv(cube_pts[1].data());
-    glVertex3dv(cube_pts[5].data());
+    glVertex3dv(&(cube_pts[1][0]));
+    glVertex3dv(&(cube_pts[5][0]));
 
-    glVertex3dv(cube_pts[2].data());
-    glVertex3dv(cube_pts[6].data());
+    glVertex3dv(&(cube_pts[2][0]));
+    glVertex3dv(&(cube_pts[6][0]));
 
-    glVertex3dv(cube_pts[3].data());
-    glVertex3dv(cube_pts[7].data());
+    glVertex3dv(&(cube_pts[3][0]));
+    glVertex3dv(&(cube_pts[7][0]));
 
     glEnd();
 

@@ -119,7 +119,7 @@ namespace glutils
       v  = vlist[q[0]] - vlist[q[3]];
       n += cross_product(u,v);
 
-      n = euclid_normalize(n);
+      n = boost::numeric::ublas::norm_2(n);
 
       nlist[q[0]] += n;
       nlist[q[1]] += n;
@@ -129,7 +129,7 @@ namespace glutils
 
     for(int i = 0 ; i < nlist.size();++i)
     {
-      nlist[i] = euclid_normalize(nlist[i]);
+      nlist[i] = boost::numeric::ublas::norm_2(nlist[i]);
     }
   }
 
