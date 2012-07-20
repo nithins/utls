@@ -246,11 +246,19 @@ namespace glutils
           vec.size()*sizeof(unsigned int)*3,0);
   }
 
-  bufobj_ptr_t make_buf_obj( const line_idx_list_t &l)
+  bufobj_ptr_t make_buf_obj( const line_idx_list_t &vec)
   {
+    std::vector<unsigned int> uivec;
+
+    BOOST_FOREACH(line_idx_t ln,vec)
+    {
+      uivec.push_back(ln[0]);
+      uivec.push_back(ln[1]);
+    }
+
     return buf_obj_t::create_bo
-        ( l.data(),GL_UNSIGNED_INT,2,GL_ELEMENT_ARRAY_BUFFER,
-          l.size()*sizeof(unsigned int)*2,0);
+        ( uivec.data(),GL_UNSIGNED_INT,2,GL_ELEMENT_ARRAY_BUFFER,
+          vec.size()*sizeof(unsigned int)*2,0);
   }
 
   bufobj_ptr_t make_buf_obj( const point_idx_list_t &p)
