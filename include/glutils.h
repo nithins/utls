@@ -122,13 +122,13 @@ namespace glutils
 
     ~buf_obj_t();
 
-    void bind_to_vertex_pointer() const;
+    void bind_to_vertex_pointer(int offest = 0) const;
     void unbind_from_vertex_pointer() const;
-    void bind_to_vertex_attrib_pointer ( GLuint ) const;
+    void bind_to_vertex_attrib_pointer ( GLuint,int offset = 0 ) const;
     void unbind_from_vertex_attrib_pointer ( GLuint ) const;
     void bind_to_color_pointer() const;
     void unbind_from_color_pointer() const;
-    void bind_to_normal_pointer() const;
+    void bind_to_normal_pointer(int offest = 0) const;
     void unbind_from_normal_pointer() const;
 
   };

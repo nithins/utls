@@ -134,13 +134,13 @@ namespace glutils
     return ( GLvoid* ) ret_ptr;
   }
 
-  void buf_obj_t::bind_to_vertex_pointer() const
+  void buf_obj_t::bind_to_vertex_pointer(int offset) const
   {
     glEnableClientState ( GL_VERTEX_ARRAY );
 
     glBindBuffer ( m_target, m_id );
 
-    glVertexPointer ( m_src_comp, m_src_type, m_stride, 0 );
+    glVertexPointer ( m_src_comp, m_src_type, m_stride, (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp) );
   }
 
   void buf_obj_t::unbind_from_vertex_pointer() const
@@ -150,13 +150,13 @@ namespace glutils
     glDisableClientState ( GL_VERTEX_ARRAY );
   }
 
-  void buf_obj_t::bind_to_vertex_attrib_pointer ( GLuint attribno ) const
+  void buf_obj_t::bind_to_vertex_attrib_pointer ( GLuint attribno ,int offset) const
   {
     glEnableVertexAttribArray ( attribno );
 
     glBindBuffer ( m_target, m_id );
 
-    glVertexAttribPointer ( attribno, m_src_comp, m_src_type, false, m_stride, 0 );
+    glVertexAttribPointer ( attribno, m_src_comp, m_src_type, false, m_stride, (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp) );
 
   }
 
@@ -184,13 +184,13 @@ namespace glutils
     glDisableClientState ( GL_COLOR_ARRAY );
   }
 
-  void buf_obj_t::bind_to_normal_pointer() const
+  void buf_obj_t::bind_to_normal_pointer(int offset) const
   {
     glEnableClientState ( GL_NORMAL_ARRAY );
 
     glBindBuffer ( m_target, m_id );
 
-    glNormalPointer ( m_src_type, m_stride, 0 );
+    glNormalPointer ( m_src_type, m_stride, (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp) );
   }
 
   void buf_obj_t::unbind_from_normal_pointer() const
