@@ -33,7 +33,7 @@ class tri_cc_t
 public:
 
   static const int cc_dim = 2;
-  static const uint INVALID_VALUE=0xffffffff;
+  static const uint INVALID_VALUE;
 
   struct tri
   {

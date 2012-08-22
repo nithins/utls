@@ -26,11 +26,9 @@ GLSLProgram::GLSLProgram()
 GLSLProgram::GLSLProgram
 (
   const std::string &shader,
-  unsigned int shaderType ,
-  const GLuint &geomIn ,
-  const GLuint &geomOut
+  unsigned int shaderType
 )
-    :  vertex_ ( NULL ), fragment_ ( NULL ), geometry_ ( NULL ), _geomIn ( geomIn ), _geomOut ( geomOut )
+    :  vertex_ ( NULL ), fragment_ ( NULL ), geometry_ ( NULL )
 {
   handle_ = glCreateProgram();
 
@@ -45,22 +43,13 @@ GLSLProgram::GLSLProgram
     case GL_GEOMETRY_SHADER_EXT:
       geometry_ = new GLSLShader ( shader, shaderType );
       attach ( geometry_ );
-
-      if ( ( _geomIn == 0 ) || ( _geomOut == 0 ) )
-      {
-        _ERROR ( "invalid geomin/geomout" );
-        throw "invalid geomin/geomout at ";
-      }
-
       break;
 
     case GL_FRAGMENT_SHADER_ARB:
       fragment_ = new GLSLShader ( shader, shaderType );
       attach ( fragment_ );
       break;
-
   }
-
 
   link();
 }
@@ -82,11 +71,9 @@ GLSLProgram::GLSLProgram ( const std::string &vertexShader, const std::string &f
 GLSLProgram::GLSLProgram
 ( const std::string &vertexShader,
   const std::string &geometryShader,
-  const std::string &fragmentShader,
-  const GLuint &geomIn,
-  const GLuint &geomOut
+  const std::string &fragmentShader
 )
-    : vertex_ ( NULL ), fragment_ ( NULL ), geometry_ ( NULL ), _geomIn ( geomIn ), _geomOut ( geomOut )
+    : vertex_ ( NULL ), fragment_ ( NULL ), geometry_ ( NULL )
 {
   handle_ = glCreateProgram();
 
@@ -186,14 +173,6 @@ void GLSLProgram::detach ( GLSLShader *shader )
 
 void GLSLProgram::link()
 {
-
-  glProgramParameteriEXT ( handle_, GL_GEOMETRY_INPUT_TYPE_EXT, _geomIn );
-  glProgramParameteriEXT ( handle_, GL_GEOMETRY_OUTPUT_TYPE_EXT, _geomOut );
-
-  int temp;
-  glGetIntegerv ( GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp );
-  glProgramParameteriEXT ( handle_, GL_GEOMETRY_VERTICES_OUT_EXT, temp );
-
   glLinkProgram ( handle_ );
   uniforms_.clear();
 }
@@ -465,9 +444,6 @@ void GLSLProgram::clear()
 
   geometry_ = NULL;
 
-  _geomIn = 0;
-
-  _geomOut = 0;
 
   glDeleteProgram ( handle_ );
 
@@ -480,18 +456,12 @@ void GLSLProgram::createFromSourceStrings
 ( GLSLProgram &prog,
   const std::string &vertexShader,
   const std::string &geometryShader,
-  const std::string &fragmentShader,
-  const GLuint &geomIn,
-  const GLuint &geomOut
-
+  const std::string &fragmentShader
 )
 {
   prog.clear();
 
   prog.handle_ = glCreateProgram();
-
-  prog._geomIn  = geomIn;
-  prog._geomOut = geomOut;
 
   if ( vertexShader.size() != 0 )
   {
@@ -519,19 +489,23 @@ void GLSLProgram::createFromSourceStrings
 
   prog.link();
 
+  std::string log = prog.GetProgramLog ();
+
+  if( log.find("error") != std::string::npos)
+    throw std::runtime_error("failed compiling shaders\n"+ log);
+
+
 }
 
 GLSLProgram * GLSLProgram::createFromSourceStrings
 ( const std::string &vertexShader,
   const std::string &geometryShader,
-  const std::string &fragmentShader,
-  const GLuint &geomIn,
-  const GLuint &geomOut
-)
+  const std::string &fragmentShader
+ )
 {
   GLSLProgram *ret = new GLSLProgram();
 
-  GLSLProgram::createFromSourceStrings ( *ret, vertexShader, geometryShader, fragmentShader, geomIn, geomOut );
+  GLSLProgram::createFromSourceStrings ( *ret, vertexShader, geometryShader, fragmentShader);
 
   return ret;
 }
@@ -540,17 +514,12 @@ void GLSLProgram::createFromSourceStrings
 (
   GLSLProgram & prog,
   const std::string &shader,
-  unsigned int shaderType,
-  const GLuint & geomIn ,
-  const GLuint & geomOut
+  unsigned int shaderType
 )
 {
   prog.clear();
 
   prog.handle_ = glCreateProgram();
-
-  prog._geomIn  = geomIn;
-  prog._geomOut = geomOut;
 
   switch ( shaderType )
   {
@@ -563,13 +532,6 @@ void GLSLProgram::createFromSourceStrings
     case GL_GEOMETRY_SHADER_EXT:
       prog.geometry_ = new GLSLShader ( shader, shaderType );
       prog.attach ( prog.geometry_ );
-
-      if ( ( prog._geomIn == 0 ) || ( prog._geomOut == 0 ) )
-      {
-        _ERROR ( "invalid geomin/geomout" );
-        throw "invalid geomin/geomout at ";
-      }
-
       break;
 
     case GL_FRAGMENT_SHADER_ARB:
@@ -582,18 +544,21 @@ void GLSLProgram::createFromSourceStrings
 
   prog.link();
 
+  std::string log = prog.GetProgramLog ();
+
+  if( log.find("error") != std::string::npos)
+    throw std::runtime_error("failed compiling shaders\n"+ log);
+
 }
 
 GLSLProgram * GLSLProgram::createFromSourceStrings
 ( const std::string &shader,
-  unsigned int shaderType ,
-  const GLuint & geomIn ,
-  const GLuint & geomOut
+  unsigned int shaderType
 )
 {
   GLSLProgram * prog = new GLSLProgram();
 
-  GLSLProgram::createFromSourceStrings ( *prog, shader, shaderType, geomIn, geomOut );
+  GLSLProgram::createFromSourceStrings ( *prog, shader, shaderType);
 
   return prog;
 }

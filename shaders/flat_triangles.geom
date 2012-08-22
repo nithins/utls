@@ -1,5 +1,9 @@
-#version 120
+#version 330 compatibility
+#extension GL_EXT_gpu_shader4: enable
 #extension GL_EXT_geometry_shader4 : enable
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices=3) out;
 
 #define NUM_LIGHTS 2
 

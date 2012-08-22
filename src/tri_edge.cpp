@@ -35,6 +35,8 @@
 
 using namespace std;
 
+const uint tri_cc_t::INVALID_VALUE = 0xffffffff;
+
 tri_cc_t::tri_cc_t(){}
 
 tri_cc_t::~tri_cc_t(){clear();}

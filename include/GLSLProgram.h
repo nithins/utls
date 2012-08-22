@@ -16,9 +16,7 @@ class GLSLProgram
     GLSLProgram
     (
       const std::string &shader,
-      unsigned int shaderType = GL_VERTEX_SHADER_ARB ,
-      const GLuint &geomIn = 0,
-      const GLuint &geomOut = 0
+      unsigned int shaderType = GL_VERTEX_SHADER
     );
     GLSLProgram
     (
@@ -28,9 +26,7 @@ class GLSLProgram
     GLSLProgram
     ( const std::string &vertexShader,
       const std::string &geometryShader,
-      const std::string &fragmentShader,
-      const GLuint &geomIn,
-      const GLuint &geomOut
+      const std::string &fragmentShader
     );
 
     ~GLSLProgram();
@@ -40,34 +36,24 @@ class GLSLProgram
     ( GLSLProgram &,
       const std::string &vertexShader,
       const std::string &geometryShader,
-      const std::string &fragmentShader,
-      const GLuint &geomIn,
-      const GLuint &geomOut
-
+      const std::string &fragmentShader
     );
 
     static GLSLProgram * createFromSourceStrings
     ( const std::string &vertexShader,
       const std::string &geometryShader,
-      const std::string &fragmentShader,
-      const GLuint &geomIn,
-      const GLuint &geomOut
+      const std::string &fragmentShader
     );
 
     static void createFromSourceStrings
     ( GLSLProgram & prog,
       const std::string &shader,
-      unsigned int shaderType = GL_VERTEX_SHADER_ARB ,
-      const GLuint &geomIn = 0,
-      const GLuint &geomOut = 0
-
+      unsigned int shaderType = GL_VERTEX_SHADER_ARB
     );
 
     static GLSLProgram * createFromSourceStrings
     ( const std::string &shader,
-      unsigned int shaderType = GL_VERTEX_SHADER_ARB ,
-      const GLuint &geomIn = 0,
-      const GLuint &geomOut = 0
+      unsigned int shaderType = GL_VERTEX_SHADER_ARB
     );
 
 
@@ -115,6 +101,14 @@ class GLSLProgram
     GLuint getAttributeLocation ( const std::string &name ) const;
 
     void GetProgramLog ( std::string &log ) const;
+
+    inline std::string GetProgramLog () const
+    {
+      std::string log;
+      GetProgramLog(log);
+      return log;
+    }
+
     GLuint getHandle() const;
     void getParameter ( GLenum param, GLint *data ) const;
     void validate() const;
@@ -133,7 +127,6 @@ class GLSLProgram
     GLuint handle_;
     typedef std::map<std::string, int> uniformmap;
     uniformmap uniforms_;
-    GLuint _geomIn, _geomOut;
 };
 
 

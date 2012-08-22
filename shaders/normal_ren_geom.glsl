@@ -1,5 +1,9 @@
-#version 120
-#extension GL_EXT_geometry_shader4 : enable         
+#version 330 compatibility
+#extension GL_EXT_gpu_shader4: enable
+#extension GL_EXT_geometry_shader4 : enable
+
+layout(lines) in;
+layout(line_strip, max_vertices=12) out;
  
 varying in vec4 normal_position[];      
  

@@ -41,7 +41,7 @@ namespace glutils
   inline bnu::bounded_vector<T,2>
   make_vec(const T&a , const T&b )
   {
-    bnu::bounded_vector<T,3> v;
+    bnu::bounded_vector<T,2> v;
     v[0] = a; v[1] = b; return v;
   }
 
@@ -287,14 +287,10 @@ namespace glutils
         bufobj_ptr_t c = bufobj_ptr_t()
         );
 
-#ifdef UTLS_ENABLE_TEXTREN
-  renderable_t * create_buffered_text_ren
-      (const string_list_t &s,
-       const vertex_list_t &p);
-#endif
-
-
-#ifdef UTLS_GEN_SHADERS
+  renderable_t * create_buffered_flat_triangles_ren
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t t,
+        bufobj_ptr_t c = bufobj_ptr_t());
 
   renderable_t * create_buffered_normals_ren
       (bufobj_ptr_t v,
@@ -303,15 +299,15 @@ namespace glutils
        bufobj_ptr_t n,
        double n_len = 1.0);
 
-  renderable_t * create_buffered_flat_triangles_ren
-      ( bufobj_ptr_t v,
-        bufobj_ptr_t t,
-        bufobj_ptr_t c = bufobj_ptr_t());
-
   renderable_t * create_buffered_flat_tetrahedrons_ren
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
         bufobj_ptr_t c = bufobj_ptr_t() );
+
+#ifdef UTLS_ENABLE_TEXTREN
+  renderable_t * create_buffered_text_ren
+      (const string_list_t &s,
+       const vertex_list_t &p);
 #endif
 
 #ifdef UTLS_USE_TRISTRIPPER

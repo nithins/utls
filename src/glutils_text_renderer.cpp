@@ -1,4 +1,4 @@
-#include <config.h>
+#include <utls_config.h>
 
 
 #if defined(GLUT_FOUND)

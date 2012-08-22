@@ -5,8 +5,7 @@
 #include <glutils.h>
 #include <GLSLProgram.h>
 
-#include <shadersources.h>
-
+#include <utls_glsl_shaders.h>
 
 GLSLProgram * s_normal_shader = NULL;
 
@@ -18,16 +17,7 @@ namespace glutils
       return;
 
     s_normal_shader = GLSLProgram::createFromSourceStrings
-                      (normal_ren_vert_glsl,normal_ren_geom_glsl,normal_ren_frag_glsl,
-                       GL_POINTS,GL_LINE_STRIP);
-
-    std::string log;
-
-    s_normal_shader->GetProgramLog ( log );
-
-    if(log.size() != 0)
-      throw std::runtime_error(std::string("normal shader errors::\n")+log);
-
+                      (NORMAL_REN_VERT_GLSL,NORMAL_REN_GEOM_GLSL,NORMAL_REN_FRAG_GLSL);
   }
 
   void clear_normal_renderer()

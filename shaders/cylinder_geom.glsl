@@ -1,7 +1,9 @@
-#version 120
+#version 330 compatibility
+#extension GL_EXT_gpu_shader4: enable
 #extension GL_EXT_geometry_shader4 : enable
-#extension GL_EXT_gpu_shader4 : enable
-#extension GL_ARB_texture_rectangle: enable
+
+layout(lines) in;
+layout(triangle_strip, max_vertices=24) out;
 
 const float line_sz   = 1.6;
 

@@ -1,2 +1,3 @@
 #cmakedefine GLUT_FOUND
 #cmakedefine FTGL_FOUND
+#cmakedefine UTLS_DIR "@UTLS_DIR@"
