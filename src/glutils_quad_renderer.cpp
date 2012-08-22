@@ -98,6 +98,15 @@ namespace glutils
     }
   };
 
+  renderable_t * create_buffered_quads_ren
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t t,
+        bufobj_ptr_t n,
+        bufobj_ptr_t c )
+  {
+    return new buffered_quad_ren_t( v, t, n, c );
+  }
+
   void compute_vertex_normals
       ( const vertex_list_t   &vlist,
         const quad_idx_list_t &qlist,
@@ -133,14 +142,14 @@ namespace glutils
     }
   }
 
-
-  renderable_t * create_buffered_quads_ren
-      ( bufobj_ptr_t v,
-        bufobj_ptr_t t,
-        bufobj_ptr_t n,
-        bufobj_ptr_t c )
+  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const quad_idx_list_t &t)
   {
-    return new buffered_quad_ren_t( v, t, n, c );
+    normal_list_t n;
+
+    compute_vertex_normals(v,t,n);
+
+    return make_buf_obj(n);
   }
+
 
 }

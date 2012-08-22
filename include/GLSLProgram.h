@@ -136,12 +136,5 @@ class GLSLProgram
     GLuint _geomIn, _geomOut;
 };
 
-#include <boost/shared_ptr.hpp>
-
-typedef boost::shared_ptr<GLSLProgram> glsl_program_ptr_t;
-
-extern glsl_program_ptr_t g_sphere_shader;
-extern glsl_program_ptr_t g_cylinder_shader;
-
 
 #endif //GLSL_PROGRAM

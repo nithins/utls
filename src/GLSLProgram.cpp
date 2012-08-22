@@ -12,7 +12,6 @@
 #include "GLSLProgram.h"
 #include "GLSLShader.h"
 
-#include "shadersources.h"
 
 using namespace std;
 
@@ -597,32 +596,4 @@ GLSLProgram * GLSLProgram::createFromSourceStrings
   GLSLProgram::createFromSourceStrings ( *prog, shader, shaderType, geomIn, geomOut );
 
   return prog;
-}
-
-glsl_program_ptr_t g_sphere_shader;
-glsl_program_ptr_t g_cylinder_shader;
-
-namespace glutils
-{
-void init_common_shaders()
-{
-  std::string log;
-
-  g_sphere_shader.reset
-      (GLSLProgram::createFromSourceStrings
-       (sphere_vert_glsl,sphere_geom_glsl,sphere_frag_glsl,GL_POINTS,GL_QUADS));
-
-  g_sphere_shader->GetProgramLog(log);
-
-  try{ensure(log.size() == 0,"---sphere_shader compile error---\n");}
-  catch (runtime_error e){cerr<<SVAR(log)<<endl;throw;}
-
-  g_cylinder_shader.reset
-      (GLSLProgram::createFromSourceStrings
-      (cylinder_vert_glsl,cylinder_geom_glsl,cylinder_frag_glsl,GL_LINES,GL_TRIANGLES));
-
-  g_cylinder_shader->GetProgramLog(log);
-
-//  ensure(log.size() == 0,"---cylinder_shader compile error---\n"+log);
-}
 }

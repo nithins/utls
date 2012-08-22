@@ -133,7 +133,7 @@ namespace glutils
       center += v[i];
     }
 
-    return center/v.size();
+    return center/double(v.size());
   }
 
 
@@ -314,16 +314,23 @@ namespace glutils
       _ERROR ( "No support for opengl 2.0" );
     }
 
+#ifdef UTLS_ENABLE_TEXTREN
     init_text_rendering();
+#endif
+
+#ifdef UTLS_GEN_SHADERS
 
     init_normal_renderer();
 
     init_common_shaders();
+#endif
   }
 
   void clear()
   {
+#ifdef UTLS_GEN_SHADERS
     clear_normal_renderer();
+#endif
   }
 
   void draw_aabb_line(vertex_t lc,vertex_t uc)
@@ -331,14 +338,14 @@ namespace glutils
 
     vertex_t cube_pts []=
     {
-      mk_vertex(lc[0],lc[1],lc[2]),
-      mk_vertex(uc[0],lc[1],lc[2]),
-      mk_vertex(lc[0],uc[1],lc[2]),
-      mk_vertex(uc[0],uc[1],lc[2]),
-      mk_vertex(lc[0],lc[1],uc[2]),
-      mk_vertex(uc[0],lc[1],uc[2]),
-      mk_vertex(lc[0],uc[1],uc[2]),
-      mk_vertex(uc[0],uc[1],uc[2]),
+      make_vec(lc[0],lc[1],lc[2]),
+      make_vec(uc[0],lc[1],lc[2]),
+      make_vec(lc[0],uc[1],lc[2]),
+      make_vec(uc[0],uc[1],lc[2]),
+      make_vec(lc[0],lc[1],uc[2]),
+      make_vec(uc[0],lc[1],uc[2]),
+      make_vec(lc[0],uc[1],uc[2]),
+      make_vec(uc[0],uc[1],uc[2]),
     };
 
     glBegin(GL_LINE_LOOP);

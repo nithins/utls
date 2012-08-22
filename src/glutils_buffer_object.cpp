@@ -4,6 +4,7 @@
 #include <typeinfo>
 
 #include <boost/foreach.hpp>
+#include <boost/shared_array.hpp>
 
 #include <glutils.h>
 
@@ -136,13 +137,14 @@ namespace glutils
     return ( GLvoid* ) ret_ptr;
   }
 
-  void buf_obj_t::bind_to_vertex_pointer() const
+  void buf_obj_t::bind_to_vertex_pointer(int offset) const
   {
     glEnableClientState ( GL_VERTEX_ARRAY );
 
     glBindBuffer ( m_target, m_id );
 
-    glVertexPointer ( m_src_comp, m_src_type, m_stride, 0 );
+    glVertexPointer ( m_src_comp, m_src_type, m_stride,
+                     (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp) );
   }
 
   void buf_obj_t::unbind_from_vertex_pointer() const
@@ -152,13 +154,14 @@ namespace glutils
     glDisableClientState ( GL_VERTEX_ARRAY );
   }
 
-  void buf_obj_t::bind_to_vertex_attrib_pointer ( GLuint attribno ) const
+  void buf_obj_t::bind_to_vertex_attrib_pointer ( GLuint attribno,int offset) const
   {
     glEnableVertexAttribArray ( attribno );
 
     glBindBuffer ( m_target, m_id );
 
-    glVertexAttribPointer ( attribno, m_src_comp, m_src_type, false, m_stride, 0 );
+    glVertexAttribPointer ( attribno, m_src_comp, m_src_type, false, m_stride,
+                           (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp));
 
   }
 
@@ -170,13 +173,14 @@ namespace glutils
   }
 
 
-  void buf_obj_t::bind_to_color_pointer() const
+  void buf_obj_t::bind_to_color_pointer(int offset) const
   {
     glEnableClientState ( GL_COLOR_ARRAY );
 
     glBindBuffer ( m_target, m_id );
 
-    glColorPointer ( m_src_comp, m_src_type, m_stride, 0 );
+    glColorPointer ( m_src_comp, m_src_type, m_stride,
+                    (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp));
   }
 
   void buf_obj_t::unbind_from_color_pointer() const
@@ -186,13 +190,14 @@ namespace glutils
     glDisableClientState ( GL_COLOR_ARRAY );
   }
 
-  void buf_obj_t::bind_to_normal_pointer() const
+  void buf_obj_t::bind_to_normal_pointer(int offset) const
   {
     glEnableClientState ( GL_NORMAL_ARRAY );
 
     glBindBuffer ( m_target, m_id );
 
-    glNormalPointer ( m_src_type, m_stride, 0 );
+    glNormalPointer ( m_src_type, m_stride,
+                     (GLvoid*)(offset*gl_sizeof(m_src_type)*m_src_comp));
   }
 
   void buf_obj_t::unbind_from_normal_pointer() const
@@ -216,74 +221,62 @@ namespace glutils
     }
   }
 
-  bufobj_ptr_t make_buf_obj( const vertex_list_t &vec)
+  template <typename T,int N>  inline boost::shared_array<T> to_carray
+  (const std::vector<bnu::bounded_vector<T,N> > &vl)
   {
-    return buf_obj_t::create_bo
-        ( ((void*)vec.data()) + 8 ,GL_DOUBLE,3,GL_ARRAY_BUFFER,
-          vec.size()*sizeof(double)*4,32);
+    boost::shared_array<T> ol(new T[vl.size()*N]);
+
+    for(int i = 0 ; i < int(vl.size()) ; ++i)
+    {
+      for(int k =0 ;k < N; ++k)
+        (ol)[N*i+k] = vl[i][k];
+    }
+
+    return ol;
   }
 
-  bufobj_ptr_t make_buf_obj( const quad_idx_list_t &q)
+  bufobj_ptr_t make_buf_obj( const vertex_list_t &vec)
   {
+    BOOST_AUTO(vl,(to_carray <double,3>(vec)));
+
     return buf_obj_t::create_bo
-        ( q.data(),GL_UNSIGNED_INT,4,GL_ELEMENT_ARRAY_BUFFER,
-          q.size()*sizeof(unsigned int)*4,0);
+        ( vl.get() ,GL_DOUBLE,3,GL_ARRAY_BUFFER,
+          vec.size()*sizeof(double)*3,0);
+  }
+
+  bufobj_ptr_t make_buf_obj( const quad_idx_list_t &vec)
+  {
+    BOOST_AUTO(vl,(to_carray <idx_t,4>(vec)));
+
+    return buf_obj_t::create_bo
+        ( vl.get() ,GL_UNSIGNED_INT,4,GL_ELEMENT_ARRAY_BUFFER,
+          vec.size()*sizeof(unsigned int)*4,0);
   }
 
   bufobj_ptr_t make_buf_obj( const tri_idx_list_t &vec)
   {
-    std::vector<unsigned int> uivec;
-
-    BOOST_FOREACH(tri_idx_t tri,vec)
-    {
-      uivec.push_back(tri[0]);
-      uivec.push_back(tri[1]);
-      uivec.push_back(tri[2]);
-    }
+    BOOST_AUTO(vl,(to_carray <idx_t,3>(vec)));
 
     return buf_obj_t::create_bo
-        ( uivec.data(),GL_UNSIGNED_INT,3,GL_ELEMENT_ARRAY_BUFFER,
+        ( vl.get() ,GL_UNSIGNED_INT,3,GL_ELEMENT_ARRAY_BUFFER,
           vec.size()*sizeof(unsigned int)*3,0);
   }
 
   bufobj_ptr_t make_buf_obj( const line_idx_list_t &vec)
   {
-    std::vector<unsigned int> uivec;
-
-    BOOST_FOREACH(line_idx_t ln,vec)
-    {
-      uivec.push_back(ln[0]);
-      uivec.push_back(ln[1]);
-    }
+    BOOST_AUTO(vl,(to_carray <idx_t,2>(vec)));
 
     return buf_obj_t::create_bo
-        ( uivec.data(),GL_UNSIGNED_INT,2,GL_ELEMENT_ARRAY_BUFFER,
+        ( vl.get() ,GL_UNSIGNED_INT,2,GL_ELEMENT_ARRAY_BUFFER,
           vec.size()*sizeof(unsigned int)*2,0);
+
   }
 
-  bufobj_ptr_t make_buf_obj( const point_idx_list_t &p)
+  bufobj_ptr_t make_buf_obj( const point_idx_list_t &vec)
   {
     return buf_obj_t::create_bo
-        ( p.data(),GL_UNSIGNED_INT,1,GL_ELEMENT_ARRAY_BUFFER,
-          p.size()*sizeof(unsigned int),0);
-  }
-
-  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const tri_idx_list_t &t)
-  {
-    normal_list_t n;
-
-    compute_vertex_normals(v,t,n);
-
-    return make_buf_obj(n);
-  }
-
-  bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const quad_idx_list_t &t)
-  {
-    normal_list_t n;
-
-    compute_vertex_normals(v,t,n);
-
-    return make_buf_obj(n);
+        ( &vec[0] ,GL_UNSIGNED_INT,1,GL_ELEMENT_ARRAY_BUFFER,
+          vec.size()*sizeof(unsigned int)*1,0);
   }
 
   class buf_obj_recast_t:public buf_obj_t
