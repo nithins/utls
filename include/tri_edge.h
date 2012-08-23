@@ -25,9 +25,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
 class tri_cc_t
 {
 public:
@@ -48,7 +45,7 @@ public:
   typedef std::vector<tri>         tri_list_t;
 
   typedef unsigned int             idx_t;
-  typedef boost::numeric::ublas::bounded_vector<idx_t,3> tri_idx_t;
+  typedef la::uivec3_t             tri_idx_t;
   typedef std::vector<tri_idx_t>   tri_idx_list_t;
 
   tri_list_t    m_tris;   // all versions of all tri.. 3 of each
@@ -113,11 +110,11 @@ public:
 
   typedef tri_cc_t::tri_idx_t      tri_idx_t;
 
-  typedef boost::numeric::ublas::bounded_vector<double,3>     vertex_t;
-  typedef std::vector<vertex_t>                               vertex_list_t;
+  typedef la::dvec3_t              vertex_t;
+  typedef std::vector<vertex_t>    vertex_list_t;
 
-  typedef boost::numeric::ublas::bounded_vector<double,3>     normal_t;
-  typedef std::vector<vertex_t>                               normal_list_t;
+  typedef la::dvec3_t              normal_t;
+  typedef std::vector<vertex_t>    normal_list_t;
 
   static const uint cc_dim =       tri_cc_t::cc_dim;
 
@@ -139,7 +136,7 @@ public:
 
   void init(const tri_idx_list_t &,const vertex_list_t &);
 
-  void init(const tri_cc_ptr_t &,const vertex_list_t &);
+  void init(tri_cc_ptr_t ,const vertex_list_t &);
 
   void clear();
 
@@ -148,6 +145,9 @@ public:
 
   inline uint get_cell_points (cellid_t  c,cellid_t   * cl) const
   { return m_tri_cc->get_cell_points(c,cl);  }
+
+  inline uint get_cell_tris (cellid_t  c,cellid_t   * cl) const
+  { return m_tri_cc->get_cell_tris(c,cl);  }
 
   inline uint get_cell_facets (cellid_t  c,cellid_t  * cl) const
   { return m_tri_cc->get_cell_facets(c,cl);  }
@@ -184,6 +184,9 @@ public:
 
   inline double get_average_edge_length() const
   { return m_average_length;}
+
+  double get_tri_area(cellid_t c) const;
+  double get_vert_area(cellid_t c) const;
 
 };
 

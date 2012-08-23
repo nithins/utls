@@ -1,4 +1,5 @@
 #include <fstream>
+#include <stdexcept>
 
 #include <GL/glew.h>
 
@@ -338,14 +339,14 @@ namespace glutils
 
     vertex_t cube_pts []=
     {
-      make_vec(lc[0],lc[1],lc[2]),
-      make_vec(uc[0],lc[1],lc[2]),
-      make_vec(lc[0],uc[1],lc[2]),
-      make_vec(uc[0],uc[1],lc[2]),
-      make_vec(lc[0],lc[1],uc[2]),
-      make_vec(uc[0],lc[1],uc[2]),
-      make_vec(lc[0],uc[1],uc[2]),
-      make_vec(uc[0],uc[1],uc[2]),
+      la::make_vec(lc[0],lc[1],lc[2]),
+      la::make_vec(uc[0],lc[1],lc[2]),
+      la::make_vec(lc[0],uc[1],lc[2]),
+      la::make_vec(uc[0],uc[1],lc[2]),
+      la::make_vec(lc[0],lc[1],uc[2]),
+      la::make_vec(uc[0],lc[1],uc[2]),
+      la::make_vec(lc[0],uc[1],uc[2]),
+      la::make_vec(uc[0],uc[1],uc[2]),
     };
 
     glBegin(GL_LINE_LOOP);

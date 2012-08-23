@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <stdexcept>
 
 #include <GL/glew.h>
 #include <glutils_impl.h>
@@ -129,7 +130,7 @@ void compute_vertex_normals
     normal_t  u = vlist[t[0]] - vlist[t[1]];
     normal_t  v = vlist[t[0]] - vlist[t[2]];
 
-    normal_t  n = boost::numeric::ublas::norm_2(cross_product(u,v));
+    normal_t  n = (u.cross(v)).normalized();
 
     nlist[t[0]] += n;
     nlist[t[1]] += n;
@@ -138,7 +139,7 @@ void compute_vertex_normals
 
   for(int i = 0 ; i < nlist.size();++i)
   {
-    nlist[i] = boost::numeric::ublas::norm_2(nlist[i]);
+    nlist[i].normalize();
   }
 }
 

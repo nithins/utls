@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <stdexcept>
 
 
 #include <cpputils.h>
@@ -41,23 +42,11 @@ tri_cc_t::tri_cc_t(){}
 
 tri_cc_t::~tri_cc_t(){clear();}
 
-typedef boost::numeric::ublas::bounded_vector<int,2> edge_t;
+typedef la::ivec2_t edge_t;
 
 template<typename T>
 inline edge_t mk_edge(const T& u,const T& v)
 {edge_t e; e[0] = u;e[1] = v; return e;}
-
-inline tri_cc_geom_t::vertex_t
-cross_product(const tri_cc_geom_t::vertex_t &u,const tri_cc_geom_t::vertex_t &v)
-{
-  tri_cc_geom_t::vertex_t p;
-
-  p[0] = u[1]*v[2]-v[1]*u[2];
-  p[1] = u[2]*v[0]-v[2]*u[0];
-  p[2] = u[0]*v[1]-v[0]*u[1];
-
-  return p;
-}
 
 void check_tlist(const tri_cc_t::tri_idx_list_t &tlist,const uint & N);
 void check_verts(const tri_cc_t &te);
@@ -369,18 +358,18 @@ uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
   {
     uint tstart = m_verts[c],t = tstart,cf_ct = 0, toff = edge_ct() + vert_ct();
 
+    cf[cf_ct++] = vert_ct() + edgeIndex(t);
+
     do
     {
-      cf[cf_ct++] = vert_ct() + edgeIndex(t);
-      cf[cf_ct++] = toff + triIndex(t);
-
       t = eprev(t);
 
+      cf[cf_ct++] = toff + triIndex(t);
+      cf[cf_ct++] = vert_ct() + edgeIndex(t);
+
       if(!has_fnext(t))
-      {
-        cf[cf_ct++] = vert_ct() + edgeIndex(t);
         break;
-      }
+
       t = fnext(t);
     }
     while (t != tstart);
@@ -523,8 +512,7 @@ double tri_cc_geom_t::compute_average_length()
 
     get_cell_points(c,pts);
 
-    avg_el += boost::numeric::ublas::norm_2
-        (get_cell_position(pts[0])-get_cell_position(pts[1]));
+    avg_el += (get_cell_position(pts[0])-get_cell_position(pts[1])).norm();
   }
 
   return avg_el/get_num_cells_dim(1);
@@ -541,7 +529,7 @@ void tri_cc_geom_t::init(const tri_idx_list_t &tl,const vertex_list_t &vl)
   init(tcc,vl);
 }
 
-void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
+void tri_cc_geom_t::init(tri_cc_ptr_t tcc,const vertex_list_t &vl)
 {
   m_tri_cc = tcc;
 
@@ -569,10 +557,11 @@ void tri_cc_geom_t::init(const tri_cc_ptr_t &tcc,const vertex_list_t &vl)
 
     get_cell_points(c,pts);
 
-    m_cell_normal[c]  = cross_product(m_cell_pos[pts[0]] -m_cell_pos[pts[1]],
-                                      m_cell_pos[pts[0]] -m_cell_pos[pts[2]]);
+    la::dvec3_t u = m_cell_pos[pts[0]] -m_cell_pos[pts[1]];
+    la::dvec3_t v = m_cell_pos[pts[0]] -m_cell_pos[pts[2]];
 
-    m_cell_normal[c] /= boost::numeric::ublas::norm_2(m_cell_normal[c]);
+    m_cell_normal[c]  = u.cross(v);
+    m_cell_normal[c].normalize();
   }
 
   cellid_t c = get_num_cells_max_dim(1);
@@ -604,6 +593,35 @@ void tri_cc_geom_t::clear()
   m_cell_pos.clear();
 
   m_cell_normal.clear();
+}
+
+double tri_cc_geom_t::get_tri_area(cellid_t c) const
+{
+  ASSERT(get_cell_dim(c) == 2);
+
+  cellid_t pts[20];
+
+  get_cell_points(c,pts);
+
+  return la::tri_area<double,3>
+      (m_cell_pos[pts[0]],m_cell_pos[pts[1]],m_cell_pos[pts[2]]);
+}
+
+double tri_cc_geom_t::get_vert_area(cellid_t c) const
+{
+  ASSERT(get_cell_dim(c) == 0);
+
+  double area = 0;
+
+  cellid_t st[40];
+
+  uint st_ct = get_vert_star(c,st);
+
+  for(uint i = 1; i < st_ct; i++)
+    area += la::tri_area<double,3>
+        (m_cell_pos[st[i-1]],m_cell_pos[c],m_cell_pos[st[i]]);
+
+  return area;
 }
 
 // a bunch of routines to ensure that tri_cc_t is consistent.

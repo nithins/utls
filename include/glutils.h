@@ -7,59 +7,32 @@
 
 #include <GL/gl.h>
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
+#include <cpputils.h>
 
 namespace glutils
 {
-  namespace bnu = boost::numeric::ublas;
-
   typedef unsigned int             idx_t;
 
   typedef idx_t                    point_idx_t;
   typedef std::vector<point_idx_t> point_idx_list_t;
-  typedef bnu::bounded_vector<idx_t,2>           line_idx_t;
+  typedef la::uivec2_t             line_idx_t;
   typedef std::vector<line_idx_t>  line_idx_list_t;
-  typedef bnu::bounded_vector<idx_t,3>           tri_idx_t;
+  typedef la::uivec3_t             tri_idx_t;
   typedef std::vector<tri_idx_t>   tri_idx_list_t;
-  typedef bnu::bounded_vector<idx_t,4>           quad_idx_t;
+  typedef la::uivec4_t             quad_idx_t;
   typedef std::vector<quad_idx_t>  quad_idx_list_t;
 
-  typedef bnu::bounded_vector<double,3>     vertex_t;
+  typedef la::dvec3_t              vertex_t;
   typedef std::vector<vertex_t>    vertex_list_t;
-  typedef bnu::bounded_vector<double,3>     color_t;
+  typedef la::dvec3_t              color_t;
   typedef std::vector<color_t>     color_list_t;
-  typedef bnu::bounded_vector<double,3>     normal_t;
+  typedef la::dvec3_t              normal_t;
   typedef std::vector<vertex_t>    normal_list_t;
 
-  typedef bnu::bounded_vector<float,4>      color4f_t;
-  typedef bnu::bounded_vector<float,4>      vertex4f_t;
+  typedef la::fvec4_t      color4f_t;
+  typedef la::fvec4_t      vertex4f_t;
 
   typedef std::vector<std::string> string_list_t;
-
-  template<typename T>
-  inline bnu::bounded_vector<T,2>
-  make_vec(const T&a , const T&b )
-  {
-    bnu::bounded_vector<T,2> v;
-    v[0] = a; v[1] = b; return v;
-  }
-
-  template<typename T>
-  inline bnu::bounded_vector<T,3>
-  make_vec(const T&a , const T&b ,const T&c)
-  {
-    bnu::bounded_vector<T,3> v;
-    v[0] = a; v[1] = b; v[2] = c; return v;
-  }
-
-  template<typename T>
-  inline bnu::bounded_vector<T,4>
-  make_vec(const T&a , const T&b ,const T&c,const T&d)
-  {
-    bnu::bounded_vector<T,4> v;
-    v[0] = a; v[1] = b; v[2] = c; v[3] = d; return v;
-  }
 
   class buf_obj_t;
 

@@ -5,6 +5,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include <glutils.h>
 
@@ -221,8 +222,8 @@ namespace glutils
     }
   }
 
-  template <typename T,int N>  inline boost::shared_array<T> to_carray
-  (const std::vector<bnu::bounded_vector<T,N> > &vl)
+  template <typename T,unsigned int N>  inline boost::shared_array<T> to_carray
+  (const std::vector<typename la::vec_t<T,N>::type > &vl)
   {
     boost::shared_array<T> ol(new T[vl.size()*N]);
 

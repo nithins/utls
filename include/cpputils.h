@@ -30,18 +30,6 @@
 typedef unsigned int  uint;
 typedef unsigned char uchar;
 
-struct unordered_pair_comparator
-{
-  bool operator() ( const std::pair<uint, uint> &p1,
-                    const std::pair<uint, uint> &p2 ) const;
-};
-
-struct ordered_pair_comparator
-{
-  bool operator() ( const std::pair<uint, uint> &p1,
-                    const std::pair<uint, uint> &p2 ) const;
-};
-
 std::string stripLineComments ( const std::string& line, const char& comment_char = '#' );
 
 std::string stripLeadingWS ( const std::string& line );
@@ -174,6 +162,94 @@ namespace std
     }
     return r;
   }
+}
 
+#include <Eigen/Dense>
+
+#include <math.h>
+
+namespace la
+{
+
+  template<typename T,unsigned int N>
+  struct vec_t
+  {
+    typedef Eigen::Matrix<T,N,1> type;
+  };
+
+  typedef vec_t<double,2>::type dvec2_t;
+  typedef vec_t<double,3>::type dvec3_t;
+  typedef vec_t<double,4>::type dvec4_t;
+
+  typedef vec_t<float,2>::type fvec2_t;
+  typedef vec_t<float,3>::type fvec3_t;
+  typedef vec_t<float,4>::type fvec4_t;
+
+  typedef vec_t<int,2>::type ivec2_t;
+  typedef vec_t<int,3>::type ivec3_t;
+  typedef vec_t<int,4>::type ivec4_t;
+
+  typedef vec_t<unsigned int,2>::type uivec2_t;
+  typedef vec_t<unsigned int,3>::type uivec3_t;
+  typedef vec_t<unsigned int,4>::type uivec4_t;
+
+  template<typename T>
+  inline typename vec_t<T,2>::type
+  make_vec(const T&a , const T&b )
+  {
+    typename vec_t<T,2>::type v;
+    v[0] = a; v[1] = b; return v;
+  }
+
+  template<typename T>
+  inline typename vec_t<T,3>::type
+  make_vec(const T&a , const T&b ,const T&c)
+  {
+    typename vec_t<T,3>::type v;
+    v[0] = a; v[1] = b; v[2] = c; return v;
+  }
+
+  template<typename T>
+  inline typename vec_t<T,4>::type
+  make_vec(const T&a , const T&b ,const T&c,const T&d)
+  {
+    typename vec_t<T,4>::type v;
+    v[0] = a; v[1] = b; v[2] = c; v[3] = d; return v;
+  }
+
+  template<typename T>
+  inline typename vec_t<T,4>::type
+  make_vec(const typename vec_t<T,3>::type &u, const T&d)
+  {
+    typename vec_t<T,4>::type v;
+    v[0] = u[0]; v[1] = u[1]; v[2] = u[2]; v[3] = d; return v;
+  }
+
+  template<typename T>
+  inline typename vec_t<T,4>::type
+  make_vec(const T&a, const typename vec_t<T,3>::type &u)
+  {
+    typename vec_t<T,4>::type v;
+    v[0] = a; v[1] = u[0]; v[2] = u[1]; v[3] = u[2]; return v;
+  }
+
+
+  template<typename T,unsigned int N>
+  inline double tri_area(const typename vec_t<T,N>::type &p,
+                    const typename vec_t<T,N>::type &q,
+                    const typename vec_t<T,N>::type &r)
+  {
+    double a = (p-q).norm();
+    double b = (q-r).norm();
+    double c = (r-p).norm();
+
+    double s = (a+b+c)/2.0;
+
+    double area2  = s*(s-a)*(s-b)*(s-c);
+
+    double area =  sqrt(area2);
+
+    return area;
+  }
 }
 #endif

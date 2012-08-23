@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstring>
+#include <stdexcept>
 
 #include <GL/glew.h>
 
@@ -128,7 +129,7 @@ namespace glutils
       v  = vlist[q[0]] - vlist[q[3]];
       n += cross_product(u,v);
 
-      n = boost::numeric::ublas::norm_2(n);
+      n.normalize();
 
       nlist[q[0]] += n;
       nlist[q[1]] += n;
@@ -138,7 +139,7 @@ namespace glutils
 
     for(int i = 0 ; i < nlist.size();++i)
     {
-      nlist[i] = boost::numeric::ublas::norm_2(nlist[i]);
+      nlist[i].normalize();
     }
   }
 

@@ -20,8 +20,10 @@ function(files_to_c_macros headerfilename)
   endforeach(i)
 endfunction(files_to_c_macros)
 
+find_package(Eigen3 REQUIRED)
 
 include_directories(
+  ${EIGEN3_INCLUDE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -30,8 +32,8 @@ include_directories(
 set(${PROJECT_NAME}_SRCS
   ${${PROJECT_NAME}_SRCS}
 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/tree.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/vecutils.h
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/tree.h
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/vecutils.h
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/cpputils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cpputils.cpp
@@ -43,8 +45,8 @@ set(${PROJECT_NAME}_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/logutil.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/logutil.cpp
 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/quad_edge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/quad_edge.cpp
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/quad_edge.h
+#  ${CMAKE_CURRENT_SOURCE_DIR}/src/quad_edge.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/tri_edge.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/tri_edge.cpp
