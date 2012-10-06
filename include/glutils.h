@@ -13,14 +13,16 @@ namespace glutils
 {
   typedef unsigned int             idx_t;
 
-  typedef idx_t                    point_idx_t;
-  typedef std::vector<point_idx_t> point_idx_list_t;
-  typedef la::uivec2_t             line_idx_t;
-  typedef std::vector<line_idx_t>  line_idx_list_t;
-  typedef la::uivec3_t             tri_idx_t;
-  typedef std::vector<tri_idx_t>   tri_idx_list_t;
-  typedef la::uivec4_t             quad_idx_t;
-  typedef std::vector<quad_idx_t>  quad_idx_list_t;
+  typedef idx_t                        point_idx_t;
+  typedef std::vector<point_idx_t>     point_idx_list_t;
+  typedef la::uivec2_t                 line_idx_t;
+  typedef std::vector<line_idx_t>      line_idx_list_t;
+  typedef la::uivec4_t                 line_adj_idx_t;
+  typedef std::vector<line_adj_idx_t>  line_adj_idx_list_t;
+  typedef la::uivec3_t                 tri_idx_t;
+  typedef std::vector<tri_idx_t>       tri_idx_list_t;
+  typedef la::uivec4_t                 quad_idx_t;
+  typedef std::vector<quad_idx_t>      quad_idx_list_t;
 
   typedef la::dvec3_t              vertex_t;
   typedef std::vector<vertex_t>    vertex_list_t;
@@ -211,6 +213,11 @@ namespace glutils
 
   bufobj_ptr_t make_normals_buf_obj( const vertex_list_t &v,const quad_idx_list_t &t);
 
+  void compute_line_adj
+    (const line_idx_list_t &ll ,
+     line_adj_idx_list_t &ladj,
+     vertex_list_t &vl);
+
   void compute_vertex_normals
       ( const vertex_list_t &vlist,
         const tri_idx_list_t &tlist,
@@ -276,6 +283,12 @@ namespace glutils
       ( bufobj_ptr_t v,
         bufobj_ptr_t t,
         bufobj_ptr_t c = bufobj_ptr_t() );
+
+  renderable_t * create_lines_adj_ren
+      ( bufobj_ptr_t v,
+        bufobj_ptr_t l = bufobj_ptr_t(),
+        bufobj_ptr_t c = bufobj_ptr_t());
+
 
 #ifdef UTLS_ENABLE_TEXTREN
   renderable_t * create_buffered_text_ren

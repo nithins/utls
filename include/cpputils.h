@@ -174,7 +174,7 @@ namespace la
   template<typename T,unsigned int N>
   struct vec_t
   {
-    typedef Eigen::Matrix<T,N,1> type;
+    typedef Eigen::Matrix<T,1,N> type;
   };
 
   typedef vec_t<double,2>::type dvec2_t;
