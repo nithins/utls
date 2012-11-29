@@ -62,17 +62,17 @@ option(NO_OPENGL "build without opengl" OFF)
 if(NOT NO_OPENGL)
   find_package(GLEW REQUIRED)
 
-  find_package(Freetype)
+#  find_package(Freetype)
 
-  if(FREETYPE_FOUND)
-    find_package(FTGL)
-  endif(FREETYPE_FOUND)
+#  if(FREETYPE_FOUND)
+#    find_package(FTGL)
+#  endif(FREETYPE_FOUND)
 
-  find_package(GLUT)
+#  find_package(GLUT)
 
-  if(NOT FTGL_FOUND AND NOT GLUT_FOUND)
-    message(FATAL_ERROR "Failed to find glut or FTGL libraries.. quitting")
-  endif(NOT FTGL_FOUND AND NOT GLUT_FOUND)
+#  if(NOT FTGL_FOUND AND NOT GLUT_FOUND)
+#    message(FATAL_ERROR "Failed to find glut or FTGL libraries.. quitting")
+#  endif(NOT FTGL_FOUND AND NOT GLUT_FOUND)
 
   files_to_c_macros(${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.h
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_triangles.vert
@@ -101,7 +101,7 @@ if(NOT NO_OPENGL)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_buffer_object.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_line_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_normal_renderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_text_renderer.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_text_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_point_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_triangle_renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_tetrahedron_renderer.cpp
