@@ -18,7 +18,7 @@ public:
 
   virtual bool exchange_field(const data_index_t &,boost::any &)  = 0;
 
-  virtual eFieldType exchange_header(const int &,boost::any &) = 0;
+  virtual eFieldType exchange_header(const int &,std::string &) = 0;
 
   static bool s_exchange_action
       (const action_callback_t &p_val,boost::any &c_val)
@@ -26,7 +26,7 @@ public:
     if(c_val.empty())
       c_val = boost::any(p_val);
     else
-      throw std::logic_error("action should be called when interacted with");
+      p_val(); // make the call
 
     return false;
   }

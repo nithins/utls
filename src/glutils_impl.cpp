@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include <GL/glew.h>
+#include <boost/algorithm/string.hpp>
 
 #include <glutils_impl.h>
 #include <cpputils.h>
@@ -140,77 +141,55 @@ namespace glutils
 
   void read_off_file ( const char *filename, vertex_list_t  &vlist,tri_idx_list_t &tlist)
   {
+    using namespace std;
+    namespace ba    = boost::algorithm;
 
-    std::fstream offFile ( filename, std::ios::in );
+    fstream off_file ( filename, fstream::in);
 
-    if ( offFile.is_open() == false )
-      throw std::runtime_error( "cannot read the file" );
+    ensure(off_file.is_open(),"unable to open off file");
 
-    std::string line;
+    string ln;
+    std::vector<string> strs;
 
-    getline ( offFile, line );
+    getline(off_file,ln);
+    ensure(ln=="OFF","Doesn't seem to be an OFF FILE");
 
-    line = stripWS ( line );
+    getline(off_file,ln);
+    ba::split(strs,ln,ba::is_any_of("\t \n"));
 
-    if ( line != "OFF" )
-      throw std::runtime_error ( "Doesnt appear to be an OFF file" );
+    int num_v = atoi(strs[0].c_str());
+    int num_t = atoi(strs[1].c_str());
 
-    getline ( offFile, line );
+    vlist.resize(num_v);
+    tlist.resize(num_t);
 
-    std::stringstream linestream ( stripWS ( line ) );
-
-    uint num_verts,num_tris;
-
-    linestream >> num_verts >> num_tris;
-
-    vlist.resize(num_verts);
-
-    tlist.resize(num_tris);
-
-    uint vpos = 0 ;
-
-    while ( !offFile.eof() )
+    for ( uint i = 0; i < num_v; ++i )
     {
-      if ( vpos == num_verts )
-        break;
+      getline(off_file,ln);
+      ba::split(strs,ln,ba::is_any_of("\t \n"));
 
-      getline ( offFile, line );
-
-      std::stringstream linestream ( stripWS ( line ) );
-
-      linestream >> vlist[vpos][0] >>vlist[vpos][1] >> vlist[vpos][2];
-
-      ++vpos;
+      vlist[i][0] = atof(strs[0].c_str());
+      vlist[i][1] = atof(strs[1].c_str());
+      vlist[i][2] = atof(strs[2].c_str());
     }
 
-    if ( num_verts != vpos )
-      throw std::runtime_error ( "incorrect num verts read" );
-
-    uint tpos = 0 ;
-
-    while ( !offFile.eof() )
+    for ( uint i = 0; i < num_t; i++ )
     {
-      if ( tpos == num_tris )
-        break;
+      getline(off_file,ln);
+      ba::split(strs,ln,ba::is_any_of("\t \n"));
 
-      getline ( offFile, line );
+      int ntv     = atoi(strs[0].c_str());
+      tlist[i][0] = atoi(strs[1].c_str());
+      tlist[i][1] = atoi(strs[2].c_str());
+      tlist[i][2] = atoi(strs[3].c_str());
 
-      uint num_points;
-
-      std::stringstream linestream ( stripWS ( line ) );
-
-      linestream >> num_points;
-
-      linestream >> tlist[tpos][0] >>tlist[tpos][1] >> tlist[tpos][2];
-
-      if(num_points != 3)
-        throw std::runtime_error ( "can read triangles only" );
-
-      ++tpos;
+      ensure(ntv == 3,"Mesh contains non-triangle polys");
+      ensure(is_in_range(tlist[i][0],0,num_v),"invalid index in file");
+      ensure(is_in_range(tlist[i][1],0,num_v),"invalid index in file");
+      ensure(is_in_range(tlist[i][2],0,num_v),"invalid index in file");
     }
 
-    if ( num_tris != tpos )
-      throw std::runtime_error ( "incorrect num tris read" );
+    off_file.close();
   }
 
   void read_tri_file
