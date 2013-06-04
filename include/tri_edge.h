@@ -78,6 +78,7 @@ public:
   uint get_cell_facets(cellid_t  ,cellid_t  * ) const;
   uint get_cell_co_facets(cellid_t  ,cellid_t  * ) const;
   uint get_vert_star(cellid_t  ,cellid_t  * ) const;
+  uint get_vert_link_verts(cellid_t  ,cellid_t  * ) const;
   cellid_t get_opp_cell(cellid_t c, cellid_t cf) const;
 
   bool is_adjacent(cellid_t  ,cellid_t ) const;

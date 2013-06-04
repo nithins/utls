@@ -380,6 +380,31 @@ uint tri_cc_t::get_vert_star(cellid_t  c,cellid_t  * cf) const
   throw std::runtime_error("invalid vertex id");
 }
 
+uint tri_cc_t::get_vert_link_verts(cellid_t  c,cellid_t  * lv) const
+{
+  if(c < vert_ct())
+  {
+    uint tstart = m_verts[c],t = tstart,lv_ct = 0;
+
+    do
+    {
+      lv[lv_ct++] = vertIndex(enext(t));
+
+      t = eprev(t);
+
+      if(!has_fnext(t))
+        break;
+
+      t = fnext(t);
+    }
+    while (t != tstart);
+
+    return lv_ct;
+  }
+
+  throw std::runtime_error("invalid vertex id");
+}
+
 bool tri_cc_t::is_adjacent(cellid_t  c,cellid_t p) const
 {
   if(c > p)
