@@ -64,6 +64,9 @@ bool operator()(const edge_t &a,const edge_t &b) const
 
 void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
 {
+  ensure(tlist.size() >0 ," No tris!!!");
+  ensure(N >0 ," No Verts !!!");
+
   typedef map<edge_t,int,edge_cmp> edge_map_t;
 
   check_tlist(tlist,N);

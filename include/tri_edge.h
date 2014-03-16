@@ -39,7 +39,7 @@ public:
     uint fnext;
   };
 
-  typedef uint                     cellid_t;
+  typedef int                      cellid_t;
 
   typedef std::vector<cellid_t>    cellid_list_t;
   typedef std::vector<tri>         tri_list_t;
@@ -143,6 +143,9 @@ public:
 
   inline uint get_cell_dim (cellid_t c) const
   { return m_tri_cc->get_cell_dim(c);  }
+
+  inline tri_cc_ptr_t get_tri_cc()
+  {return m_tri_cc;}
 
   inline uint get_cell_points (cellid_t  c,cellid_t   * cl) const
   { return m_tri_cc->get_cell_points(c,cl);  }
