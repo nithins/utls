@@ -588,9 +588,20 @@ void tri_cc_geom_t::init(tri_cc_ptr_t tcc,const vertex_list_t &vl)
     la::dvec3_t u = m_cell_pos[pts[0]] -m_cell_pos[pts[1]];
     la::dvec3_t v = m_cell_pos[pts[0]] -m_cell_pos[pts[2]];
 
+    ensurev(u != v)
+        << "Found Degenerate triangles in Mesh." << endl
+        << SVAR(c) << endl
+        << SVAR3(pts[0],pts[1],pts[2]) << endl
+        << SVAR(m_cell_pos[pts[0]]) << endl
+        << SVAR(m_cell_pos[pts[1]]) << endl
+        << SVAR(m_cell_pos[pts[2]]) << endl;
+
+
     m_cell_normal[c]  = u.cross(v);
+
     m_cell_normal[c].normalize();
-  }
+
+ }
 
   cellid_t c = get_num_cells_max_dim(1);
 

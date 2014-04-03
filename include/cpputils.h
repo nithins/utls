@@ -119,6 +119,13 @@ inline void __ensure(bool c, const char * s,const char * file, const char *func,
 #define ensure_oe(c,s) __ensure<std::overflow_error>(c,s,__FILE__,__func__,__LINE__ )
 #define ensure_ia(c,s) __ensure<std::invalid_argument>(c,s,__FILE__,__func__,__LINE__)
 
+#define ensurev(cond) \
+  if(!(cond)) \
+  for(std::stringstream ss ; true ; throw std::runtime_error(ss.str())) \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "
+
+
 #ifndef NDEBUG
 
 inline void __assert(bool c, const char * s,const char * file, const char *func, const int &line)
