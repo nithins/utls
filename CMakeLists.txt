@@ -48,8 +48,8 @@ set(${PROJECT_NAME}_SRCS
 #  ${CMAKE_CURRENT_SOURCE_DIR}/include/quad_edge.h
 #  ${CMAKE_CURRENT_SOURCE_DIR}/src/quad_edge.cpp
 
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/tri_edge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/tri_edge.cpp
+#  ${CMAKE_CURRENT_SOURCE_DIR}/include/tri_edge.h
+#  ${CMAKE_CURRENT_SOURCE_DIR}/src/tri_edge.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/timer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/timer.cpp

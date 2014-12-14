@@ -173,8 +173,13 @@ namespace std
   }
 }
 
-#include <Eigen/Dense>
+/*===========================================================================*/
+/* Linear Algebra utilities
+/*---------------------------------------------------------------------------*/
 
+// This section may be redefined in other projects.
+#ifndef __UTL_H_INCLUDED
+#include <Eigen/Dense>
 #include <math.h>
 
 namespace la
@@ -261,4 +266,9 @@ namespace la
     return area;
   }
 }
+
+#endif
+
+/*===========================================================================*/
+
 #endif
