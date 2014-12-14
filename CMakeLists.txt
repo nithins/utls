@@ -29,8 +29,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
-set(${PROJECT_NAME}_SRCS
-  ${${PROJECT_NAME}_SRCS}
+set(UTLS_SRCS
+  ${UTLS_SRCS}
 
 #  ${CMAKE_CURRENT_SOURCE_DIR}/include/tree.h
 #  ${CMAKE_CURRENT_SOURCE_DIR}/include/vecutils.h
@@ -94,7 +94,7 @@ if(NOT NO_OPENGL)
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_frag.glsl
   )
 
-  set(${PROJECT_NAME}_SRCS ${${PROJECT_NAME}_SRCS}
+  set(UTLS_SRCS ${UTLS_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/include/glutils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_impl.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/glutils_impl.cpp
@@ -125,7 +125,7 @@ if(NOT NO_OPENGL)
     ${CMAKE_CURRENT_SOURCE_DIR}/tristripper
   )
 
-  set(${PROJECT_NAME}_LINKLIBS  ${${PROJECT_NAME}_LINKLIBS}
+  set(UTLS_LINKLIBS  ${UTLS_LINKLIBS}
     ${GLEW_LIBRARY}
     ${GLUT_LIBRARIES}
     ${FREETYPE_LIBRARIES}
@@ -139,7 +139,15 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/utls_config.h
   )
 
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SRCS})
+set_source_files_properties(${UTLS_SRCS} PROPERTIES COMPILE_FLAGS -fpic)
 
-target_link_libraries(${PROJECT_NAME} ${${PROJECT_NAME}_LINKLIBS})
+add_library(utls-objects OBJECT ${UTLS_SRCS})
+
+option(BUILD_UTLS_LIB "Build the utls shared lib" ON)
+if(BUILD_UTLS_LIB)
+    add_library(utls SHARED ${UTLS_SRCS})
+    target_link_libraries(utls ${UTLS_LINKLIBS})
+    install(TARGETS utls DESTINATION lib)
+endif(BUILD_UTLS_LIB)
+
 
