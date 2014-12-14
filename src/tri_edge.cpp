@@ -30,7 +30,6 @@
 
 
 #include <cpputils.h>
-#include <logutil.h>
 
 #include <tri_edge.h>
 
@@ -84,22 +83,23 @@ void tri_cc_t::init(const tri_idx_list_t &tlist,const uint & N)
   {
     tri_idx_t t = tlist[ti];
 
-    if(edge_map.count(mk_edge(t[0],t[1])) == 1 ||
-       edge_map.count(mk_edge(t[1],t[2])) == 1 ||
-       edge_map.count(mk_edge(t[2],t[0])) == 1)
-      std::swap(t[0],t[1]);
+//    if(edge_map.count(mk_edge(t[0],t[1])) == 1 ||
+//       edge_map.count(mk_edge(t[1],t[2])) == 1 ||
+//       edge_map.count(mk_edge(t[2],t[0])) == 1)
+//      std::swap(t[0],t[1]);
 
-    for( int vi = 0 ; vi < 3 ; ++vi)
+    for( int u = 0,v = 1 ; u < 3 ; ++u, v = (v + 1)%3 )
     {
-      int tvi = 3*ti + vi;
+      int tvi = 3*ti + u;
 
-      m_tris[tvi].v = t[vi];
-      m_verts[t[vi]] = tvi;
+      m_tris[tvi].v = t[u];
+      m_verts[t[u]] = tvi;
 
-      edge_t e = mk_edge(t[vi],t[(vi+1)%3]);
-      edge_t e_= mk_edge(t[(vi+1)%3],t[vi]);
+      edge_t e = mk_edge(t[u],t[v]);
+      edge_t e_= mk_edge(t[v],t[u]);
 
-      ASSERT(edge_map.count(e) == 0 && "non manifold tri attachment");
+      try{ensure(edge_map.count(e) == 0,"2 edges with same induced orientation found");}
+      catch (runtime_error e){cerr<<SVAR(t[u])<<SVAR(t[v])<<endl; throw;}
 
       if(edge_map.count(e_) == 1)
       {
