@@ -5,7 +5,9 @@
 #include <glutils.h>
 #include <GLSLProgram.h>
 
-#include <utls_glsl_shaders.h>
+extern const char *NORMAL_REN_VERT_GLSL;
+extern const char *NORMAL_REN_GEOM_GLSL;
+extern const char *NORMAL_REN_FRAG_GLSL;
 
 GLSLProgram * s_normal_shader = NULL;
 

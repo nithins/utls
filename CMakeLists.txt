@@ -2,23 +2,28 @@
 project(utls)
 
 #minimum cmake version needed
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.8)
 
 #tell cmake where to look for the find files.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# generate the headerfile containing the shader sources
-function(files_to_c_macros headerfilename)
+# generate a headerfile/sourcefile containing the shader source code as strings
+function(files_to_c_variables headerfilename sourcefilename)
   file(WRITE ${headerfilename} "// this is an automatically generated file\n")
+  file(WRITE ${sourcefilename} "// this is an automatically generated file\n")
+
   foreach(i ${ARGN})
     file(READ ${i} file_str)
     string(REPLACE "\n" "\\n\"\\\n\"" file_str "${file_str}")
     get_filename_component(bn ${i} NAME)
     string(REPLACE "." "_" bn "${bn}")
     string(TOUPPER "${bn}" bn)
-    file(APPEND ${headerfilename} "#define ${bn} \"${file_str}\"\n\n")
+    file(APPEND ${headerfilename} "extern const char *${bn}; \n\n")
+    file(APPEND ${sourcefilename}        "const char *${bn} = \"${file_str}\";\n\n")
   endforeach(i)
-endfunction(files_to_c_macros)
+  
+  set_source_files_properties(${sourcefilename} PROPERTIES OBJECT_DEPENDS "${ARGN}")
+endfunction(files_to_c_variables)
 
 find_package(Eigen3 REQUIRED)
 
@@ -74,7 +79,10 @@ if(NOT NO_OPENGL)
 #    message(FATAL_ERROR "Failed to find glut or FTGL libraries.. quitting")
 #  endif(NOT FTGL_FOUND AND NOT GLUT_FOUND)
 
-  files_to_c_macros(${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.h
+  files_to_c_variables(
+    ${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.h
+    ${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.cpp
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_triangles.vert
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/flat_triangles.geom
 
@@ -114,6 +122,7 @@ if(NOT NO_OPENGL)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/GLSLShader.cpp
 
     ${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.h
+    ${CMAKE_CURRENT_BINARY_DIR}/utls_glsl_shaders.cpp
     )
 
 
@@ -145,7 +154,7 @@ add_library(utls-objects OBJECT ${UTLS_SRCS})
 
 option(BUILD_UTLS_LIB "Build the utls shared lib" ON)
 if(BUILD_UTLS_LIB)
-    add_library(utls SHARED ${UTLS_SRCS})
+    add_library(utls SHARED $<TARGET_OBJECTS:utls-objects>)
     target_link_libraries(utls ${UTLS_LINKLIBS})
     install(TARGETS utls DESTINATION lib)
 endif(BUILD_UTLS_LIB)

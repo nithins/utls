@@ -8,7 +8,8 @@
 #include <logutil.h>
 #include <cstring>
 
-#include <utls_glsl_shaders.h>
+extern const char *FLAT_TRIANGLES_VERT;
+extern const char *FLAT_TRIANGLES_GEOM;
 
 namespace glutils
 {
