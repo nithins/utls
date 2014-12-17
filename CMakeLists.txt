@@ -152,7 +152,7 @@ set_source_files_properties(${UTLS_SRCS} PROPERTIES COMPILE_FLAGS -fpic)
 
 add_library(utls-objects OBJECT ${UTLS_SRCS})
 
-option(BUILD_UTLS_LIB "Build the utls shared lib" ON)
+set(BUILD_UTLS_LIB ON CACHE BOOL "Build the utls shared lib")
 if(BUILD_UTLS_LIB)
     add_library(utls SHARED $<TARGET_OBJECTS:utls-objects>)
     target_link_libraries(utls ${UTLS_LINKLIBS})
