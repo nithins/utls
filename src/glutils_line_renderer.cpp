@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <stdexcept>
+#include <numeric>
 
 #include <GL/glew.h>
 
@@ -174,7 +175,7 @@ namespace glutils
       for(int j = 0 ; j < 2; ++j )
         off[ll[i][j]] += 1;
 
-    partial_sum(off.begin(),off.end(),off.begin());
+    std::partial_sum(off.begin(),off.end(),off.begin());
 
     vector<int> adj(off[V-1],-1);
 
