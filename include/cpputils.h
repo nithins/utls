@@ -21,127 +21,6 @@
 #ifndef __CPPUTILS_H_INCLUDED__
 #define __CPPUTILS_H_INCLUDED__
 
-#include <string>
-#include <sstream>
-#include <ostream>
-#include <vector>
-#include <iostream>
-
-typedef unsigned int  uint;
-typedef unsigned char uchar;
-
-std::string stripLineComments ( const std::string& line, const char& comment_char = '#' );
-
-std::string stripLeadingWS ( const std::string& line );
-
-std::string stripTrailingWS ( const std::string& line );
-
-std::string stripWS ( const std::string &line );
-
-void tokenize_string ( const std::string& , std::vector<std::string>& ,
-                       const std::string& delimiters = " " );
-
-/**
- * Splits the given string given on the given string delimiter. ( delimter string not included)
- * @param line_str
- * @param tokens
- * @param split_str
- */
-void split_string ( const std::string & line_str,
-                    std::vector<std::string> & tokens,
-                    const std::string & split_str );
-namespace utls
-{
-  template <class T> inline std::string to_string (const T& t)
-  {std::stringstream ss;ss << t;return ss.str();}
-
-  template <> inline std::string to_string (const std::string& t){return t;}
-
-  template <typename T,typename U> inline std::string to_string (const std::pair<T,U>& t)
-  {return to_string<T>(t.first)+":"+to_string<U>(t.second);}
-
-  template<typename Titer>
-  typename std::iterator_traits<Titer>::difference_type count(Titer b, Titer e)
-  {
-    typename std::iterator_traits<Titer>::difference_type val = 0;
-    for( ; b != e; ++b) ++val; return val;
-  }
-
-  template<typename T>
-  inline void set_vec_value(std::vector<T> & vec, int i,const T& v){vec[i] = v;}
-
-  template<typename T>
-  inline const T& get_vec_value(const std::vector<T> & vec, int i){return vec[i];}
-}
-
-class assertion_error:public std::exception
-{
-
-public:
-  /** Takes a character string describing the error.  */
-  assertion_error(const std::string& );
-  virtual ~assertion_error() throw();
-
-  /** Returns a C-style character string describing the general cause of
-   *  the current error (the same string passed to the ctor).  */
-  virtual const char*
-  what() const throw();
-
-  assertion_error& push(const std::string & s);
-};
-
-#define two_power(i)   (std::pow(2,(i)))
-#define divide_rz(a,b) ((a)/(b))
-#define divide_ri(a,b) (((a)+(b)-1)/(b))
-
-std::string __format_ffl(const char *file,const char* func,int line);
-
-#define FILEFUNCLINE __format_ffl(__FILE__,__func__,__LINE__)
-
-#define SVAR(v)            (std::string(#v)+" = "+utls::to_string(v)+" ")
-#define SVAR1(v1)          (SVAR(v1))
-#define SVAR2(v1,v2)       (SVAR(v1)+" "+SVAR(v2))
-#define SVAR3(v1,v2,v3)    (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v3))
-#define SVAR4(v1,v2,v3,v4) (SVAR(v1)+" "+SVAR(v2)+" "+SVAR(v3)+" "+SVAR(v4))
-
-
-#define PUSHVAR(v) push(SVAR(v))
-
-template<typename T>
-inline void __ensure(bool c, const char * s,const char * file, const char *func, const int &line)
-{
-  if(!c)
-    throw T(std::string("\n")+__format_ffl(file,func,line)+"\n"+s);
-}
-
-#define ensure(c,s)    __ensure<std::runtime_error>(c,s,__FILE__,__func__,__LINE__)
-#define ensure_re(c,s) __ensure<std::runtime_error>(c,s,__FILE__,__func__,__LINE__)
-#define ensure_oe(c,s) __ensure<std::overflow_error>(c,s,__FILE__,__func__,__LINE__ )
-#define ensure_ia(c,s) __ensure<std::invalid_argument>(c,s,__FILE__,__func__,__LINE__)
-
-#define ensurev(cond) \
-  if(!(cond)) \
-  for(std::stringstream ss ; true ; throw std::runtime_error(ss.str())) \
-  ss<<"Failed to ensure condition " << #cond <<"\n" \
-    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "
-
-
-#ifndef NDEBUG
-
-inline void __assert(bool c, const char * s,const char * file, const char *func, const int &line)
-{
-  if(!c)
-    throw assertion_error(std::string("\n Assertion failure: ")+__format_ffl(file,func,line)+"\n"+s);
-}
-
-#define ASSERT(c) __assert((c),#c,__FILE__,__func__,__LINE__)
-
-#else
-#define ASSERT(c)
-#endif
-
-#define is_in_range(i,b,e) (((b) <= (i)) && ((i) < (e)))
-
 // for some reason this is not in c++ 99 or 03 .. remove if c++0x
 namespace std
 {
@@ -270,5 +149,549 @@ namespace la
 #endif
 
 /*===========================================================================*/
+
+
+
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------*/
+
+#include <vector>
+#include <string>
+#include <sstream>
+
+namespace utls {
+
+/*---------------------------------------------------------------------------*/
+
+///  \brief A generic to string impl that uses the << operator of type T
+template <typename T>
+inline std::string to_string (const T& v)
+{std::stringstream ss; ss << v ; return ss.str();}
+
+/*---------------------------------------------------------------------------*/
+
+template <typename T1,typename T2>
+inline std::string to_string (const std::pair<T1,T2> &p)
+{std::stringstream ss; ss <<p.first <<","<< p.second ; return ss.str();}
+
+/*---------------------------------------------------------------------------*/
+
+template <class iter_t>
+void argsort(iter_t b, iter_t e, std::vector<size_t>& idxs);
+
+/*---------------------------------------------------------------------------*/
+
+template <class iter_t>
+void rearrange(iter_t b, iter_t e,const std::vector<size_t>& idxs);
+
+/*---------------------------------------------------------------------------*/
+
+/// \brief strip front and back whitespaces in given string
+void trim(std::string &s);
+
+/*---------------------------------------------------------------------------*/
+
+/// \brief Converts a given string to the template type
+template <class T> inline T from_string(std::string s);
+
+/*---------------------------------------------------------------------------*/
+
+///  \brief Converts a given string to the template types
+template <typename T1,typename T2>
+inline void from_string(std::string s,T1& t1,T2& t2)
+{std::stringstream ss(s);ss >> t1 >> t2;}
+
+/*---------------------------------------------------------------------------*/
+
+///  \brief Converts a given string to the template types
+template <typename T1,typename T2,typename T3>
+inline void from_string(std::string s,T1& t1,T2& t2,T3& t3)
+{std::stringstream ss(s);ss >> t1 >> t2 >> t3;}
+
+/*---------------------------------------------------------------------------*/
+
+///  \brief Converts a given string to the template types
+template <typename T1,typename T2,typename T3,typename T4>
+inline void from_string(std::string s,T1& t1,T2& t2,T3& t3,T4& t4)
+{std::stringstream ss(s);ss >> t1 >> t2 >> t3 >> t4;}
+
+/*---------------------------------------------------------------------------*/
+
+}// namespace utl
+/*===========================================================================*/
+
+
+
+
+
+
+/*===========================================================================*/
+/* Misc utility classes
+/*---------------------------------------------------------------------------*/
+
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
+
+namespace utls {
+
+/*---------------------------------------------------------------------------*/
+
+
+/**
+  \brief A class to iterate over non-comment lines of a file
+
+  \note All parts of a line that succeed the comment char ('#' default) are
+  assumed to be a comment and are stripped
+
+  \note Sample usage
+  for(file_line_iterator lgen("file.txt"),lend; lgen != lend; )
+    cout << *lgen++;
+
+**/
+
+class file_line_iterator
+    : public boost::iterator_facade<
+    file_line_iterator
+    , std::string const
+    , boost::forward_traversal_tag
+    >
+{
+public:
+  file_line_iterator(const char * f,char c_char='#');
+  file_line_iterator(){}
+
+private:
+  friend class boost::iterator_core_access;
+  void increment();
+  bool equal(file_line_iterator const& other) const;
+  const std::string &dereference() const;
+
+private:
+  boost::shared_ptr<std::ifstream> is;
+  std::string                      value;
+  char                             c_char;
+};
+
+/*---------------------------------------------------------------------------*/
+
+/** \brief Simple stopwatch timer (to measure wall clock time NOT cpu time) **/
+class timer
+{
+ public:
+  timer()
+  {restart();}
+
+  inline void   restart()
+  { _start_time = boost::posix_time::microsec_clock::local_time(); }
+
+  inline double elapsed() const
+  {
+    boost::posix_time::time_duration td =
+        boost::posix_time::microsec_clock::local_time() - _start_time;
+
+    return double(td.total_milliseconds())/1000;
+  }
+
+ private:
+  boost::posix_time::ptime _start_time;
+}; // timer
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef UTL_LOG_LEVEL
+#define UTL_LOG_LEVEL 2
+#endif
+
+/** \brief A simple multi-threaded logger                                   **/
+class logger
+{
+ public:
+
+  enum severity_level {trace,debug,info,warning,error,fatal};
+
+  inline bool isOpen(severity_level severity)
+  {return severity >= UTL_LOG_LEVEL;}
+
+  inline void push_ts(const std::string & log)
+  {
+    std::string tstr = boost::posix_time::to_simple_string
+        (boost::posix_time::microsec_clock::local_time());
+
+    boost::mutex::scoped_lock  lock(s_mutex);
+    std::clog << "[" <<tstr <<"] " << log << std::endl;
+  }
+
+  inline void push(const std::string & log)
+  {
+    boost::mutex::scoped_lock  lock(s_mutex);
+    std::clog << log;
+  }
+
+  static inline logger& get() {return s_logger;}
+
+private:
+
+  static boost::mutex s_mutex;
+  static logger       s_logger;
+}; // logger
+
+namespace detail
+{
+/** \brief a small extension of std::pair where only first is initialized   **/
+template<class _T1, class _T2> struct pair:public std::pair<_T1,_T2>
+{pair(const _T1 &t1){std::pair<_T1,_T2>::first = t1;}};
+}//namespace detail
+
+}// namespace utl
+
+/*===========================================================================*/
+
+
+
+/*===========================================================================*/
+/* Binary read and write functions
+/*---------------------------------------------------------------------------*/
+
+namespace utl {
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_write(std::ostream &os, const T &v)
+{os.write((const char*)(const void*)&v,sizeof(T));}
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_read(std::istream &is, const T &v)
+{is.read((char*)(void*)&v,sizeof(T));}
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_read_raw(std::istream &is, T * v, size_t n)
+{is.read((char*)(void*)v,n*sizeof(T));}
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_write_raw(std::ostream &os, T * v, size_t n)
+{os.write((const char*)(const void*)v,n*sizeof(T));}
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_read_vec(std::istream &is, std::vector<T> &v)
+{
+  size_t n;
+  bin_read(is,n);
+  v.resize(n);
+  is.read((char*)(void*)v.data(),v.size()*sizeof(T));
+}
+
+/*---------------------------------------------------------------------------*/
+
+template<typename T>
+inline void bin_write_vec(std::ostream &os, const std::vector<T> &v)
+{
+  bin_write<size_t>(os,v.size());
+  os.write((const char*)(const void*)v.data(),v.size()*sizeof(T));
+}
+
+/*---------------------------------------------------------------------------*/
+
+}
+/*===========================================================================*/
+
+
+/*===========================================================================*/
+/* Macro definitions
+/*---------------------------------------------------------------------------*/
+
+#define is_in_range(i,b,e) (((b) <= (i)) && ((i) < (e)))
+#define two_power(i)   (std::pow(2,(i)))
+#define divide_rz(a,b) ((a)/(b))
+#define divide_ri(a,b) (((a)+(b)-1)/(b))
+
+/*---------------------------------------------------------------------------*/
+
+#define LOG(lev)  \
+  if(utls::logger::get().isOpen(utls::logger::lev))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push(__utl_lm_v__.second.str())) __utl_lm_v__.second
+
+/*---------------------------------------------------------------------------*/
+
+#define WLOG  \
+  if(utls::logger::get().isOpen(utls::logger::warning))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push_ts(__utl_lm_v__.second.str())) \
+  __utl_lm_v__.second \
+  <<utls::detail::__classFunction__(__PRETTY_FUNCTION__) << " "
+
+/*---------------------------------------------------------------------------*/
+
+#define ILOG  \
+  if(utls::logger::get().isOpen(utls::logger::info))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push_ts(__utl_lm_v__.second.str())) \
+  __utl_lm_v__.second \
+  <<utls::detail::__classFunction__(__PRETTY_FUNCTION__) << " "
+
+/*---------------------------------------------------------------------------*/
+
+#define DLOG  \
+  if(utls::logger::get().isOpen(utls::logger::debug))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push_ts(__utl_lm_v__.second.str())) \
+  __utl_lm_v__.second \
+  <<utls::detail::__classFunction__(__PRETTY_FUNCTION__) << " "
+
+/*---------------------------------------------------------------------------*/
+
+#define TLOG  \
+  if(utls::logger::get().isOpen(utls::logger::trace))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push_ts(__utl_lm_v__.second.str())) \
+  __utl_lm_v__.second << utls::detail::__trace_indenter_t__::get_indent()\
+  <<utls::detail::__classFunction__(__PRETTY_FUNCTION__) << " "
+
+
+#define TLOG_INDENT utls::detail::__trace_indenter_t__ __trace_indenter__; \
+
+/*---------------------------------------------------------------------------*/
+
+#define LOG_TS(lev)  \
+  if(utls::logger::get().isOpen(utls::logger::lev))\
+  for(utls::detail::pair<bool,std::stringstream> __utl_lm_v__(true); \
+      __utl_lm_v__.first ;__utl_lm_v__.first=false,\
+  utls::logger::get().push_ts(__utl_lm_v__.second.str())) __utl_lm_v__.second
+
+/*---------------------------------------------------------------------------*/
+
+#define SVAR(VAR) #VAR << " = "<< (VAR) << " "
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef ASSERT
+#ifndef NDEBUG
+#define ASSERT(cond) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to assert condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+  ;throw std::runtime_error(ss.str());}
+#else  //ifndef NDEBUG
+#define ASSERT(cond)
+#endif // ifndef NDEBUG
+#endif // ifndef ASSERT
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef ASSERTV
+#ifndef NDEBUG
+#define ASSERTV(cond,var1) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to assert condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n"\
+  ;throw std::runtime_error(ss.str());}
+#else  //ifndef NDEBUG
+#define ASSERTV(cond,var1)
+#endif // ifndef NDEBUG
+#endif // ifndef ASSERTV
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef ASSERTV2
+#ifndef NDEBUG
+#define ASSERTV2(cond,var1,var2) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to assert condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n"\
+  ;throw std::runtime_error(ss.str());}
+#else  //ifndef NDEBUG
+#define ASSERTV2(cond,var1,var2)
+#endif // ifndef NDEBUG
+#endif // ifndef ASSERTV2
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef ASSERTV3
+#ifndef NDEBUG
+#define ASSERTV3(cond,var1,var2,var3) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to assert condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n"\
+    << #var3 <<" = "<< (var3) << "\n"\
+  ;throw std::runtime_error(ss.str());}
+#else  //ifndef NDEBUG
+#define ASSERTV3(cond,var1,var2)
+#endif // ifndef NDEBUG
+#endif // ifndef ASSERTV2
+
+/*---------------------------------------------------------------------------*/
+
+#ifndef ASSERTS
+#ifndef NDEBUG
+#define ASSERTS(cond)\
+  if(!(cond)) \
+  for(std::stringstream ss ; true ; throw std::runtime_error(ss.str())) \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "
+#else  //ifndef NDEBUG
+#define ASSERTS(cond)\
+if(false) \
+std::stringstream()
+#endif // ifndef NDEBUG
+#endif // ifndef ASSERT
+
+
+/*---------------------------------------------------------------------------*/
+
+#define ENSURE(cond,mesg) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    <<"Message : " << #mesg << "\n"\
+  ;throw std::runtime_error(ss.str());}
+
+/*---------------------------------------------------------------------------*/
+
+#define ENSUREV(cond,mesg,var1) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    <<"Message : " << #mesg << "\n"\
+    << #var1 <<" = "<< (var1) << "\n"\
+  ;throw std::runtime_error(ss.str());}
+
+/*---------------------------------------------------------------------------*/
+
+#define ENSUREV2(cond,mesg,var1,var2) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    <<"Message : " << #mesg << "\n"\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n";\
+  ;throw std::runtime_error(ss.str());}
+
+/*---------------------------------------------------------------------------*/
+
+#define ENSUREV3(cond,mesg,var1,var2,var3) if (!(cond))\
+{ std::stringstream ss; \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    <<"Message : " << #mesg << "\n"\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n"\
+    << #var3 <<" = "<< (var3) << "\n";\
+  ;throw std::runtime_error(ss.str());}
+
+/*---------------------------------------------------------------------------*/
+
+#define ENSURES(cond) \
+  if(!(cond)) \
+  for(std::stringstream ss ; true ; throw std::runtime_error(ss.str())) \
+  ss<<"Failed to ensure condition " << #cond <<"\n" \
+    <<"at ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "
+
+/*---------------------------------------------------------------------------*/
+
+#define BTRACE_ERROR(func) \
+try { func ; } catch (const std::exception &e) {\
+  if(utls::logger::get().isOpen(utls::logger::error)){\
+    std::stringstream ss; ss \
+    <<"From: ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n ";\
+    utls::logger::get().push(ss.str());}\
+  throw;}
+
+/*---------------------------------------------------------------------------*/
+
+#define CHECK_ERRORV1(func,var1) \
+try { func ; } catch (const std::exception &e) {\
+  if(utls::logger::get().isOpen(utls::logger::error)){\
+    std::stringstream ss; ss \
+    <<"From: ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n";\
+    utls::logger::get().push(ss.str());}\
+  throw;}
+
+/*---------------------------------------------------------------------------*/
+
+#define CHECK_ERRORV2(func,var1,var2) \
+try { func ; } catch (const std::exception &e) {\
+  if(utls::logger::get().isOpen(utls::logger::error)){\
+    std::stringstream ss; ss \
+    <<"From: ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n";\
+    utls::logger::get().push(ss.str());}\
+  throw;}
+
+/*---------------------------------------------------------------------------*/
+
+#define CHECK_ERRORV3(func,var1,var2,var3) \
+try { func ; } catch (const std::exception &e) {\
+  if(utls::logger::get().isOpen(utls::logger::error)){\
+    std::stringstream ss; ss \
+    <<"From: ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    << #var1 <<" = "<< (var1) << "\n"\
+    << #var2 <<" = "<< (var2) << "\n"\
+    << #var3 <<" = "<< (var3) << "\n";\
+    utls::logger::get().push(ss.str());}\
+  throw;}
+
+/*---------------------------------------------------------------------------*/
+
+#define CHECK_ERRORS(func,strm) \
+try { func ; } catch (const std::exception &e) {\
+  if(utls::logger::get().isOpen(utls::logger::error)){\
+    std::stringstream ss; ss \
+    <<"From: ("<<__FILE__<<","<<__func__<<","<<__LINE__<<") \n "\
+    strm <<std::endl;\
+    utls::logger::get().push(ss.str());}\
+  throw;}
+
+/*---------------------------------------------------------------------------*/
+
+namespace utls{ namespace detail{
+
+std::string __classFunction__(const std::string& prettyFunction);
+
+class __trace_indenter_t__
+{
+  static int   s_indent;
+public:
+  __trace_indenter_t__()   {++s_indent;}
+  ~__trace_indenter_t__()  {--s_indent;}
+  static std::string get_indent();
+};
+
+}}
+
+
+/*===========================================================================*/
+
+
 
 #endif

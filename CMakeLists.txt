@@ -2,7 +2,7 @@
 project(utls)
 
 #minimum cmake version needed
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.11)
 
 #tell cmake where to look for the find files.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

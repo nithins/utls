@@ -247,7 +247,7 @@ namespace glutils
       m_lin_bo   = lin_buf;
       m_col_bo   = col_buf;
 
-      ensure_ia(m_ver_bo != 0,"Vertex data unavailable");
+      ENSURE(m_ver_bo != 0,"Vertex data unavailable");
 
       if ( !m_lin_bo)
       {

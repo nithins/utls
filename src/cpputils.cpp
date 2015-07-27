@@ -117,38 +117,138 @@ std::string __format_ffl(const char *file,const char* func,int line)
   return (std::string("(")+basename(file)+","+func+","+utls::to_string(line)+")");
 }
 
-assertion_error::assertion_error(const std::string& s)
+#include <sstream>
+#include <fstream>
+
+#include <vector>
+
+#include <tr1/functional>
+
+
+/*===========================================================================*/
+
+using namespace std;
+
+namespace utls {
+/*---------------------------------------------------------------------------*/
+
+void trim(std::string &s)
 {
-  push(s);
+  s.erase(s.begin(), std::find_if
+          (s.begin(), s.end(),
+           std::not1(std::ptr_fun<int, int>(std::isspace))));
+  s.erase(std::find_if
+          (s.rbegin(), s.rend(),
+           std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 }
 
-assertion_error::~assertion_error() throw()
+/*---------------------------------------------------------------------------*/
+
+file_line_iterator::file_line_iterator(const char * f,char c_char):
+  is(new std::ifstream(f)),c_char(c_char)
 {
+  ENSUREV(is->is_open(),"cannot read the file",f);
+  increment();
 }
 
-std::vector<std::string> s_exp_messages;
+/*---------------------------------------------------------------------------*/
 
-std::string s_final_msg;
-
-assertion_error& assertion_error::push(const std::string & s)
+void file_line_iterator::increment()
 {
-  static boost::mutex mutex;
-  boost::mutex::scoped_lock scoped_lock(mutex);
+  value.clear();
 
-  s_exp_messages.push_back(s);
+  while(is && value.size() == 0)
+  {
+    if(is->eof())
+    {
+      is.reset();
+      value.clear();
+      break;
+    }
 
-  return *this;
+    std::getline(*is,value);
+
+    int p = value.find(c_char);
+
+    if ( p < value.size() )
+      value = value.substr(0,p);
+
+    trim(value);
+  }
 }
 
-const char* assertion_error::what() const throw()
+/*---------------------------------------------------------------------------*/
+
+bool file_line_iterator::equal(file_line_iterator const& other) const
 {
-  std::stringstream ss;
+  if(!is && !other.is)
+    return true;
 
-  for( uint i = 0 ; i < s_exp_messages.size(); ++i)
-    ss<<s_exp_messages[i]<<endl;
+  if(!is || !other.is)
+    return false;
 
-  s_final_msg = ss.str();
+  ENSURE(is == other.is, "cannot compare distinct istream iters");
 
-  return s_final_msg.c_str();
+  return is->tellg() == other.is->tellg();
 }
+
+/*---------------------------------------------------------------------------*/
+
+const std::string & file_line_iterator::dereference() const
+{
+  ENSURE(is,"dereferencing past end of line stream");
+  return value;
+}
+
+/*---------------------------------------------------------------------------*/
+
+namespace detail{
+std::string __classFunction__(const std::string& prettyFunction)
+{
+  std::string str(prettyFunction);
+
+  str = str.substr(str.find(" ")+1);
+  str = str.substr(0,str.find("("));
+
+  size_t first_colon  =  str.rfind("::");
+
+  if(first_colon != std::string::npos)
+  {
+    size_t second_colon = str.substr(0,first_colon).rfind("::");
+
+    if(second_colon != std::string::npos)
+      str   = str.substr(second_colon+2);
+  }
+  return str;
+}
+
+/*---------------------------------------------------------------------------*/
+
+std::string __trace_indenter_t__::get_indent()
+{
+  std::string s;
+
+  for(int i = 0 ; i < s_indent; ++i)
+    s += "  ";
+
+  return s;
+}
+
+
+}
+
+/*---------------------------------------------------------------------------*/
+
+boost::mutex logger::s_mutex;
+logger       logger::s_logger;
+
+int    detail::__trace_indenter_t__::s_indent = 0;
+
+/*---------------------------------------------------------------------------*/
+
+} // namespace utl
+
+/*===========================================================================*/
+
+
 

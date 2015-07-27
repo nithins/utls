@@ -236,6 +236,9 @@ namespace glutils
   public:
     virtual int    render() = 0 ;
     virtual void   gl_init(){}
+    virtual void   animate(double dt){}
+    virtual bool   isAnimation(){return false;}
+    virtual bool   processKey(int key, int modifiers){return false;}
 
     virtual bool get_extent ( double * ){return false;}
     virtual ~renderable_t() {}

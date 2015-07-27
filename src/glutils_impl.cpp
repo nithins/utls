@@ -146,16 +146,17 @@ namespace glutils
 
     fstream off_file ( filename, fstream::in);
 
-    ensure(off_file.is_open(),"unable to open off file");
+    ENSURE(off_file.is_open(),"unable to open off file");
 
     string ln;
     std::vector<string> strs;
 
     getline(off_file,ln);
-    ensure(ln=="OFF","Doesn't seem to be an OFF FILE");
+    ba::split(strs,ln,ba::is_any_of("\t \n\r"));
+    ENSURES(strs[0]=="OFF") << "Doesn't seem to be an OFF FILE ::" << SVAR(ln) << " ::";
 
     getline(off_file,ln);
-    ba::split(strs,ln,ba::is_any_of("\t \n"));
+    ba::split(strs,ln,ba::is_any_of("\t \n\r"));
 
     int num_v = atoi(strs[0].c_str());
     int num_t = atoi(strs[1].c_str());
@@ -166,7 +167,7 @@ namespace glutils
     for ( uint i = 0; i < num_v; ++i )
     {
       getline(off_file,ln);
-      ba::split(strs,ln,ba::is_any_of("\t \n"));
+      ba::split(strs,ln,ba::is_any_of("\t \n\r"));
 
       vlist[i][0] = atof(strs[0].c_str());
       vlist[i][1] = atof(strs[1].c_str());
@@ -176,17 +177,17 @@ namespace glutils
     for ( uint i = 0; i < num_t; i++ )
     {
       getline(off_file,ln);
-      ba::split(strs,ln,ba::is_any_of("\t \n"));
+      ba::split(strs,ln,ba::is_any_of("\t \n\r"));
 
       int ntv     = atoi(strs[0].c_str());
       tlist[i][0] = atoi(strs[1].c_str());
       tlist[i][1] = atoi(strs[2].c_str());
       tlist[i][2] = atoi(strs[3].c_str());
 
-      ensure(ntv == 3,"Mesh contains non-triangle polys");
-      ensure(is_in_range(tlist[i][0],0,num_v),"invalid index in file");
-      ensure(is_in_range(tlist[i][1],0,num_v),"invalid index in file");
-      ensure(is_in_range(tlist[i][2],0,num_v),"invalid index in file");
+      ENSURE(ntv == 3,"Mesh contains non-triangle polys");
+      ENSURE(is_in_range(tlist[i][0],0,num_v),"invalid index in file");
+      ENSURE(is_in_range(tlist[i][1],0,num_v),"invalid index in file");
+      ENSURE(is_in_range(tlist[i][2],0,num_v),"invalid index in file");
     }
 
     off_file.close();
